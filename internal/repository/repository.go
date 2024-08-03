@@ -22,16 +22,24 @@ type Modules interface {
 	CreateModule(module *model.Module) (int, error)
 }
 
+type Questions interface {
+	GetQuestions() ([]model.Question, error)
+	CreateQuestion(question *model.Question) (int, error)
+	CreateAnswers(answers []model.Answer) error
+}
+
 type Repository struct {
 	Auth
 	Courses
 	Modules
+	Questions
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
-		Auth:    NewAuthRepository(db),
-		Courses: NewCourseRepository(db),
-		Modules: NewModuleRepository(db),
+		Auth:      NewAuthRepository(db),
+		Courses:   NewCourseRepository(db),
+		Modules:   NewModuleRepository(db),
+		Questions: NewQuestionRepository(db),
 	}
 }
