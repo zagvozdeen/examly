@@ -9,7 +9,7 @@ type Auth interface {
 	CreateUser(user model.User) (int, error)
 	GetUserByEmail(email string) (model.User, error)
 	IsExistsUserByEmail(email string) (bool, error)
-	GetUserByID(id int) (user model.User, err error)
+	GetUserByID(id int) (model.User, error)
 }
 
 type Courses interface {
@@ -17,14 +17,21 @@ type Courses interface {
 	CreateCourse(course *model.Course) (int, error)
 }
 
+type Modules interface {
+	GetModules() ([]model.Module, error)
+	CreateModule(module *model.Module) (int, error)
+}
+
 type Repository struct {
 	Auth
 	Courses
+	Modules
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
 	return &Repository{
 		Auth:    NewAuthRepository(db),
 		Courses: NewCourseRepository(db),
+		Modules: NewModuleRepository(db),
 	}
 }

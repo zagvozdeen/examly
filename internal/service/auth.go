@@ -1,12 +1,12 @@
 package service
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/Den4ik117/examly/config"
 	"github.com/Den4ik117/examly/internal/model"
 	"github.com/Den4ik117/examly/internal/repository"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/guregu/null/v5"
 	"golang.org/x/crypto/bcrypt"
 	"time"
 )
@@ -52,11 +52,11 @@ func (s *AuthService) CreateUser(u RegisterInput) (int, error) {
 	}
 
 	user := model.User{
-		Email:     sql.NullString{String: u.Email, Valid: true},
-		FirstName: sql.NullString{String: u.FirstName, Valid: true},
-		LastName:  sql.NullString{String: u.LastName, Valid: true},
+		Email:     null.StringFrom(u.Email),
+		FirstName: null.StringFrom(u.FirstName),
+		LastName:  null.StringFrom(u.LastName),
 		Role:      model.SimpleUserRole,
-		Password:  sql.NullString{String: string(bytes), Valid: true},
+		Password:  null.StringFrom(string(bytes)),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}

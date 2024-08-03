@@ -1,19 +1,19 @@
 package model
 
 import (
-	"database/sql"
+	"github.com/guregu/null/v5"
 	"time"
 )
 
 type User struct {
-	ID        int            `db:"id"`
-	Email     sql.NullString `db:"email"`
-	FirstName sql.NullString `db:"first_name"`
-	LastName  sql.NullString `db:"last_name"`
-	Role      UserRole       `db:"role"`
-	Password  sql.NullString `db:"password"`
-	AvatarID  sql.NullInt64  `db:"avatar_id"`
-	DeletedAt sql.NullTime   `db:"deleted_at"`
-	CreatedAt time.Time      `db:"created_at"`
-	UpdatedAt time.Time      `db:"updated_at"`
+	ID        int         `json:"id" db:"id"`
+	Email     null.String `json:"email" db:"email"`
+	FirstName null.String `json:"first_name" db:"first_name"`
+	LastName  null.String `json:"last_name" db:"last_name"`
+	Role      UserRole    `json:"role" db:"role"`
+	Password  null.String `json:"password" db:"password"`
+	AvatarID  null.Int    `json:"avatar_id" db:"avatar_id"`
+	DeletedAt null.Time   `json:"deleted_at" db:"deleted_at"`
+	CreatedAt time.Time   `json:"created_at" db:"created_at"`
+	UpdatedAt time.Time   `json:"updated_at" db:"updated_at"`
 }

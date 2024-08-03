@@ -17,14 +17,21 @@ type Courses interface {
 	CreateCourse(user *model.User, input *CreateCourseInput) (int, error)
 }
 
+type Modules interface {
+	GetModules() ([]model.Module, error)
+	CreateModule(input *CreateModuleInput) (int, error)
+}
+
 type Service struct {
 	Auth
 	Courses
+	Modules
 }
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Auth:    NewAuthService(repos.Auth),
 		Courses: NewCourseService(repos.Courses),
+		Modules: NewModuleService(repos.Modules),
 	}
 }

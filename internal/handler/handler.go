@@ -32,5 +32,8 @@ func (h *Handler) InitRoutes() *mux.Router {
 	authRouter.HandleFunc("/courses", h.getCourses).Methods("GET")
 	authRouter.HandleFunc("/courses", h.createCourse).Methods("POST")
 
+	authRouter.HandleFunc("/modules", h.getModules).Methods("GET")
+	authRouter.HandleFunc("/modules", h.createModule).Methods("POST")
+
 	return router
 }
