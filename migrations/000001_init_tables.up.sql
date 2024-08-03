@@ -13,7 +13,6 @@ CREATE TABLE IF NOT EXISTS users
     email       VARCHAR(255)                 NULL,
     first_name  VARCHAR(255)                 NULL,
     last_name   VARCHAR(255)                 NULL,
-    guest_token uuid                         NULL,
     role        VARCHAR(255)                 NOT NULL,
     password    VARCHAR(255)                 NULL,
     avatar_id   BIGINT references files (id) NULL,

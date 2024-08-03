@@ -1,17 +1,23 @@
 package model
 
-type userRole string
-
-const (
-	AdminRole      userRole = "ADMIN"
-	ManagerRole    userRole = "MANAGER"
-	SimpleUserRole userRole = "USER"
+import (
+	"database/sql/driver"
 )
 
-type UserRole interface {
-	Value() userRole
+type UserRole string
+
+const (
+	AdminRole      UserRole = "ADMIN"
+	ManagerRole    UserRole = "MANAGER"
+	SimpleUserRole UserRole = "USER"
+	GuestRole      UserRole = "GUEST"
+)
+
+func (u *UserRole) Scan(src interface{}) error {
+	*u = UserRole(src.(string))
+	return nil
 }
 
-func (r userRole) Value() userRole {
-	return r
+func (u UserRole) Value() (driver.Value, error) {
+	return string(u), nil
 }

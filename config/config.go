@@ -12,6 +12,7 @@ type Config struct {
 	DBDatabase string
 	DBUsername string
 	DBPassword string
+	SecretKey  string
 }
 
 var Envs = initConfig()
@@ -28,6 +29,7 @@ func initConfig() *Config {
 		DBDatabase: getEnv("DB_DATABASE", "postgres"),
 		DBUsername: getEnv("DB_USERNAME", "postgres"),
 		DBPassword: getEnv("DB_PASSWORD", ""),
+		SecretKey:  getEnv("APP_KEY", ""),
 	}
 }
 
