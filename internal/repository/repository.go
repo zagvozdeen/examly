@@ -14,6 +14,7 @@ type Auth interface {
 
 type Courses interface {
 	GetCourses() ([]model.Course, error)
+	CreateCourse(course *model.Course) (int, error)
 }
 
 type Repository struct {

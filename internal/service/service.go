@@ -14,6 +14,7 @@ type Auth interface {
 
 type Courses interface {
 	GetCourses() ([]model.Course, error)
+	CreateCourse(user *model.User, input *CreateCourseInput) (int, error)
 }
 
 type Service struct {
