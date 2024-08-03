@@ -1,5 +1,6 @@
 services:
   db:
+    container_name: examly-postgres
     image: postgres
     restart: always
     environment:
@@ -10,3 +11,14 @@ services:
       - ./.docker/volumes/postgres:/var/lib/postgresql/data
     ports:
       - "5432:5432"
+
+  node:
+    container_name: examly-node
+    image: node:alpine
+    entrypoint: /bin/sh
+    working_dir: /app
+    tty: true
+    volumes:
+      - ./resources:/app
+    ports:
+      - "5173:5173"

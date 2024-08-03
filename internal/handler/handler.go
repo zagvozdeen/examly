@@ -17,6 +17,9 @@ func NewHandler(services *service.Service) *Handler {
 
 func (h *Handler) InitRoutes() *mux.Router {
 	router := mux.NewRouter()
+
+	router.HandleFunc("/", h.viewIndex).Methods("GET")
+
 	subRouter := router.PathPrefix("/api/v1").Subrouter()
 
 	guestRouter := subRouter.PathPrefix("/").Subrouter()
