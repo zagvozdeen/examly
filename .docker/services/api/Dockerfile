@@ -1,4 +1,4 @@
-FROM golang
+FROM golang as build
 
 WORKDIR /app
 
@@ -6,11 +6,17 @@ COPY . .
 
 RUN go mod download
 
-RUN go build -o ./bin/api ./cmd/api/main.go
+RUN CGO_ENABLED=0 go build -o /app/bin/api ./cmd/api/main.go
 
-#FROM scratch
-#COPY --from=0 /bin/hello /bin/hello
-EXPOSE 8080
-CMD ["./bin/api"]
+FROM scratch
+
+WORKDIR /app
+
+COPY --from=build /app/bin/api .
+COPY --from=build /app/.env .
+
+EXPOSE 8000
+
+CMD ["./api"]
 
 
