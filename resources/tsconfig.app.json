@@ -9,7 +9,8 @@
     "skipLibCheck": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./ts/*"]
+      "@/*": ["./ts/*"],
+      "@images/*": ["./images/*"]
     },
     "types": ["node"],
 

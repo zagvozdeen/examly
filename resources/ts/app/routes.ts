@@ -1,3 +1,4 @@
+import AppLayout from '@/components/AppLayout.vue'
 import PageLogin from '@/pages/PageLogin.vue'
 import PageMain from '@/pages/PageMain.vue'
 import PageRegister from '@/pages/PageRegister.vue'
@@ -7,18 +8,24 @@ export const createRoutes = (): Array<RouteRecordRaw> => {
   return [
     {
       path: '/',
-      component: PageMain,
-      name: 'main',
-    },
-    {
-      path: '/login',
-      component: PageLogin,
-      name: 'login',
-    },
-    {
-      path: '/register',
-      component: PageRegister,
-      name: 'register',
+      component: AppLayout,
+      children: [
+        {
+          path: '/',
+          component: PageMain,
+          name: 'main',
+        },
+        {
+          path: '/login',
+          component: PageLogin,
+          name: 'login',
+        },
+        {
+          path: '/register',
+          component: PageRegister,
+          name: 'register',
+        },
+      ],
     },
   ]
 }
