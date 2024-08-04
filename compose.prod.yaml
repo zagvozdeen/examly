@@ -1,0 +1,42 @@
+services:
+  db:
+    container_name: examly-postgres
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    volumes:
+      - ./.docker/volumes/postgres:/var/lib/postgresql/data
+#    ports:
+#      - "5432:5432"
+
+  node:
+    container_name: examly-node
+#    build:
+#      context: .
+#      dockerfile: ./.docker/services/frontend/Dockerfile
+    image: node:alpine
+    entrypoint: /bin/sh
+    working_dir: /app
+#    command: sh -c "npm i && npm run build"
+    tty: true
+    volumes:
+      - ./resources:/app
+
+  app:
+    container_name: examly-app
+    build:
+      context: .
+      dockerfile: ./.docker/services/api/Dockerfile
+    restart: always
+    depends_on:
+      - db
+#        condition: service_healthy
+#    volumes:
+#      - ./resources:/var/www/html
+    ports:
+      - "8080:8080"
+#    ports:
+#      - "5173:5173"

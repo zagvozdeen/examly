@@ -2,3 +2,5 @@
 .env
 .docker/volumes/*
 .DS_Store
+bin
+public

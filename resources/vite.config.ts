@@ -6,8 +6,9 @@ import path from 'path'
 export default defineConfig({
   server: {
     host: true,
-    origin: 'http://localhost:5173/',
+    origin: 'http://localhost:5173',
   },
+  base: 'https://examly.ru/dist/',
   plugins: [vue()],
   resolve: {
     alias: {

@@ -29,3 +29,17 @@ build:
 
 check:
 	@docker compose exec node npm run check
+
+prod-up:
+	@#docker compose --file compose.prod.yaml up -d
+	@docker compose --file compose.prod.yaml up --build -d
+prod-down:
+	@docker compose --file compose.prod.yaml down
+prod-restart prod-r:
+	@make prod-down
+	@make prod-up
+prod-build:
+	@docker compose exec node npm run build
+	@rm -rf ./public
+	@mkdir ./public
+	@mv ./resources/dist ./public
