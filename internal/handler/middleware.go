@@ -8,11 +8,11 @@ import (
 func (h *Handler) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t := r.Header.Get("Authorization")
-		if len([]rune(t)) <= 8 {
+		if len([]rune(t)) <= 7 {
 			http.Error(w, "token is empty", http.StatusUnauthorized)
 			return
 		}
-		t = t[8:]
+		t = t[7:]
 
 		user, err := h.services.Auth.CheckAuth(t)
 		if err != nil {

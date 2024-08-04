@@ -69,7 +69,7 @@ func (r *AuthRepository) IsExistsUserByEmail(email string) (bool, error) {
 
 func (r *AuthRepository) GetUserByID(id int) (user model.User, err error) {
 	row := r.db.QueryRow(
-		"SELECT id, email, first_name, last_name, concat_ws(' ', first_name, last_name) as full_name, role, password, avatar_id, deleted_at, created_at, updated_at FROM users WHERE id = $1 AND deleted_at IS NULL LIMIT 1",
+		"SELECT id, email, first_name, last_name, nullif(concat_ws(' ', first_name, last_name), '') as full_name, role, password, avatar_id, deleted_at, created_at, updated_at FROM users WHERE id = $1 AND deleted_at IS NULL LIMIT 1",
 		id,
 	)
 

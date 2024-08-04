@@ -26,3 +26,6 @@ bash:
 
 build:
 	@docker compose exec node npm run build
+
+check:
+	@docker compose exec node npm run check
