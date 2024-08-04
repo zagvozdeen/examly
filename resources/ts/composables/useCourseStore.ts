@@ -10,14 +10,14 @@ export const useCourseStore = () => {
       .json<{ data: Course[] }>()
   }
 
-  const getCourse = (id: number) => {
+  const getCourseByUuid = (uuid: string) => {
     return ky
-      .get(`/courses/${id}`)
+      .get(`courses/${uuid}`)
       .json<{ data: Course }>()
   }
 
   return {
     getCourses,
-    getCourse,
+    getCourseByUuid,
   }
 }

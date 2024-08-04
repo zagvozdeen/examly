@@ -36,3 +36,13 @@ func (r *CourseRepository) CreateCourse(course *model.Course) (id int, err error
 
 	return id, err
 }
+
+func (r *CourseRepository) GetCourseByUUID(uuid string) (course model.Course, err error) {
+	err = r.db.Get(
+		&course,
+		"SELECT * FROM courses WHERE uuid = $1 AND deleted_at IS NULL LIMIT 1",
+		uuid,
+	)
+
+	return course, err
+}

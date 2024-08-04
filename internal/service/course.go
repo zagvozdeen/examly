@@ -39,3 +39,7 @@ func (s *CourseService) CreateCourse(user *model.User, input *CreateCourseInput)
 
 	return s.repo.CreateCourse(course)
 }
+
+func (s *CourseService) GetCourseByUUID(uuid string) (model.Course, error) {
+	return s.repo.GetCourseByUUID(uuid)
+}

@@ -5,6 +5,7 @@ import (
 	"github.com/Den4ik117/examly/internal/model"
 	"github.com/Den4ik117/examly/internal/service"
 	"github.com/go-playground/validator/v10"
+	"github.com/gorilla/mux"
 	"net/http"
 )
 
@@ -51,5 +52,26 @@ func (h *Handler) createCourse(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"data": id,
+	})
+}
+
+func (h *Handler) getCourseByUUID(w http.ResponseWriter, r *http.Request) {
+	uuid := mux.Vars(r)["uuid"]
+
+	if uuid == "" {
+		http.Error(w, "empty uuid", http.StatusBadRequest)
+		return
+	}
+
+	course, err := h.services.Courses.GetCourseByUUID(uuid)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"data": course,
 	})
 }

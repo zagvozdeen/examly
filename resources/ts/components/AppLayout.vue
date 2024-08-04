@@ -10,7 +10,7 @@
           >
             <AppLogo />
           </router-link>
-          <main>
+          <main class="">
             <component
               :is="Component"
               ref="currentComponent"

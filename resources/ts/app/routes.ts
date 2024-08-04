@@ -1,4 +1,5 @@
 import AppLayout from '@/components/AppLayout.vue'
+import PageCourse from '@/pages/PageCourse.vue'
 import PageLogin from '@/pages/PageLogin.vue'
 import PageMain from '@/pages/PageMain.vue'
 import PageRegister from '@/pages/PageRegister.vue'
@@ -24,6 +25,11 @@ export const createRoutes = (): Array<RouteRecordRaw> => {
           path: '/register',
           component: PageRegister,
           name: 'register',
+        },
+        {
+          path: '/courses/:uuid',
+          component: PageCourse,
+          name: 'courses.show',
         },
       ],
     },

@@ -1,35 +1,43 @@
 <template>
   <div class="flex flex-col gap-4">
-    <span>Acting as: {{ me?.email || me?.role }}</span>
+    <span class="text-2xl text-center py-16">Какому курсу ты хочешь научиться?</span>
 
-    <span>Courses:</span>
-    <ul class="list-inside list-disc">
-      <li
-        v-for="course in courses"
+    <ul class="flex flex-col bg-obscure-700 rounded-md overflow-hidden">
+      <template
+        v-for="(course, index) in courses"
         :key="course.id"
       >
-        {{ course.name }}
-      </li>
+        <li>
+          <router-link
+            class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
+            :to="{
+              name: 'courses.show',
+              params: { uuid: course.uuid },
+            }"
+          >
+            <div class="bg-orange-400 rounded w-full py-0.5 text-center">
+              <i class="bi bi-1-circle-fill" />
+            </div>
+            <span>{{ course.name }}</span>
+            <i class="bi bi-chevron-right" />
+          </router-link>
+        </li>
+        <li
+          v-if="index + 1 !== courses.length"
+          class="h-px w-[calc(100%-28px-1rem)] ml-auto bg-obscure-500"
+        />
+      </template>
     </ul>
-
-    <router-link to="/login">
-      Вход
-    </router-link>
-
-    <router-link to="/register">
-      Регистрация
-    </router-link>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { Course, PageExpose } from '@/types.ts'
-import { me } from '@/composables/useAuthStore.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'
 import { onMounted, ref } from 'vue'
 
 defineExpose<PageExpose>({
-  title: 'TEST',
+  title: 'Главная',
 })
 
 const courseStore = useCourseStore()

@@ -15,6 +15,7 @@ type Auth interface {
 type Courses interface {
 	GetCourses() ([]model.Course, error)
 	CreateCourse(user *model.User, input *CreateCourseInput) (int, error)
+	GetCourseByUUID(uuid string) (model.Course, error)
 }
 
 type Modules interface {
