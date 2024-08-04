@@ -43,3 +43,4 @@ prod-build:
 	@rm -rf ./public
 	@mkdir ./public
 	@mv ./resources/dist ./public
+	@mv ./public/dist/index.html ./public/index.html
