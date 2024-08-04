@@ -44,3 +44,5 @@ prod-build:
 	@mkdir ./public
 	@mv ./resources/dist ./public
 	@mv ./public/dist/index.html ./public/index.html
+prod-migrate:
+	@docker compose exec migrate ./migrate

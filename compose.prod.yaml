@@ -19,6 +19,13 @@ services:
     volumes:
       - ./resources:/app
 
+  migrate:
+    container_name: examly-migrate
+    build:
+      context: .
+      dockerfile: ./.docker/services/migrate/Dockerfile
+    tty: true
+
   app:
     container_name: examly-app
     build:
