@@ -1,9 +1,5 @@
 <template>
   <div class="flex flex-col gap-4">
-    <router-link :to="{ name: 'main' }">
-      <AppLogo />
-    </router-link>
-
     <n-form
       ref="formRef"
       :rules="formRules"
@@ -92,7 +88,6 @@
       </n-form-item>
     </n-form>
 
-
     <span class="text-center">Уже есть аккаунт? <router-link
       :to="{ name: 'login' }"
       class="underline"
@@ -102,7 +97,6 @@
   </div>
 </template>
 <script lang="ts" setup>
-import AppLogo from '@/components/AppLogo.vue'
 import { NForm, NFormItem, NInput, NButton, FormInst, FormRules, useMessage } from 'naive-ui'
 import { reactive, ref } from 'vue'
 import { useAuthStore } from '@/composables/useAuthStore.ts'

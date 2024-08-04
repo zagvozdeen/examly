@@ -1,7 +1,5 @@
 <template>
   <div class="flex flex-col gap-4">
-    <AppLogo />
-
     <span>Acting as: {{ me?.email || me?.role }}</span>
 
     <span>Courses:</span>
@@ -25,7 +23,6 @@
 </template>
 
 <script lang="ts" setup>
-import AppLogo from '@/components/AppLogo.vue'
 import { Course, PageExpose } from '@/types.ts'
 import { me } from '@/composables/useAuthStore.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'

@@ -1,10 +1,24 @@
 <template>
-  <div class="max-w-md mx-auto p-4">
+  <div class="sm:max-w-xl mx-auto sm:p-4">
     <router-view v-slot="{ Component }">
-      <component
-        :is="Component"
-        ref="currentComponent"
-      />
+      <div class="sm:block sm:max-h-none sm:overflow-auto grid max-h-dvh overflow-hidden grid-rows-[1fr_min-content]">
+        <div class="overflow-auto sm:p-0 p-4 flex flex-col gap-4">
+          <AppHeader class="sm:block hidden" />
+          <router-link
+            class="sm:hidden"
+            :to="{ name: 'main' }"
+          >
+            <AppLogo />
+          </router-link>
+          <main>
+            <component
+              :is="Component"
+              ref="currentComponent"
+            />
+          </main>
+        </div>
+        <AppFooter class="sm:hidden" />
+      </div>
     </router-view>
   </div>
 </template>
@@ -13,6 +27,9 @@
 import { onMounted, ref, watch } from 'vue'
 import { PageExpose } from '@/types.js'
 import { useAuthStore } from '@/composables/useAuthStore.ts'
+import AppFooter from '@/components/AppFooter.vue'
+import AppHeader from '@/components/AppHeader.vue'
+import AppLogo from '@/components/AppLogo.vue'
 
 const authStore = useAuthStore()
 
