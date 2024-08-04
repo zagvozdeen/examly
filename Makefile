@@ -31,7 +31,6 @@ check:
 	@docker compose exec node npm run check
 
 prod-up:
-	@#docker compose --file compose.prod.yaml up -d
 	@docker compose --file compose.prod.yaml up --build -d
 prod-down:
 	@docker compose --file compose.prod.yaml down
