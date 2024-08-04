@@ -1,7 +1,7 @@
 <template>
   <div class="sm:max-w-xl mx-auto sm:p-4">
     <router-view v-slot="{ Component }">
-      <div class="sm:block sm:max-h-none sm:overflow-auto grid max-h-dvh overflow-hidden grid-rows-[1fr_min-content]">
+      <div class="sm:block sm:max-h-none sm:min-h-0 sm:overflow-auto grid min-h-dvh max-h-dvh overflow-hidden grid-rows-[1fr_min-content]">
         <div class="overflow-auto sm:p-0 p-4 flex flex-col gap-4">
           <AppHeader class="sm:block hidden" />
           <router-link
