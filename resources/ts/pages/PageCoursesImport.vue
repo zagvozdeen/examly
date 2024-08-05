@@ -18,6 +18,13 @@
       </n-form-item>
 
       <n-form-item
+        label="Файл (YAML)"
+        path="file_id"
+      >
+        <AppUploadFile v-model:value="formValue.file_id" />
+      </n-form-item>
+
+      <n-form-item
         :show-feedback="false"
         :show-label="false"
       >
@@ -30,13 +37,6 @@
         </n-button>
       </n-form-item>
     </n-form>
-
-    <!--    <span class="text-center">Ещё нет аккаунта? <router-link-->
-    <!--      :to="{ name: 'register' }"-->
-    <!--      class="underline"-->
-    <!--    >-->
-    <!--      Зарегистрироваться-->
-    <!--    </router-link></span>-->
   </div>
 </template>
 <script lang="ts" setup>
@@ -47,6 +47,7 @@ import { useRouter } from 'vue-router'
 import { Course, PageExpose } from '@/types.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'
 import { useQuestionStore } from '@/composables/useQuestionStore.ts'
+import AppUploadFile from '@/components/AppUploadFile.vue'
 
 const router = useRouter()
 const message = useMessage()
@@ -60,9 +61,8 @@ defineExpose<PageExpose>({
 
 const formRef = ref<FormInst>()
 const formValue = reactive({
-  // email: null as string | null,
-  // password: null as string | null,
   course_id: null as number | null,
+  file_id: null as number | null,
 })
 const formRules: FormRules = {
   course_id: {
@@ -70,10 +70,11 @@ const formRules: FormRules = {
     type: 'number',
     message: 'Выберите курс',
   },
-  // password: {
-  //   required: true,
-  //   message: 'Введите пароль',
-  // },
+  file_id: {
+    required: true,
+    type: 'number',
+    message: 'Выберите файл',
+  },
 }
 const courses = ref<Course[]>([])
 const options = computed(() => courses.value.map(course => ({

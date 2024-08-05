@@ -39,3 +39,14 @@ export interface Course {
   created_at: string
   updated_at: string
 }
+
+export interface FileModel {
+  id: number
+  uuid: string
+  content: string
+  size: number
+  mime_type: string
+  origin_name: string
+  created_at: string
+  updated_at: string
+}

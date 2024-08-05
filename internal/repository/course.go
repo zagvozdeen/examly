@@ -14,7 +14,7 @@ func NewCourseRepository(db *sqlx.DB) *CourseRepository {
 }
 
 func (r *CourseRepository) GetCourses() ([]model.Course, error) {
-	var courses []model.Course
+	courses := make([]model.Course, 0)
 
 	err := r.db.Select(
 		&courses,
