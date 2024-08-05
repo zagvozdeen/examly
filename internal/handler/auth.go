@@ -87,3 +87,33 @@ func (h *Handler) getMe(w http.ResponseWriter, r *http.Request) {
 		"data": user,
 	})
 }
+
+func (h *Handler) updateMe(w http.ResponseWriter, r *http.Request) {
+	var u service.UpdateUserInput
+	err := json.NewDecoder(r.Body).Decode(&u)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	validate := validator.New()
+	err = validate.Struct(u)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	user := r.Context().Value("user").(*model.User)
+
+	updated, err := h.services.Auth.UpdateUser(*user, &u)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"data": updated,
+	})
+}

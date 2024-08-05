@@ -3,6 +3,7 @@ import { User } from '@/types.ts'
 import { ref } from 'vue'
 
 export const me = ref<User>()
+export const isAuthenticated = ref<boolean>(false)
 
 export const useAuthStore = () => {
   const ky = useKy()
@@ -10,6 +11,15 @@ export const useAuthStore = () => {
   const getMe = async () => {
     const data = await ky
       .get('me')
+      .json<{ data: User }>()
+
+    me.value = data.data
+    isAuthenticated.value = true
+  }
+
+  const updateMe = async (json: object) => {
+    const data = await ky
+      .patch('me', { json })
       .json<{ data: User }>()
 
     me.value = data.data
@@ -29,6 +39,7 @@ export const useAuthStore = () => {
 
   return {
     getMe,
+    updateMe,
     login,
     register,
   }

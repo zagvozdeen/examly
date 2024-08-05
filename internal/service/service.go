@@ -10,6 +10,7 @@ type Auth interface {
 	Login(input LoginInput) (string, error)
 	GetGuestToken() (string, error)
 	CheckAuth(t string) (*model.User, error)
+	UpdateUser(user model.User, u *UpdateUserInput) (*model.User, error)
 }
 
 type Courses interface {

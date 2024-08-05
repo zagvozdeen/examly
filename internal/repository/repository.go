@@ -10,6 +10,7 @@ type Auth interface {
 	GetUserByEmail(email string) (model.User, error)
 	IsExistsUserByEmail(email string) (bool, error)
 	GetUserByID(id int) (model.User, error)
+	UpdateUser(user *model.User) error
 }
 
 type Courses interface {

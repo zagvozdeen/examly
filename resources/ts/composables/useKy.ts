@@ -3,9 +3,6 @@ import ky from 'ky'
 export const useKy = () => {
   return ky.extend({
     prefixUrl: '/api/v1',
-    // headers: {
-    //   'Content-Type': 'application/json',
-    // },
     hooks: {
       beforeRequest: [
         (request) => {

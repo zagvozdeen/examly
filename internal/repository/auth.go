@@ -89,3 +89,16 @@ func (r *AuthRepository) GetUserByID(id int) (user model.User, err error) {
 
 	return user, err
 }
+
+func (r *AuthRepository) UpdateUser(user *model.User) error {
+	_, err := r.db.Exec(
+		"UPDATE users SET first_name = $1, last_name = $2, email = $3, updated_at = $4 WHERE id = $5 AND deleted_at IS NULL",
+		user.FirstName,
+		user.LastName,
+		user.Email,
+		user.UpdatedAt,
+		user.ID,
+	)
+
+	return err
+}

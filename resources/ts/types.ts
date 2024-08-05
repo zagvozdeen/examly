@@ -1,5 +1,8 @@
+import { RouteLocationResolved } from 'vue-router'
+
 export interface PageExpose {
   title: string
+  back?: RouteLocationResolved
 }
 
 export enum UserRole {
@@ -7,6 +10,13 @@ export enum UserRole {
   ManagerRole = 'MANAGER',
   SimpleUserRole = 'USER',
   GuestRole = 'GUEST',
+}
+
+export const UserRoleTranslates: Record<UserRole, string> = {
+  [UserRole.AdminRole]: 'Администратор',
+  [UserRole.ManagerRole]: 'Модератор',
+  [UserRole.SimpleUserRole]: 'Пользователь',
+  [UserRole.GuestRole]: 'Гость',
 }
 
 export interface User {

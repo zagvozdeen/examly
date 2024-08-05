@@ -30,10 +30,10 @@
         </li>
         <li>
           <router-link
-            :to="{ name: 'login' }"
+            :to="{ name: 'me' }"
             class="uppercase text-xs font-medium"
             :class="{
-              'text-orange-400': route.name === 'login'
+              'text-orange-400': route.name === 'me'
             }"
           >
             Личный кабинет

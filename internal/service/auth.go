@@ -32,6 +32,12 @@ type LoginInput struct {
 	Password string `json:"password" validate:"required"`
 }
 
+type UpdateUserInput struct {
+	FirstName string `json:"first_name" validate:"required,max=255"`
+	LastName  string `json:"last_name" validate:"required,max=255"`
+	Email     string `json:"email" validate:"required,email,max=255"`
+}
+
 type Claims struct {
 	UserID int `json:"user_id"`
 	jwt.RegisteredClaims
@@ -118,6 +124,22 @@ func (s *AuthService) CheckAuth(t string) (*model.User, error) {
 	}
 
 	return &user, nil
+}
+
+func (s *AuthService) UpdateUser(user model.User, u *UpdateUserInput) (*model.User, error) {
+	user.FirstName = null.StringFrom(u.FirstName)
+	user.LastName = null.StringFrom(u.LastName)
+	user.Email = null.StringFrom(u.Email)
+	user.UpdatedAt = time.Now()
+
+	err := s.repo.UpdateUser(&user)
+	if err != nil {
+		return nil, err
+	}
+
+	updated, err := s.repo.GetUserByID(user.ID)
+
+	return &updated, err
 }
 
 func generateTokenByUserID(id int) (string, error) {
