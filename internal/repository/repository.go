@@ -30,11 +30,16 @@ type Questions interface {
 	CreateAnswers(answers []model.Answer) error
 }
 
+type Files interface {
+	CreateFile(file *model.File) (id int, err error)
+}
+
 type Repository struct {
 	Auth
 	Courses
 	Modules
 	Questions
+	Files
 }
 
 func NewRepository(db *sqlx.DB) *Repository {
@@ -43,5 +48,6 @@ func NewRepository(db *sqlx.DB) *Repository {
 		Courses:   NewCourseRepository(db),
 		Modules:   NewModuleRepository(db),
 		Questions: NewQuestionRepository(db),
+		Files:     NewFileRepository(db),
 	}
 }

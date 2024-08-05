@@ -45,5 +45,7 @@ func (h *Handler) InitRoutes() *mux.Router {
 	authRouter.HandleFunc("/questions", h.getQuestions).Methods("GET")
 	authRouter.HandleFunc("/questions", h.createQuestion).Methods("POST")
 
+	authRouter.HandleFunc("/files", h.uploadFile).Methods("POST")
+
 	return router
 }

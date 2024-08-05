@@ -1,24 +1,28 @@
 CREATE TABLE IF NOT EXISTS files
 (
-    id         BIGSERIAL PRIMARY KEY,
-    content    VARCHAR(255) NULL,
-    deleted_at TIMESTAMP    NULL,
-    created_at TIMESTAMP    NOT NULL,
-    updated_at TIMESTAMP    NOT NULL
+    id          BIGSERIAL PRIMARY KEY,
+    uuid        uuid         NOT NULL,
+    content     VARCHAR(255) NOT NULL,
+    size        bigint       NOT NULL,
+    mime_type   VARCHAR(255) NOT NULL,
+    origin_name VARCHAR(255) NOT NULL,
+    deleted_at  TIMESTAMP    NULL,
+    created_at  TIMESTAMP    NOT NULL,
+    updated_at  TIMESTAMP    NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS users
 (
-    id          BIGSERIAL PRIMARY KEY,
-    email       VARCHAR(255)                 NULL,
-    first_name  VARCHAR(255)                 NULL,
-    last_name   VARCHAR(255)                 NULL,
-    role        VARCHAR(255)                 NOT NULL,
-    password    VARCHAR(255)                 NULL,
-    avatar_id   BIGINT references files (id) NULL,
-    deleted_at  TIMESTAMP                    NULL,
-    created_at  TIMESTAMP                    NOT NULL,
-    updated_at  TIMESTAMP                    NOT NULL
+    id         BIGSERIAL PRIMARY KEY,
+    email      VARCHAR(255)                 NULL,
+    first_name VARCHAR(255)                 NULL,
+    last_name  VARCHAR(255)                 NULL,
+    role       VARCHAR(255)                 NOT NULL,
+    password   VARCHAR(255)                 NULL,
+    avatar_id  BIGINT references files (id) NULL,
+    deleted_at TIMESTAMP                    NULL,
+    created_at TIMESTAMP                    NOT NULL,
+    updated_at TIMESTAMP                    NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS courses

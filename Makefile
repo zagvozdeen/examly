@@ -39,8 +39,8 @@ prod-restart prod-r:
 	@make prod-up
 prod-build:
 	@docker compose exec node npm run build
-	@rm -rf ./public
-	@mkdir ./public
+	@rm -rf ./public/dist || true
+	@rm ./public/index.html || true
 	@mv ./resources/dist ./public
 	@mv ./public/dist/index.html ./public/index.html
 prod-migrate:

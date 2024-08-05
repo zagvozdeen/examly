@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/Den4ik117/examly/internal/model"
 	"github.com/Den4ik117/examly/internal/repository"
+	"mime/multipart"
 )
 
 type Auth interface {
@@ -29,11 +30,16 @@ type Questions interface {
 	CreateQuestion(input *CreateQuestionInput) (int, error)
 }
 
+type Files interface {
+	UploadFile(file multipart.File, header *multipart.FileHeader) (*model.File, error)
+}
+
 type Service struct {
 	Auth
 	Courses
 	Modules
 	Questions
+	Files
 }
 
 func NewService(repos *repository.Repository) *Service {
@@ -42,5 +48,6 @@ func NewService(repos *repository.Repository) *Service {
 		Courses:   NewCourseService(repos.Courses),
 		Modules:   NewModuleService(repos.Modules),
 		Questions: NewQuestionService(repos.Questions),
+		Files:     NewFileService(repos.Files),
 	}
 }
