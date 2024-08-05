@@ -36,7 +36,7 @@
         <router-link
           class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
           :to="{
-            name: 'main',
+            name: 'my.modules',
           }"
         >
           <div class="bg-red-400 rounded w-full py-0.5 text-center">
@@ -51,7 +51,7 @@
         <router-link
           class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
           :to="{
-            name: 'main',
+            name: 'my.questions',
           }"
         >
           <div class="bg-green-400 rounded w-full py-0.5 text-center">

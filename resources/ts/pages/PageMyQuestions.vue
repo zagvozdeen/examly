@@ -1,13 +1,13 @@
 <template>
   <div class="flex flex-col gap-4">
     <span class="text-gray-400 text-center text-xs">
-      Здесь Вы можете посмотреть список созданных курсов и их статус.
+      Вопросы и ответы тоже проходят проверку модерацией
       <br>
-      Созданные курсы проходят модерацию, прежде чем попадут в общий доступ.
+      перед тем как попасть в общий доступ.
     </span>
 
     <router-link
-      :to="{ name: 'my.courses.create' }"
+      :to="{ name: 'my.questions.create' }"
       class="sm:self-center"
     >
       <n-button
@@ -16,12 +16,12 @@
       >
         <div class="flex items-center gap-2">
           <i class="bi bi-plus-square-fill" />
-          <span>Создать курс</span>
+          <span>Создать вопрос</span>
         </div>
       </n-button>
     </router-link>
 
-    <n-table v-if="courses.length > 0">
+    <n-table v-if="questions.length > 0">
       <thead>
         <tr>
           <th>Название</th>
@@ -30,11 +30,11 @@
       </thead>
       <tbody>
         <tr
-          v-for="course in courses"
-          :key="course.id"
+          v-for="question in questions"
+          :key="question.id"
         >
-          <td>{{ course.name }}</td>
-          <td>{{ course.status }}</td>
+          <td>{{ question.content }}</td>
+          <td>{{ question.status }}</td>
         </tr>
       </tbody>
     </n-table>
@@ -49,24 +49,24 @@
 import { NTable, NButton } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Course, PageExpose } from '@/types.ts'
-import { useCourseStore } from '@/composables/useCourseStore.ts'
+import { PageExpose, Question } from '@/types.ts'
+import { useQuestionStore } from '@/composables/useQuestionStore.ts'
 
 const router = useRouter()
-const courseStore = useCourseStore()
+const questionStore = useQuestionStore()
 
-const courses = ref<Course[]>([])
+const questions = ref<Question[]>([])
 
 defineExpose<PageExpose>({
-  title: 'Мои курсы',
+  title: 'Созданные вопросы',
   back: router.resolve({ name: 'me' }),
 })
 
 onMounted(() => {
-  courseStore
-    .getMyCourses()
+  questionStore
+    .getMyQuestions()
     .then(data => {
-      courses.value = data.data
+      questions.value = data.data
     })
 })
 </script>

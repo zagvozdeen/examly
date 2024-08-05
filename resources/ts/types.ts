@@ -59,3 +59,21 @@ export interface FileModel {
   created_at: string
   updated_at: string
 }
+
+export interface Module {
+  id: number
+  uuid: string
+  name: string
+  status: CourseStatus
+  created_at: string
+  updated_at: string
+}
+
+export interface Question {
+  id: number
+  uuid: string
+  content: string
+  status: CourseStatus
+  created_at: string
+  updated_at: string
+}
