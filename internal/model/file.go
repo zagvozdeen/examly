@@ -12,6 +12,7 @@ type File struct {
 	Size       int       `json:"size" db:"size"`
 	MimeType   string    `json:"mime_type" db:"mime_type"`
 	OriginName string    `json:"origin_name" db:"origin_name"`
+	UserID     int       `json:"user_id" db:"user_id"`
 	DeletedAt  null.Time `json:"deleted_at" db:"deleted_at"`
 	CreatedAt  time.Time `json:"created_at" db:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at" db:"updated_at"`

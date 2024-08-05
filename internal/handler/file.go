@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"github.com/Den4ik117/examly/internal/model"
 	"net/http"
 )
 
@@ -19,7 +20,9 @@ func (h *Handler) uploadFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	f, err := h.services.UploadFile(file, handler)
+	user := r.Context().Value("user").(*model.User)
+
+	f, err := h.services.UploadFile(user, file, handler)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

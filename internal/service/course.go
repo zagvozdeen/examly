@@ -12,7 +12,9 @@ type CourseService struct {
 }
 
 type CreateCourseInput struct {
-	Name string `json:"name" validate:"required,max=255"`
+	Name  string `json:"name" validate:"required,max=255"`
+	Color string `json:"color" validate:"required,max=255"`
+	Icon  string `json:"icon" validate:"required,max=255"`
 }
 
 func NewCourseService(repo repository.Courses) *CourseService {
@@ -21,6 +23,10 @@ func NewCourseService(repo repository.Courses) *CourseService {
 
 func (s *CourseService) GetCourses() ([]model.Course, error) {
 	return s.repo.GetCourses()
+}
+
+func (s *CourseService) GetCoursesByUserID(id int) ([]model.Course, error) {
+	return s.repo.GetCoursesByUserID(id)
 }
 
 func (s *CourseService) CreateCourse(user *model.User, input *CreateCourseInput) (int, error) {
@@ -33,6 +39,9 @@ func (s *CourseService) CreateCourse(user *model.User, input *CreateCourseInput)
 		UUID:      courseUUID.String(),
 		Name:      input.Name,
 		UserID:    user.ID,
+		Color:     input.Color,
+		Icon:      input.Icon,
+		Status:    model.NewCourseStatus,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}

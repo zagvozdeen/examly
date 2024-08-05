@@ -24,7 +24,7 @@ func NewFileService(repo repository.Files) *FileService {
 	return &FileService{repo: repo}
 }
 
-func (s *FileService) UploadFile(file multipart.File, header *multipart.FileHeader) (*model.File, error) {
+func (s *FileService) UploadFile(user *model.User, file multipart.File, header *multipart.FileHeader) (*model.File, error) {
 	err := os.MkdirAll(FileDir, os.ModePerm)
 	if err != nil {
 		log.Println(err)
@@ -59,6 +59,7 @@ func (s *FileService) UploadFile(file multipart.File, header *multipart.FileHead
 		Size:       int(header.Size),
 		MimeType:   header.Header.Get("Content-Type"),
 		OriginName: header.Filename,
+		UserID:     user.ID,
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
 	}

@@ -18,7 +18,20 @@ func (r *CourseRepository) GetCourses() ([]model.Course, error) {
 
 	err := r.db.Select(
 		&courses,
-		"SELECT * FROM courses WHERE deleted_at IS NULL",
+		"SELECT * FROM courses WHERE status = $1 AND deleted_at IS NULL",
+		model.ActiveCourseStatus,
+	)
+
+	return courses, err
+}
+
+func (r *CourseRepository) GetCoursesByUserID(id int) ([]model.Course, error) {
+	courses := make([]model.Course, 0)
+
+	err := r.db.Select(
+		&courses,
+		"SELECT * FROM courses WHERE user_id = $1 AND deleted_at IS NULL",
+		id,
 	)
 
 	return courses, err
@@ -26,9 +39,12 @@ func (r *CourseRepository) GetCourses() ([]model.Course, error) {
 
 func (r *CourseRepository) CreateCourse(course *model.Course) (id int, err error) {
 	err = r.db.QueryRow(
-		"INSERT INTO courses (uuid, name, user_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5) RETURNING id",
+		"INSERT INTO courses (uuid, name, color, icon, status, user_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
 		course.UUID,
 		course.Name,
+		course.Color,
+		course.Icon,
+		course.Status,
 		course.UserID,
 		course.CreatedAt,
 		course.UpdatedAt,

@@ -16,6 +16,7 @@ type Auth interface {
 
 type Courses interface {
 	GetCourses() ([]model.Course, error)
+	GetCoursesByUserID(id int) ([]model.Course, error)
 	CreateCourse(user *model.User, input *CreateCourseInput) (int, error)
 	GetCourseByUUID(uuid string) (model.Course, error)
 }
@@ -31,7 +32,7 @@ type Questions interface {
 }
 
 type Files interface {
-	UploadFile(file multipart.File, header *multipart.FileHeader) (*model.File, error)
+	UploadFile(user *model.User, file multipart.File, header *multipart.FileHeader) (*model.File, error)
 }
 
 type Service struct {
