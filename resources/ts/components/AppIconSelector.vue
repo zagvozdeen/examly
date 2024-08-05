@@ -43,7 +43,7 @@ import { computed, ref } from 'vue'
 
 const PER_PAGE = 48
 const iteration = ref(1)
-const value = defineModel('value')
+const value = defineModel<string | undefined | null>('value')
 
 const available = computed(() => {
   return BOOTSTRAP_ICONS.length > PER_PAGE * iteration.value

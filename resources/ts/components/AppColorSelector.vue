@@ -24,7 +24,7 @@
 </template>
 
 <script lang="ts" setup>
-const value = defineModel('value')
+const value = defineModel<string | undefined | null>('value')
 
 const colors = [
   'bg-slate-400',
