@@ -5,8 +5,10 @@ import PageMain from '@/pages/PageMain.vue'
 import PageRegister from '@/pages/PageRegister.vue'
 import { RouteRecordRaw } from 'vue-router'
 import PageMe from '@/pages/PageMe.vue'
-import PageMeSettings from '@/pages/PageMeSettings.vue'
+import PageMySettings from '@/pages/PageMySettings.vue'
 import PageCoursesImport from '@/pages/PageCoursesImport.vue'
+import PageMyCourses from '@/pages/PageMyCourses.vue'
+import PageMyCoursesEdit from '@/pages/PageMyCoursesEdit.vue'
 
 export const createRoutes = (): Array<RouteRecordRaw> => {
   return [
@@ -25,9 +27,24 @@ export const createRoutes = (): Array<RouteRecordRaw> => {
           name: 'me',
         },
         {
-          path: '/me/settings',
-          component: PageMeSettings,
-          name: 'me.settings',
+          path: '/my/settings',
+          component: PageMySettings,
+          name: 'my.settings',
+        },
+        {
+          path: '/my/courses',
+          component: PageMyCourses,
+          name: 'my.courses',
+        },
+        {
+          path: '/my/courses/create',
+          component: PageMyCoursesEdit,
+          name: 'my.courses.create',
+        },
+        {
+          path: '/my/courses/:uuid/edit',
+          component: PageMyCoursesEdit,
+          name: 'my.courses.edit',
         },
         {
           path: '/login',

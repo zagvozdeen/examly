@@ -39,9 +39,10 @@ func (r *CourseRepository) GetCoursesByUserID(id int) ([]model.Course, error) {
 
 func (r *CourseRepository) CreateCourse(course *model.Course) (id int, err error) {
 	err = r.db.QueryRow(
-		"INSERT INTO courses (uuid, name, color, icon, status, user_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
+		"INSERT INTO courses (uuid, name, description, color, icon, status, user_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id",
 		course.UUID,
 		course.Name,
+		course.Description,
 		course.Color,
 		course.Icon,
 		course.Status,

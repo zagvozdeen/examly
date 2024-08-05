@@ -43,5 +43,7 @@ prod-build:
 	@rm ./public/index.html || true
 	@mv ./resources/dist ./public
 	@mv ./public/dist/index.html ./public/index.html
-prod-migrate:
-	@docker compose exec migrate ./migrate
+prod-migrate-up:
+	@docker compose exec migrate ./migrate up
+prod-migrate-down:
+	@docker compose exec migrate ./migrate down

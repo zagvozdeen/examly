@@ -31,10 +31,19 @@ export interface User {
   updated_at: string
 }
 
+export enum CourseStatus {
+  New = 'NEW',
+  Active = 'ACTIVE',
+  Inactive = 'INACTIVE',
+}
+
 export interface Course {
   id: number
   uuid: string
   name: string
+  color: string
+  icon: string
+  status: CourseStatus
   user_id: number
   created_at: string
   updated_at: string

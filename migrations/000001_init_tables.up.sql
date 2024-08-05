@@ -28,16 +28,17 @@ CREATE TABLE IF NOT EXISTS users
 
 CREATE TABLE IF NOT EXISTS courses
 (
-    id         BIGSERIAL PRIMARY KEY,
-    uuid       uuid                         NOT NULL,
-    name       VARCHAR(255)                 NOT NULL,
-    color      VARCHAR(255)                 NOT NULL,
-    icon       VARCHAR(255)                 NOT NULL,
-    status     VARCHAR(255)                 NOT NULL,
-    user_id    BIGINT references users (id) not null,
-    deleted_at TIMESTAMP                    NULL,
-    created_at TIMESTAMP                    NOT NULL,
-    updated_at TIMESTAMP                    NOT NULL
+    id          BIGSERIAL PRIMARY KEY,
+    uuid        uuid                         NOT NULL,
+    name        VARCHAR(255)                 NOT NULL,
+    description text                         NOT NULL,
+    color       VARCHAR(255)                 NOT NULL,
+    icon        VARCHAR(255)                 NOT NULL,
+    status      VARCHAR(255)                 NOT NULL,
+    user_id     BIGINT references users (id) not null,
+    deleted_at  TIMESTAMP                    NULL,
+    created_at  TIMESTAMP                    NOT NULL,
+    updated_at  TIMESTAMP                    NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS modules

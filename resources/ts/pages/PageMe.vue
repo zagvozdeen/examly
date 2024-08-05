@@ -3,7 +3,7 @@
     <span class="text-2xl text-center py-8">Личный кабинет</span>
 
     <router-link
-      :to="{ name: 'me.settings' }"
+      :to="{ name: 'my.settings' }"
       class="bg-obscure-700 rounded-md p-2 hover:bg-obscure-500 bg-opacity-50"
     >
       <div class="grid grid-cols-[min-content_1fr_min-content] items-center gap-2">
@@ -21,7 +21,7 @@
         <router-link
           class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
           :to="{
-            name: 'main',
+            name: 'my.courses',
           }"
         >
           <div class="bg-blue-400 rounded w-full py-0.5 text-center">
