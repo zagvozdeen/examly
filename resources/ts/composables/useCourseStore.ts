@@ -16,6 +16,12 @@ export const useCourseStore = () => {
       .json<{ data: Course[] }>()
   }
 
+  const getAllCourses = () => {
+    return ky
+      .get('all-courses')
+      .json<{ data: Course[] }>()
+  }
+
   const getCourseByUuid = (uuid: string) => {
     return ky
       .get(`courses/${uuid}`)
@@ -31,6 +37,7 @@ export const useCourseStore = () => {
   return {
     getCourses,
     getMyCourses,
+    getAllCourses,
     getCourseByUuid,
     createCourse,
   }

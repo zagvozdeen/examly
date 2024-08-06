@@ -25,6 +25,23 @@ func (h *Handler) getQuestions(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (h *Handler) getMyQuestions(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(*model.User)
+	questions, err := h.services.GetQuestionsByUserID(user.ID)
+	if err != nil {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]any{
+		"data": questions,
+	})
+}
+
 func (h *Handler) createQuestion(w http.ResponseWriter, r *http.Request) {
 	var u service.CreateQuestionInput
 	err := json.NewDecoder(r.Body).Decode(&u)
@@ -50,7 +67,9 @@ func (h *Handler) createQuestion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	id, err := h.services.Questions.CreateQuestion(&u)
+	user := r.Context().Value("user").(*model.User)
+
+	id, err := h.services.Questions.CreateQuestion(user, &u)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

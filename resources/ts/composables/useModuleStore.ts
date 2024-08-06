@@ -6,7 +6,13 @@ export const useModuleStore = () => {
 
   const getMyModules = () => {
     return ky
-      .get('my/modules')
+      .get('my-modules')
+      .json<{data: Module[]}>()
+  }
+
+  const getAllModules = () => {
+    return ky
+      .get('all-modules')
       .json<{data: Module[]}>()
   }
 
@@ -24,6 +30,7 @@ export const useModuleStore = () => {
 
   return {
     getMyModules,
+    getAllModules,
     createModule,
     getModuleByUuid,
   }

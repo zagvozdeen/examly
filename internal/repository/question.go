@@ -16,7 +16,18 @@ func NewQuestionRepository(db *sqlx.DB) *QuestionRepository {
 func (r *QuestionRepository) GetQuestions() (questions []model.Question, err error) {
 	err = r.db.Select(
 		&questions,
-		"SELECT * FROM questions WHERE deleted_at IS NULL",
+		"SELECT * FROM questions WHERE status = $1 AND deleted_at IS NULL",
+		model.ActiveCourseStatus,
+	)
+
+	return questions, err
+}
+
+func (r *QuestionRepository) GetQuestionsByUserID(id int) (questions []model.Question, err error) {
+	err = r.db.Select(
+		&questions,
+		"SELECT * FROM questions WHERE user_id = $1 AND deleted_at IS NULL",
+		id,
 	)
 
 	return questions, err
@@ -24,11 +35,16 @@ func (r *QuestionRepository) GetQuestions() (questions []model.Question, err err
 
 func (r *QuestionRepository) CreateQuestion(question *model.Question) (id int, err error) {
 	err = r.db.QueryRow(
-		"INSERT INTO questions (content, type, course_id, module_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+		"INSERT INTO questions (uuid, content, explanation, type, status, course_id, module_id, file_id, user_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id",
+		question.UUID,
 		question.Content,
+		question.Explanation,
 		question.Type,
+		question.Status,
 		question.CourseID,
 		question.ModuleID,
+		question.FileID,
+		question.UserID,
 		question.CreatedAt,
 		question.UpdatedAt,
 	).Scan(&id)

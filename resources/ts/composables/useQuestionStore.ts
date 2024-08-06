@@ -6,7 +6,7 @@ export const useQuestionStore = () => {
 
   const getMyQuestions = () => {
     return ky
-      .get('my/questions')
+      .get('my-questions')
       .json<{data: Question[]}>()
   }
 

@@ -21,7 +21,10 @@
       </n-button>
     </router-link>
 
-    <n-table v-if="courses.length > 0">
+    <n-table
+      v-if="courses.length > 0"
+      size="small"
+    >
       <thead>
         <tr>
           <th>Название</th>
@@ -34,7 +37,7 @@
           :key="course.id"
         >
           <td>{{ course.name }}</td>
-          <td>{{ course.status }}</td>
+          <td>{{ CourseStatusTranslates[course.status] }}</td>
         </tr>
       </tbody>
     </n-table>
@@ -49,7 +52,7 @@
 import { NTable, NButton } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Course, PageExpose } from '@/types.ts'
+import { Course, CourseStatusTranslates, PageExpose } from '@/types.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'
 
 const router = useRouter()

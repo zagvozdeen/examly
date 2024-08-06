@@ -16,17 +16,22 @@ type Auth interface {
 type Courses interface {
 	GetCourses() ([]model.Course, error)
 	GetCoursesByUserID(id int) ([]model.Course, error)
+	GetAllCourses(id int) ([]model.Course, error)
+	GetCoursesByIDs(ids []int) ([]model.Course, error)
 	CreateCourse(course *model.Course) (int, error)
 	GetCourseByUUID(uuid string) (model.Course, error)
 }
 
 type Modules interface {
 	GetModules() ([]model.Module, error)
+	GetModulesByUserID(id int) ([]model.Module, error)
+	GetAllModules(id int) ([]model.Module, error)
 	CreateModule(module *model.Module) (int, error)
 }
 
 type Questions interface {
 	GetQuestions() ([]model.Question, error)
+	GetQuestionsByUserID(id int) ([]model.Question, error)
 	CreateQuestion(question *model.Question) (int, error)
 	CreateAnswers(answers []model.Answer) error
 }

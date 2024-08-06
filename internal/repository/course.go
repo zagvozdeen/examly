@@ -37,6 +37,29 @@ func (r *CourseRepository) GetCoursesByUserID(id int) ([]model.Course, error) {
 	return courses, err
 }
 
+func (r *CourseRepository) GetAllCourses(id int) ([]model.Course, error) {
+	courses := make([]model.Course, 0)
+
+	err := r.db.Select(
+		&courses,
+		"SELECT * FROM courses WHERE (user_id = $1 OR status = $2) AND deleted_at IS NULL",
+		id,
+		model.ActiveCourseStatus,
+	)
+
+	return courses, err
+}
+
+func (r *CourseRepository) GetCoursesByIDs(ids []int) ([]model.Course, error) {
+	courses := make([]model.Course, 0)
+
+	query, args, err := sqlx.In("SELECT * FROM courses WHERE id IN (?) AND deleted_at IS NULL", ids)
+	query = r.db.Rebind(query)
+	err = r.db.Select(&courses, query, args...)
+
+	return courses, err
+}
+
 func (r *CourseRepository) CreateCourse(course *model.Course) (id int, err error) {
 	err = r.db.QueryRow(
 		"INSERT INTO courses (uuid, name, description, color, icon, status, user_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id",

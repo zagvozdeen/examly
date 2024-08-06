@@ -81,6 +81,11 @@ export const createRoutes = (): Array<RouteRecordRaw> => {
           name: 'my.questions.edit',
         },
         {
+          path: '/my/questions/import',
+          component: PageCoursesImport,
+          name: 'my.questions.import',
+        },
+        {
           path: '/login',
           component: PageLogin,
           name: 'login',
@@ -94,11 +99,6 @@ export const createRoutes = (): Array<RouteRecordRaw> => {
           path: '/courses/:uuid',
           component: PageCourse,
           name: 'courses.show',
-        },
-        {
-          path: '/courses/import',
-          component: PageCoursesImport,
-          name: 'courses.import',
         },
       ],
     },

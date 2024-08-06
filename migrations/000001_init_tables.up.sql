@@ -56,18 +56,19 @@ CREATE TABLE IF NOT EXISTS modules
 
 CREATE TABLE IF NOT EXISTS questions
 (
-    id         BIGSERIAL PRIMARY KEY,
-    uuid       uuid                           NOT NULL,
-    content    text                           not null,
-    type       VARCHAR(255)                   NOT NULL,
-    status     VARCHAR(255)                   NOT NULL,
-    course_id  BIGINT references courses (id) not null,
-    module_id  BIGINT references modules (id) null,
-    file_id    BIGINT references files (id)   null,
-    user_id    BIGINT references users (id)   not null,
-    deleted_at TIMESTAMP                      NULL,
-    created_at TIMESTAMP                      NOT NULL,
-    updated_at TIMESTAMP                      NOT NULL
+    id          BIGSERIAL PRIMARY KEY,
+    uuid        uuid                           NOT NULL,
+    content     text                           not null,
+    explanation text                           null,
+    type        VARCHAR(255)                   NOT NULL,
+    status      VARCHAR(255)                   NOT NULL,
+    course_id   BIGINT references courses (id) not null,
+    module_id   BIGINT references modules (id) null,
+    file_id     BIGINT references files (id)   null,
+    user_id     BIGINT references users (id)   not null,
+    deleted_at  TIMESTAMP                      NULL,
+    created_at  TIMESTAMP                      NOT NULL,
+    updated_at  TIMESTAMP                      NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS answers

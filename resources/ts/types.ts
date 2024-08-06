@@ -37,6 +37,12 @@ export enum CourseStatus {
   Inactive = 'INACTIVE',
 }
 
+export const CourseStatusTranslates: Record<CourseStatus, string> = {
+  [CourseStatus.New]: 'Новый',
+  [CourseStatus.Active]: 'Активен',
+  [CourseStatus.Inactive]: 'Неактивен',
+}
+
 export interface Course {
   id: number
   uuid: string
@@ -65,14 +71,30 @@ export interface Module {
   uuid: string
   name: string
   status: CourseStatus
+  course_id: number
+  user_id: number
   created_at: string
   updated_at: string
+  course: Course | null
+}
+
+export enum QuestionType {
+  OneAnswerType = 'ONE_ANSWER',
+  MultiplyAnswersType = 'MULTIPLY_ANSWERS',
+  InputType = 'INPUT',
+}
+
+export const QuestionTypeTranslates: Record<QuestionType, string> = {
+  [QuestionType.OneAnswerType]: 'Один ответ',
+  [QuestionType.MultiplyAnswersType]: 'Несколько ответов',
+  [QuestionType.InputType]: 'Поле для ввода',
 }
 
 export interface Question {
   id: number
   uuid: string
   content: string
+  type: QuestionType
   status: CourseStatus
   created_at: string
   updated_at: string

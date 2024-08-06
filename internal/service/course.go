@@ -3,8 +3,8 @@ package service
 import (
 	"github.com/Den4ik117/examly/internal/model"
 	"github.com/Den4ik117/examly/internal/repository"
+	"github.com/Den4ik117/examly/internal/util"
 	"github.com/google/uuid"
-	"time"
 )
 
 type CourseService struct {
@@ -30,6 +30,20 @@ func (s *CourseService) GetCoursesByUserID(id int) ([]model.Course, error) {
 	return s.repo.GetCoursesByUserID(id)
 }
 
+func (s *CourseService) GetAllCourses(id int) ([]model.Course, error) {
+	return s.repo.GetAllCourses(id)
+}
+
+func (s *CourseService) GetModuleCourses(modules []model.Module) ([]model.Course, error) {
+	ids := make([]int, len(modules))
+	for i, module := range modules {
+		ids[i] = module.CourseID
+	}
+	ids = util.UniqueIntSlice(ids)
+
+	return s.repo.GetCoursesByIDs(ids)
+}
+
 func (s *CourseService) CreateCourse(user *model.User, input *CreateCourseInput) (int, error) {
 	courseUUID, err := uuid.NewV7()
 	if err != nil {
@@ -44,9 +58,8 @@ func (s *CourseService) CreateCourse(user *model.User, input *CreateCourseInput)
 		Color:       input.Color,
 		Icon:        input.Icon,
 		Status:      model.NewCourseStatus,
-		CreatedAt:   time.Now(),
-		UpdatedAt:   time.Now(),
 	}
+	course.FillTime()
 
 	return s.repo.CreateCourse(course)
 }

@@ -65,7 +65,7 @@
         <router-link
           class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
           :to="{
-            name: 'courses.import',
+            name: 'my.questions.import',
           }"
         >
           <div class="bg-purple-400 rounded w-full py-0.5 text-center">

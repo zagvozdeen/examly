@@ -3,6 +3,7 @@ package service
 import (
 	"github.com/Den4ik117/examly/internal/model"
 	"github.com/Den4ik117/examly/internal/repository"
+	"github.com/google/uuid"
 	"github.com/guregu/null/v5"
 	"time"
 )
@@ -17,11 +18,13 @@ type Answers struct {
 }
 
 type CreateQuestionInput struct {
-	Content  string    `json:"content" validate:"required"`
-	Type     string    `json:"type" validate:"required"`
-	CourseID int       `json:"course_id" validate:"required"`
-	ModuleID int       `json:"module_id" validate:"required"`
-	Answers  []Answers `json:"answers" validate:"required,dive,required"`
+	Content     string    `json:"content" validate:"required"`
+	Explanation string    `json:"explanation" validate:""`
+	Type        string    `json:"type" validate:"required"`
+	CourseID    int       `json:"course_id" validate:"required"`
+	FileID      int       `json:"file_id" validate:""`
+	ModuleID    int       `json:"module_id" validate:""`
+	Answers     []Answers `json:"answers" validate:"required,dive,required"`
 }
 
 func NewQuestionService(repo repository.Questions) *QuestionService {
@@ -32,14 +35,28 @@ func (s *QuestionService) GetQuestions() ([]model.Question, error) {
 	return s.repo.GetQuestions()
 }
 
-func (s *QuestionService) CreateQuestion(input *CreateQuestionInput) (int, error) {
+func (s *QuestionService) GetQuestionsByUserID(id int) ([]model.Question, error) {
+	return s.repo.GetQuestionsByUserID(id)
+}
+
+func (s *QuestionService) CreateQuestion(user *model.User, input *CreateQuestionInput) (int, error) {
+	uid, err := uuid.NewV7()
+	if err != nil {
+		return 0, err
+	}
+
 	question := &model.Question{
-		Content:   input.Content,
-		Type:      input.Type,
-		CourseID:  input.CourseID,
-		ModuleID:  null.IntFrom(int64(input.ModuleID)),
-		CreatedAt: time.Now(),
-		UpdatedAt: time.Now(),
+		UUID:        uid.String(),
+		Content:     input.Content,
+		Explanation: null.NewString(input.Explanation, input.Explanation != ""),
+		Type:        input.Type,
+		Status:      model.NewCourseStatus,
+		CourseID:    input.CourseID,
+		ModuleID:    null.NewInt(int64(input.ModuleID), input.ModuleID != 0),
+		FileID:      null.NewInt(int64(input.FileID), input.FileID != 0),
+		UserID:      user.ID,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
 	}
 
 	questionID, err := s.repo.CreateQuestion(question)

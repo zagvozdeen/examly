@@ -37,13 +37,17 @@ func (h *Handler) InitRoutes() *mux.Router {
 
 	authRouter.HandleFunc("/courses", h.getCourses).Methods("GET")
 	authRouter.HandleFunc("/my-courses", h.getMyCourses).Methods("GET")
+	authRouter.HandleFunc("/all-courses", h.getAllCourses).Methods("GET")
 	authRouter.HandleFunc("/courses", h.createCourse).Methods("POST")
 	authRouter.HandleFunc("/courses/{uuid}", h.getCourseByUUID).Methods("GET")
 
 	authRouter.HandleFunc("/modules", h.getModules).Methods("GET")
+	authRouter.HandleFunc("/my-modules", h.getMyModules).Methods("GET")
+	authRouter.HandleFunc("/all-modules", h.getAllModules).Methods("GET")
 	authRouter.HandleFunc("/modules", h.createModule).Methods("POST")
 
 	authRouter.HandleFunc("/questions", h.getQuestions).Methods("GET")
+	authRouter.HandleFunc("/my-questions", h.getMyQuestions).Methods("GET")
 	authRouter.HandleFunc("/questions", h.createQuestion).Methods("POST")
 
 	authRouter.HandleFunc("/files", h.uploadFile).Methods("POST")

@@ -109,7 +109,7 @@ const onSubmit = () => {
 
 onMounted(() => {
   courseStore
-    .getCourses()
+    .getAllCourses()
     .then(data => {
       courses.value = data.data
     })

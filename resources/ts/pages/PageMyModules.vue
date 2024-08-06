@@ -25,6 +25,7 @@
       <thead>
         <tr>
           <th>Название</th>
+          <th>Курс</th>
           <th>Статус</th>
         </tr>
       </thead>
@@ -34,7 +35,8 @@
           :key="module.id"
         >
           <td>{{ module.name }}</td>
-          <td>{{ module.status }}</td>
+          <td>{{ module.course?.name }}</td>
+          <td>{{ CourseStatusTranslates[module.status] }}</td>
         </tr>
       </tbody>
     </n-table>
@@ -49,7 +51,7 @@
 import { NTable, NButton } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Module, PageExpose } from '@/types.ts'
+import { CourseStatusTranslates, Module, PageExpose } from '@/types.ts'
 import { useModuleStore } from '@/composables/useModuleStore.ts'
 
 const router = useRouter()

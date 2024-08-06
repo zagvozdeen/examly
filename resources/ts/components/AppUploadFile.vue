@@ -4,27 +4,23 @@
     list-type="image-card"
     :max="1"
     @before-upload="onBeforeUpload"
+    @remove="onRemove"
   >
-    {{ title || 'Выберите файл' }}
+    <slot>
+      Выберите файл
+    </slot>
   </n-upload>
 </template>
 
 <script lang="ts" setup>
 import { NUpload, UploadFileInfo, useMessage } from 'naive-ui'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
 import { useFileStore } from '@/composables/useFileStore.ts'
 
 const fileStore = useFileStore()
 const message = useMessage()
 
-defineProps<{
-  title?: string
-  value: number | null
-}>()
-
-const emit = defineEmits<{
-  'update:value': [value: number]
-}>()
+const value = defineModel<number | null>('value')
 
 const fileList = ref<UploadFileInfo[]>([])
 
@@ -48,7 +44,7 @@ const onBeforeUpload = async (data: { file: UploadFileInfo }) => {
       type: response.data.mime_type,
     })
 
-    emit('update:value', response.data.id)
+    value.value = response.data.id
   } catch (e) {
     message.error('При загрузке файла произошла ошибка')
     console.error(e)
@@ -56,4 +52,16 @@ const onBeforeUpload = async (data: { file: UploadFileInfo }) => {
 
   return false
 }
+
+const onRemove = () => {
+  value.value = null
+
+  return false
+}
+
+watch(value, (newValue) => {
+  if (!newValue) {
+    fileList.value = []
+  }
+})
 </script>

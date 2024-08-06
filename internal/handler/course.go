@@ -42,6 +42,23 @@ func (h *Handler) getMyCourses(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (h *Handler) getAllCourses(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(*model.User)
+	courses, err := h.services.GetAllCourses(user.ID)
+	if err != nil {
+		w.Header().Add("Content-Type", "application/json")
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(http.StatusText(http.StatusInternalServerError)))
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]any{
+		"data": courses,
+	})
+}
+
 func (h *Handler) createCourse(w http.ResponseWriter, r *http.Request) {
 	var u service.CreateCourseInput
 	err := json.NewDecoder(r.Body).Decode(&u)
