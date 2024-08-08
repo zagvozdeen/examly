@@ -15,10 +15,26 @@
               params: { uuid: course.uuid },
             }"
           >
-            <div class="bg-orange-400 rounded w-full py-0.5 text-center">
-              <i class="bi bi-1-circle-fill" />
+            <div
+              class="rounded w-full py-0.5 text-center"
+              :class="{
+                [course.color]: true,
+              }"
+            >
+              <i
+                class="bi"
+                :class="{
+                  [course.icon]: true,
+                }"
+              />
             </div>
-            <span>{{ course.name }}</span>
+            <div class="flex flex-col">
+              <span>{{ course.name }}</span>
+              <span
+                v-if="course.description"
+                class="text-xs text-gray-400"
+              >{{ course.description }}</span>
+            </div>
             <i class="bi bi-chevron-right" />
           </router-link>
         </li>

@@ -40,6 +40,7 @@ func (h *Handler) InitRoutes() *mux.Router {
 	authRouter.HandleFunc("/all-courses", h.getAllCourses).Methods("GET")
 	authRouter.HandleFunc("/courses", h.createCourse).Methods("POST")
 	authRouter.HandleFunc("/courses/{uuid}", h.getCourseByUUID).Methods("GET")
+	authRouter.HandleFunc("/courses/{uuid}/marathon", h.createMarathon).Methods("POST")
 
 	authRouter.HandleFunc("/modules", h.getModules).Methods("GET")
 	authRouter.HandleFunc("/my-modules", h.getMyModules).Methods("GET")
@@ -49,8 +50,13 @@ func (h *Handler) InitRoutes() *mux.Router {
 	authRouter.HandleFunc("/questions", h.getQuestions).Methods("GET")
 	authRouter.HandleFunc("/my-questions", h.getMyQuestions).Methods("GET")
 	authRouter.HandleFunc("/questions", h.createQuestion).Methods("POST")
+	authRouter.HandleFunc("/questions/import", h.importQuestions).Methods("POST")
 
 	authRouter.HandleFunc("/files", h.uploadFile).Methods("POST")
+
+	authRouter.HandleFunc("/user-courses/{uuid}", h.getUserCourseByUUID).Methods("GET")
+
+	authRouter.HandleFunc("/user-questions/{uuid}", h.checkAnswer).Methods("PATCH")
 
 	return router
 }

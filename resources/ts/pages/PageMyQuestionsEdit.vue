@@ -99,6 +99,7 @@
                 :checked="answer.is_true"
                 name="questions-radio-button"
                 :value="answer.id"
+                tabindex="-1"
                 @change="onChange(answer.id)"
               />
               <AppAnswerInput

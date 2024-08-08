@@ -107,5 +107,50 @@ func (h *Handler) getCourseByUUID(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 	json.NewEncoder(w).Encode(map[string]interface{}{
 		"data": course,
+		"stats": [3]map[string]any{
+			{
+				"completed": 250,
+				"total":     400,
+				"name":      "Марафон",
+			},
+			{
+				"completed": 11,
+				"total":     20,
+				"name":      "Экзамен",
+			},
+			{
+				"completed": 17,
+				"total":     19,
+				"name":      "Ошибки",
+			},
+		},
+	})
+}
+
+func (h *Handler) createMarathon(w http.ResponseWriter, r *http.Request) {
+	user := r.Context().Value("user").(*model.User)
+
+	uuid := mux.Vars(r)["uuid"]
+	if uuid == "" {
+		http.Error(w, "empty uuid", http.StatusBadRequest)
+		return
+	}
+
+	input := &service.CreateUserCourseInput{
+		CourseUUID: uuid,
+		UserID:     user.ID,
+		Type:       model.MarathonUserCourseType,
+	}
+
+	uuid, err := h.services.Courses.CreateUserCourse(input)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"data": uuid,
 	})
 }

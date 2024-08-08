@@ -1,5 +1,5 @@
 import { useKy } from '@/composables/useKy.ts'
-import { Course } from '@/types.ts'
+import { Course, CourseStats, UserCourse, UserQuestion } from '@/types.ts'
 
 export const useCourseStore = () => {
   const ky = useKy()
@@ -25,7 +25,18 @@ export const useCourseStore = () => {
   const getCourseByUuid = (uuid: string) => {
     return ky
       .get(`courses/${uuid}`)
-      .json<{ data: Course }>()
+      .json<{
+        data: Course
+        stats: CourseStats
+      }>()
+  }
+
+  const getUserCourseByUuid = (uuid: string) => {
+    return ky
+      .get(`user-courses/${uuid}`)
+      .json<{
+        data: UserCourse
+      }>()
   }
 
   const createCourse = (json: object) => {
@@ -34,11 +45,26 @@ export const useCourseStore = () => {
       .json()
   }
 
+  const createMarathon = (uuid: string) => {
+    return ky
+      .post(`courses/${uuid}/marathon`)
+      .json<{ data: string }>()
+  }
+
+  const checkAnswer = (uuid: string, json: object) => {
+    return ky
+      .patch(`user-questions/${uuid}`, { json })
+      .json<{ data: UserQuestion }>()
+  }
+
   return {
     getCourses,
     getMyCourses,
     getAllCourses,
     getCourseByUuid,
+    getUserCourseByUuid,
     createCourse,
+    createMarathon,
+    checkAnswer,
   }
 }

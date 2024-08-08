@@ -21,6 +21,8 @@ type Courses interface {
 	GetModuleCourses(modules []model.Module) ([]model.Course, error)
 	CreateCourse(user *model.User, input *CreateCourseInput) (int, error)
 	GetCourseByUUID(uuid string) (model.Course, error)
+	CreateUserCourse(input *CreateUserCourseInput) (string, error)
+	GetQuestionsAnswers(questions []model.Question) ([]model.Answer, error)
 }
 
 type Modules interface {
@@ -34,10 +36,19 @@ type Questions interface {
 	GetQuestions() ([]model.Question, error)
 	GetQuestionsByUserID(id int) ([]model.Question, error)
 	CreateQuestion(user *model.User, input *CreateQuestionInput) (int, error)
+	ImportQuestions(input *ImportQuestionsInput) error
 }
 
 type Files interface {
 	UploadFile(user *model.User, file multipart.File, header *multipart.FileHeader) (*model.File, error)
+}
+
+type UserCourses interface {
+	GetUserCourseByUUID(uuid string) (model.UserCourse, error)
+}
+
+type UserQuestions interface {
+	CheckAnswer(input *CheckAnswerInput) (*model.UserQuestion, error)
 }
 
 type Service struct {
@@ -46,14 +57,18 @@ type Service struct {
 	Modules
 	Questions
 	Files
+	UserCourses
+	UserQuestions
 }
 
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
-		Auth:      NewAuthService(repos.Auth),
-		Courses:   NewCourseService(repos.Courses),
-		Modules:   NewModuleService(repos.Modules),
-		Questions: NewQuestionService(repos.Questions),
-		Files:     NewFileService(repos.Files),
+		Auth:          NewAuthService(repos.Auth),
+		Courses:       NewCourseService(repos.Courses),
+		Modules:       NewModuleService(repos.Modules),
+		Questions:     NewQuestionService(repos.Questions),
+		Files:         NewFileService(repos.Files),
+		UserCourses:   NewUserCourseService(repos.UserCourses),
+		UserQuestions: NewUserQuestionService(repos.UserQuestionsInterface),
 	}
 }

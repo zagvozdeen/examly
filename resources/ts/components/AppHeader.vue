@@ -19,10 +19,10 @@
         </li>
         <li>
           <router-link
-            :to="{ name: 'register' }"
+            :to="{ name: 'stats' }"
             class="uppercase text-xs font-medium"
             :class="{
-              'text-orange-400': route.name === 'register'
+              'text-orange-400': route.name === 'stats'
             }"
           >
             Статистика

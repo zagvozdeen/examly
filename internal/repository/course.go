@@ -86,3 +86,97 @@ func (r *CourseRepository) GetCourseByUUID(uuid string) (course model.Course, er
 
 	return course, err
 }
+
+func (r *CourseRepository) GetModulesByCourseID(id int) ([]model.Module, error) {
+	modules := make([]model.Module, 0)
+
+	err := r.db.Select(
+		&modules,
+		"SELECT * FROM modules WHERE course_id = $1 AND status = $2 AND deleted_at IS NULL",
+		id,
+		model.ActiveCourseStatus,
+	)
+
+	return modules, err
+}
+
+func (r *CourseRepository) GetQuestionsByCourseID(id int) ([]model.Question, error) {
+	questions := make([]model.Question, 0)
+
+	err := r.db.Select(
+		&questions,
+		"SELECT * FROM questions WHERE course_id = $1 AND status = $2 AND deleted_at IS NULL",
+		id,
+		model.ActiveCourseStatus,
+	)
+
+	return questions, err
+}
+
+func (r *CourseRepository) GetAnswersByIDs(ids []int) ([]model.Answer, error) {
+	answers := make([]model.Answer, 0)
+
+	query, args, err := sqlx.In("SELECT * FROM answers WHERE question_id IN (?) AND deleted_at IS NULL", ids)
+	query = r.db.Rebind(query)
+	err = r.db.Select(&answers, query, args...)
+
+	return answers, err
+}
+
+func (r *CourseRepository) CreateUserQuestions(questions []model.UserQuestion) (map[int]int, error) {
+	rows, err := r.db.NamedQuery(
+		"INSERT INTO user_questions (uuid, content, explanation, type, is_true, sort, course_id, question_id, module_id, file_id, created_at, updated_at) VALUES (:uuid, :content, :explanation, :type, :is_true, :sort, :course_id, :question_id, :module_id, :file_id, :created_at, :updated_at) RETURNING id, question_id",
+		questions,
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	ids := map[int]int{}
+
+	for rows.Next() {
+		var id, qid int
+		err = rows.Scan(&id, &qid)
+		if err != nil {
+			return nil, err
+		}
+		ids[qid] = id
+	}
+
+	return ids, nil
+}
+
+func (r *CourseRepository) CreateUserCourse(course *model.UserCourse) (int, error) {
+	var id int
+
+	err := r.db.QueryRow(
+		"INSERT INTO user_courses (uuid, name, type, user_id, course_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id",
+		course.UUID,
+		course.Name,
+		course.Type,
+		course.UserID,
+		course.CourseID,
+		course.CreatedAt,
+		course.UpdatedAt,
+	).Scan(&id)
+
+	return id, err
+}
+
+func (r *CourseRepository) CreateUserModules(modules []model.UserModule) error {
+	_, err := r.db.NamedQuery(
+		"INSERT INTO user_modules (name, course_id, created_at, updated_at) VALUES (:name, :course_id, :created_at, :updated_at)",
+		modules,
+	)
+
+	return err
+}
+
+func (r *CourseRepository) CreateUserAnswers(answers []model.UserAnswer) error {
+	_, err := r.db.NamedQuery(
+		"INSERT INTO user_answers (content, question_id, is_true, is_chosen, sort, created_at, updated_at) VALUES (:content, :question_id, :is_true, :is_chosen, :sort, :created_at, :updated_at)",
+		answers,
+	)
+
+	return err
+}

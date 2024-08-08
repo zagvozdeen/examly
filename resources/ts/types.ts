@@ -47,6 +47,7 @@ export interface Course {
   id: number
   uuid: string
   name: string
+  description: string | null
   color: string
   icon: string
   status: CourseStatus
@@ -54,6 +55,8 @@ export interface Course {
   created_at: string
   updated_at: string
 }
+
+export type CourseStats = Array<{completed: number, total: number, name: string}>
 
 export interface FileModel {
   id: number
@@ -96,6 +99,60 @@ export interface Question {
   content: string
   type: QuestionType
   status: CourseStatus
+  created_at: string
+  updated_at: string
+}
+
+export enum UserCourseType {
+  MarathonUserCourseType = 'MARATHON',
+  ModuleUserCourseType = 'MODULE',
+  ExamUserCourseType = 'EXAM',
+}
+
+export interface UserCourse {
+  id: number
+  uuid: string
+  name: string
+  type: UserCourseType
+  user_id: number
+  course_id: number
+  last_question_id: number | null
+  created_at: string
+  updated_at: string
+  modules: UserModule[]
+  questions: UserQuestion[]
+}
+
+export interface UserModule {
+  id: number
+  name: string
+  course_id: number
+  created_at: string
+  updated_at: string
+}
+
+export interface UserQuestion {
+  id: number
+  uuid: string
+  content: string
+  explanation: string
+  is_true: boolean | null
+  course_id: number
+  module_id: number | null
+  question_id: number
+  file_id: number
+  type: QuestionType
+  created_at: string
+  updated_at: string
+  answers: UserAnswer[]
+}
+
+export interface UserAnswer {
+  id: number
+  content: string
+  question_id: number
+  is_chosen: boolean
+  is_true: boolean
   created_at: string
   updated_at: string
 }

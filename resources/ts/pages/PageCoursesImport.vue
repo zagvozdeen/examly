@@ -21,7 +21,10 @@
         label="Файл (YAML)"
         path="file_id"
       >
-        <AppUploadFile v-model:value="formValue.file_id" />
+        <AppUploadFile
+          v-model:value="formValue.file_id"
+          accept="application/json"
+        />
       </n-form-item>
 
       <n-form-item
@@ -84,6 +87,7 @@ const options = computed(() => courses.value.map(course => ({
 
 const clearForm = () => {
   formValue.course_id = null
+  formValue.file_id = null
 }
 
 const onSubmit = async () => {

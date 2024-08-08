@@ -85,13 +85,15 @@ CREATE TABLE IF NOT EXISTS answers
 CREATE TABLE IF NOT EXISTS user_courses
 (
     id               BIGSERIAL PRIMARY KEY,
-    uuid             uuid                         NOT NULL,
-    name             VARCHAR(255)                 NOT NULL,
-    user_id          BIGINT references users (id) not null,
-    last_question_id BIGINT                       NULL,
-    deleted_at       TIMESTAMP                    NULL,
-    created_at       TIMESTAMP                    NOT NULL,
-    updated_at       TIMESTAMP                    NOT NULL
+    uuid             uuid                           NOT NULL,
+    name             VARCHAR(255)                   NOT NULL,
+    type             VARCHAR(255)                   NOT NULL,
+    user_id          BIGINT references users (id)   not null,
+    course_id        BIGINT references courses (id) not null,
+    last_question_id BIGINT                         NULL,
+    deleted_at       TIMESTAMP                      NULL,
+    created_at       TIMESTAMP                      NOT NULL,
+    updated_at       TIMESTAMP                      NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_modules
@@ -106,15 +108,20 @@ CREATE TABLE IF NOT EXISTS user_modules
 
 CREATE TABLE IF NOT EXISTS user_questions
 (
-    id         BIGSERIAL PRIMARY KEY,
-    content    text                                not null,
-    type       VARCHAR(255)                        NOT NULL,
-    is_true    bool                                null,
-    course_id  BIGINT references user_courses (id) not null,
-    module_id  BIGINT references user_modules (id) null,
-    deleted_at TIMESTAMP                           NULL,
-    created_at TIMESTAMP                           NOT NULL,
-    updated_at TIMESTAMP                           NOT NULL
+    id          BIGSERIAL PRIMARY KEY,
+    uuid        uuid                                not null,
+    content     text                                not null,
+    explanation text                                null,
+    type        VARCHAR(255)                        NOT NULL,
+    is_true     bool                                null,
+    sort        INTEGER                             not null,
+    course_id   BIGINT references user_courses (id) not null,
+    question_id BIGINT references questions (id)    not null,
+    module_id   BIGINT references user_modules (id) null,
+    file_id     BIGINT references files (id)        null,
+    deleted_at  TIMESTAMP                           NULL,
+    created_at  TIMESTAMP                           NOT NULL,
+    updated_at  TIMESTAMP                           NOT NULL
 );
 
 CREATE TABLE IF NOT EXISTS user_answers
@@ -123,7 +130,8 @@ CREATE TABLE IF NOT EXISTS user_answers
     content     text                                  not null,
     question_id BIGINT references user_questions (id) not null,
     is_true     bool                                  not null,
-    is_chosen   bool                                  null,
+    is_chosen   bool                                  not null,
+    sort        INTEGER                               not null,
     deleted_at  TIMESTAMP                             NULL,
     created_at  TIMESTAMP                             NOT NULL,
     updated_at  TIMESTAMP                             NOT NULL

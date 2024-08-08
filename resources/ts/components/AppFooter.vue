@@ -15,10 +15,10 @@
       </li>
       <li>
         <router-link
-          :to="{ name: 'register' }"
+          :to="{ name: 'stats' }"
           class="text-center text-xs px-1 py-2 font-medium flex flex-col"
           :class="{
-            'text-orange-400': route.name === 'register'
+            'text-orange-400': route.name === 'stats'
           }"
         >
           <i class="bi bi-bar-chart-line-fill text-sm" />

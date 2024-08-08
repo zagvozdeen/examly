@@ -81,3 +81,34 @@ func (h *Handler) createQuestion(w http.ResponseWriter, r *http.Request) {
 		"data": id,
 	})
 }
+
+func (h *Handler) importQuestions(w http.ResponseWriter, r *http.Request) {
+	var u service.ImportQuestionsInput
+	err := json.NewDecoder(r.Body).Decode(&u)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	validate := validator.New()
+	err = validate.Struct(u)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	user := r.Context().Value("user").(*model.User)
+	u.UserID = user.ID
+
+	err = h.services.Questions.ImportQuestions(&u)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]interface{}{
+		"data": "ok",
+	})
+}
