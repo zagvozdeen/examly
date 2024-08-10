@@ -52,3 +52,7 @@ func (s *UserCourseService) GetUserCourseByUUID(uuid string) (model.UserCourse, 
 
 	return course, nil
 }
+
+func (s *UserCourseService) GetUserCourseByTypeAndUserID(t string, id int) (course model.UserCourse, err error) {
+	return s.repo.GetUserCourseByTypeAndUserID(t, id)
+}

@@ -28,6 +28,7 @@ export const useCourseStore = () => {
       .json<{
         data: Course
         stats: CourseStats
+        errors: Course
       }>()
   }
 
@@ -51,6 +52,12 @@ export const useCourseStore = () => {
       .json<{ data: string }>()
   }
 
+  const createExam = (uuid: string) => {
+    return ky
+      .post(`courses/${uuid}/exam`)
+      .json<{ data: string }>()
+  }
+
   const checkAnswer = (uuid: string, json: object) => {
     return ky
       .patch(`user-questions/${uuid}`, { json })
@@ -65,6 +72,7 @@ export const useCourseStore = () => {
     getUserCourseByUuid,
     createCourse,
     createMarathon,
+    createExam,
     checkAnswer,
   }
 }

@@ -23,6 +23,16 @@ func (r *UserCourseRepository) GetUserCourseByUUID(uuid string) (course model.Us
 	return course, err
 }
 
+func (r *UserCourseRepository) GetUserCourseByID(id int) (course model.UserCourse, err error) {
+	err = r.db.Get(
+		&course,
+		"SELECT * FROM user_courses WHERE id = $1 AND deleted_at IS NULL LIMIT 1",
+		id,
+	)
+
+	return course, err
+}
+
 func (r *UserCourseRepository) GetUserQuestionsByCourseID(id int) (questions []model.UserQuestion, err error) {
 	err = r.db.Select(
 		&questions,
@@ -51,4 +61,33 @@ func (r *UserCourseRepository) GetUserAnswersByQuestionIDs(ids []int) ([]model.U
 	err = r.db.Select(&answers, query, args...)
 
 	return answers, err
+}
+
+func (r *UserCourseRepository) GetUserCourseByTypeAndUserID(t string, id int) (course model.UserCourse, err error) {
+	err = r.db.Get(
+		&course,
+		"SELECT * FROM user_courses WHERE type = $1 AND user_id = $2 AND deleted_at IS NULL LIMIT 1",
+		t,
+		id,
+	)
+
+	return course, err
+}
+
+func (r *UserCourseRepository) CreateUserQuestion(question *model.UserQuestion) error {
+	return r.db.QueryRowx(
+		"INSERT INTO user_questions (uuid, content, explanation, type, is_true, sort, course_id, question_id, module_id, file_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id",
+		question.UUID,
+		question.Content,
+		question.Explanation,
+		question.Type,
+		question.IsTrue,
+		question.Sort,
+		question.CourseID,
+		question.QuestionID,
+		question.ModuleID,
+		question.FileID,
+		question.CreatedAt,
+		question.UpdatedAt,
+	).Scan(&question.ID)
 }

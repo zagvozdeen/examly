@@ -60,13 +60,3 @@ func (r *QuestionRepository) CreateAnswers(answers []model.Answer) error {
 
 	return err
 }
-
-func (r *QuestionRepository) GetFileByID(id int) (file model.File, err error) {
-	err = r.db.Get(
-		&file,
-		"SELECT * FROM files WHERE id = $1 AND deleted_at IS NULL",
-		id,
-	)
-
-	return file, err
-}

@@ -182,6 +182,10 @@ const checkAnswer = () => {
         const index = course.value.questions.findIndex(question => question.id === currentQuestion.value?.id)
         course.value.questions[index] = data.data
         currentQuestion.value = data.data
+
+        if (data.data.is_true) {
+          nextQuestion()
+        }
       }
 
       loadingBar.finish()

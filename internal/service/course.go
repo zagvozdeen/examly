@@ -1,6 +1,7 @@
 package service
 
 import (
+	"cmp"
 	"fmt"
 	"github.com/Den4ik117/examly/internal/model"
 	"github.com/Den4ik117/examly/internal/repository"
@@ -116,11 +117,9 @@ func (s *CourseService) CreateUserCourse(input *CreateUserCourseInput) (string, 
 		CourseID: course.ID,
 	}
 
-	id, err := s.repo.CreateUserCourse(userCourse)
-	if err != nil {
+	if err = s.repo.CreateUserCourse(userCourse); err != nil {
 		return "", err
 	}
-	userCourse.ID = id
 
 	userModules := make([]model.UserModule, len(modules))
 	for i, module := range modules {
@@ -163,15 +162,26 @@ func (s *CourseService) CreateUserCourse(input *CreateUserCourseInput) (string, 
 		}
 	}
 
+	slices.SortFunc(userQuestions, func(a, b model.UserQuestion) int {
+		return cmp.Compare(a.Sort, b.Sort)
+	})
+	if input.Type == model.ExamUserCourseType {
+		end := slices.Min([]int{20, len(userQuestions)})
+		userQuestions = userQuestions[:end]
+	}
 	qids, err := s.repo.CreateUserQuestions(userQuestions)
 	if err != nil {
 		return "", err
 	}
 
-	userAnswers := make([]model.UserAnswer, len(answers))
+	var userAnswers []model.UserAnswer
 	order = util.RandomIntSlice(len(answers))
 	for i, answer := range answers {
-		userAnswers[i] = model.UserAnswer{
+		if qids[answer.QuestionID] == 0 {
+			continue
+		}
+
+		userAnswers = append(userAnswers, model.UserAnswer{
 			Model: model.Model{
 				CreatedAt: time.Now(),
 				UpdatedAt: time.Now(),
@@ -181,7 +191,7 @@ func (s *CourseService) CreateUserCourse(input *CreateUserCourseInput) (string, 
 			IsTrue:     answer.IsTrue,
 			IsChosen:   false,
 			Sort:       order[i],
-		}
+		})
 	}
 
 	err = s.repo.CreateUserAnswers(userAnswers)
@@ -203,4 +213,22 @@ func (s *CourseService) GetQuestionsAnswers(questions []model.Question) ([]model
 
 func (s *CourseService) GetCourseByUUID(uuid string) (model.Course, error) {
 	return s.repo.GetCourseByUUID(uuid)
+}
+
+func (s *CourseService) GetStatsByUserID(id int) ([]repository.CourseStats, error) {
+	stats, err := s.repo.GetUserStatsByCourse(id)
+	if err != nil {
+		return stats, err
+	}
+
+	for i, stat := range stats {
+		stats[i].Name = model.GetLabelByCourseType(stat.Type)
+		stats[i].Sort = model.GetSortByCourseType(stat.Type)
+	}
+
+	slices.SortFunc(stats, func(a, b repository.CourseStats) int {
+		return cmp.Compare(b.Sort, a.Sort)
+	})
+
+	return stats, nil
 }

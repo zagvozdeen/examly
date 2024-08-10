@@ -2,6 +2,7 @@ package handler
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/Den4ik117/examly/internal/model"
 	"github.com/Den4ik117/examly/internal/service"
 	"github.com/go-playground/validator/v10"
@@ -90,49 +91,40 @@ func (h *Handler) createCourse(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *Handler) getCourseByUUID(w http.ResponseWriter, r *http.Request) {
-	uuid := mux.Vars(r)["uuid"]
-
-	if uuid == "" {
-		http.Error(w, "empty uuid", http.StatusBadRequest)
+	uuid, found := mux.Vars(r)["uuid"]
+	if !found {
+		encode(w, r, http.StatusBadRequest, fmt.Errorf("empty uuid"))
 		return
 	}
 
 	course, err := h.services.Courses.GetCourseByUUID(uuid)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		encode(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"data": course,
-		"stats": [3]map[string]any{
-			{
-				"completed": 250,
-				"total":     400,
-				"name":      "Марафон",
-			},
-			{
-				"completed": 11,
-				"total":     20,
-				"name":      "Экзамен",
-			},
-			{
-				"completed": 17,
-				"total":     19,
-				"name":      "Ошибки",
-			},
-		},
+	user := current(r)
+	stats, err := h.services.Courses.GetStatsByUserID(user.ID)
+
+	errorCourse, err := h.services.UserCourses.GetUserCourseByTypeAndUserID(model.ErrorUserCourseType, user.ID)
+	if err != nil {
+		encode(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	encode(w, r, http.StatusOK, CustomResponse{
+		"data":   course,
+		"stats":  stats,
+		"errors": errorCourse,
 	})
 }
 
 func (h *Handler) createMarathon(w http.ResponseWriter, r *http.Request) {
-	user := r.Context().Value("user").(*model.User)
+	user := current(r)
 
 	uuid := mux.Vars(r)["uuid"]
 	if uuid == "" {
-		http.Error(w, "empty uuid", http.StatusBadRequest)
+		encode(w, r, http.StatusBadRequest, fmt.Errorf("empty uuid"))
 		return
 	}
 
@@ -144,13 +136,33 @@ func (h *Handler) createMarathon(w http.ResponseWriter, r *http.Request) {
 
 	uuid, err := h.services.Courses.CreateUserCourse(input)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		encode(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"data": uuid,
-	})
+	encode(w, r, http.StatusCreated, uuid)
+}
+
+func (h *Handler) createExam(w http.ResponseWriter, r *http.Request) {
+	user := current(r)
+
+	uuid := mux.Vars(r)["uuid"]
+	if uuid == "" {
+		encode(w, r, http.StatusBadRequest, fmt.Errorf("empty uuid"))
+		return
+	}
+
+	input := &service.CreateUserCourseInput{
+		CourseUUID: uuid,
+		UserID:     user.ID,
+		Type:       model.ExamUserCourseType,
+	}
+
+	uuid, err := h.services.Courses.CreateUserCourse(input)
+	if err != nil {
+		encode(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	encode(w, r, http.StatusCreated, uuid)
 }

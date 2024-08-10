@@ -24,9 +24,10 @@ type Courses interface {
 	GetQuestionsByCourseID(id int) ([]model.Question, error)
 	GetAnswersByIDs(ids []int) ([]model.Answer, error)
 	CreateUserQuestions(questions []model.UserQuestion) (map[int]int, error)
-	CreateUserCourse(course *model.UserCourse) (int, error)
+	CreateUserCourse(course *model.UserCourse) error
 	CreateUserModules(modules []model.UserModule) error
 	CreateUserAnswers(answers []model.UserAnswer) error
+	GetUserStatsByCourse(id int) (d []CourseStats, err error)
 }
 
 type Modules interface {
@@ -41,18 +42,21 @@ type Questions interface {
 	GetQuestionsByUserID(id int) ([]model.Question, error)
 	CreateQuestion(question *model.Question) (int, error)
 	CreateAnswers(answers []model.Answer) error
-	GetFileByID(id int) (model.File, error)
 }
 
 type Files interface {
-	CreateFile(file *model.File) (id int, err error)
+	CreateFile(file *model.File) (int, error)
+	GetFileByID(id int) (model.File, error)
 }
 
 type UserCourses interface {
 	GetUserCourseByUUID(uuid string) (model.UserCourse, error)
+	GetUserCourseByID(id int) (course model.UserCourse, err error)
 	GetUserQuestionsByCourseID(id int) ([]model.UserQuestion, error)
 	GetUserModulesByCourseID(id int) ([]model.UserModule, error)
 	GetUserAnswersByQuestionIDs(ids []int) ([]model.UserAnswer, error)
+	GetUserCourseByTypeAndUserID(t string, id int) (course model.UserCourse, err error)
+	CreateUserQuestion(question *model.UserQuestion) error
 }
 
 type UserQuestionsInterface interface {

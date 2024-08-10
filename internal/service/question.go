@@ -14,7 +14,8 @@ import (
 )
 
 type QuestionService struct {
-	repo repository.Questions
+	repo  repository.Questions
+	files repository.Files
 }
 
 type Answers struct {
@@ -45,8 +46,11 @@ type questionJsonStruct struct {
 	Answer   any      `json:"answer"`
 }
 
-func NewQuestionService(repo repository.Questions) *QuestionService {
-	return &QuestionService{repo: repo}
+func NewQuestionService(repo repository.Questions, files repository.Files) *QuestionService {
+	return &QuestionService{
+		repo:  repo,
+		files: files,
+	}
 }
 
 func (s *QuestionService) GetQuestions() ([]model.Question, error) {
@@ -107,7 +111,7 @@ func (s *QuestionService) CreateQuestion(user *model.User, input *CreateQuestion
 }
 
 func (s *QuestionService) ImportQuestions(input *ImportQuestionsInput) error {
-	f, err := s.repo.GetFileByID(input.FileID)
+	f, err := s.files.GetFileByID(input.FileID)
 	if err != nil {
 		return err
 	}

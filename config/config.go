@@ -7,6 +7,7 @@ import (
 )
 
 type Config struct {
+	AppEnv     string
 	DBHost     string
 	DBPort     string
 	DBDatabase string
@@ -24,6 +25,7 @@ func initConfig() *Config {
 	}
 
 	return &Config{
+		AppEnv:     getEnv("APP_ENV", "development"),
 		DBHost:     getEnv("DB_HOST", "127.0.0.1"),
 		DBPort:     getEnv("DB_PORT", "5432"),
 		DBDatabase: getEnv("DB_DATABASE", "postgres"),

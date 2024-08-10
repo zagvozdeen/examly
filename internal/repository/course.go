@@ -146,10 +146,8 @@ func (r *CourseRepository) CreateUserQuestions(questions []model.UserQuestion) (
 	return ids, nil
 }
 
-func (r *CourseRepository) CreateUserCourse(course *model.UserCourse) (int, error) {
-	var id int
-
-	err := r.db.QueryRow(
+func (r *CourseRepository) CreateUserCourse(course *model.UserCourse) error {
+	return r.db.QueryRow(
 		"INSERT INTO user_courses (uuid, name, type, user_id, course_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id",
 		course.UUID,
 		course.Name,
@@ -158,9 +156,7 @@ func (r *CourseRepository) CreateUserCourse(course *model.UserCourse) (int, erro
 		course.CourseID,
 		course.CreatedAt,
 		course.UpdatedAt,
-	).Scan(&id)
-
-	return id, err
+	).Scan(&course.ID)
 }
 
 func (r *CourseRepository) CreateUserModules(modules []model.UserModule) error {
@@ -179,4 +175,41 @@ func (r *CourseRepository) CreateUserAnswers(answers []model.UserAnswer) error {
 	)
 
 	return err
+}
+
+type CourseStats struct {
+	Name      string `json:"name"`
+	Type      string `json:"-"`
+	Total     int    `json:"total"`
+	Completed int    `json:"completed"`
+	Sort      int    `json:"-"`
+}
+
+func (r *CourseRepository) GetUserStatsByCourse(id int) (d []CourseStats, err error) {
+	rows, err := r.db.Query(
+		`
+SELECT c.type as type, COUNT(q.*) as total, COUNT(q.is_true) as completed
+FROM (SELECT id,
+             type,
+             RANK() OVER (PARTITION BY type ORDER BY created_at DESC) AS rank
+      FROM user_courses WHERE user_id = $1) c
+         JOIN user_questions q on q.course_id = c.id
+WHERE c.rank = 1
+GROUP BY c.type
+`,
+		id,
+	)
+	if err != nil {
+		return d, err
+	}
+
+	for rows.Next() {
+		s := CourseStats{}
+		if err = rows.Scan(&s.Type, &s.Total, &s.Completed); err != nil {
+			return d, err
+		}
+		d = append(d, s)
+	}
+
+	return d, err
 }

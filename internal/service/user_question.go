@@ -1,6 +1,8 @@
 package service
 
 import (
+	"database/sql"
+	"errors"
 	"fmt"
 	"github.com/Den4ik117/examly/internal/model"
 	"github.com/Den4ik117/examly/internal/repository"
@@ -12,18 +14,29 @@ import (
 )
 
 type UserQuestionService struct {
-	repo repository.UserQuestionsInterface
+	repo        repository.UserQuestionsInterface
+	courses     repository.Courses
+	userCourses repository.UserCourses
 }
 
 type CheckAnswerInput struct {
 	QuestionUUID string `json:"-"`
+	UserID       int    `json:"-"`
 	AnswerID     int    `json:"answer_id"`
 	AnswersIDs   []int  `json:"answers_ids"`
 	Input        string `json:"input"`
 }
 
-func NewUserQuestionService(repo repository.UserQuestionsInterface) *UserQuestionService {
-	return &UserQuestionService{repo: repo}
+func NewUserQuestionService(
+	repo repository.UserQuestionsInterface,
+	courses repository.Courses,
+	userCourses repository.UserCourses,
+) *UserQuestionService {
+	return &UserQuestionService{
+		repo:        repo,
+		courses:     courses,
+		userCourses: userCourses,
+	}
 }
 
 func (s *UserQuestionService) CheckAnswer(input *CheckAnswerInput) (*model.UserQuestion, error) {
@@ -39,6 +52,8 @@ func (s *UserQuestionService) CheckAnswer(input *CheckAnswerInput) (*model.UserQ
 	if err != nil {
 		return nil, err
 	}
+
+	isTrue := false
 
 	if question.Type == model.OneAnswerType {
 		if input.AnswerID == 0 {
@@ -60,12 +75,7 @@ func (s *UserQuestionService) CheckAnswer(input *CheckAnswerInput) (*model.UserQ
 			return nil, err
 		}
 
-		question.IsTrue = null.BoolFrom(answers[index].IsTrue)
-		question.UpdatedAt = time.Now()
-		err = s.repo.UpdateUserQuestion(&question)
-		if err != nil {
-			return nil, err
-		}
+		isTrue = answers[index].IsTrue
 	}
 
 	if question.Type == model.MultiplyAnswersType {
@@ -94,14 +104,9 @@ func (s *UserQuestionService) CheckAnswer(input *CheckAnswerInput) (*model.UserQ
 			}
 		}
 
-		question.IsTrue = null.BoolFrom(util.AllFunc(answers, func(answer model.UserAnswer) bool {
+		isTrue = util.AllFunc(answers, func(answer model.UserAnswer) bool {
 			return answer.IsTrue == answer.IsChosen
-		}))
-		question.UpdatedAt = time.Now()
-		err = s.repo.UpdateUserQuestion(&question)
-		if err != nil {
-			return nil, err
-		}
+		})
 	}
 
 	if question.Type == model.InputType {
@@ -112,8 +117,6 @@ func (s *UserQuestionService) CheckAnswer(input *CheckAnswerInput) (*model.UserQ
 		index := slices.IndexFunc(answers, func(answer model.UserAnswer) bool {
 			return strings.ToLower(answer.Content) == strings.ToLower(input.Input)
 		})
-
-		isTrue := false
 
 		if index == -1 {
 			answer := &model.UserAnswer{
@@ -126,42 +129,106 @@ func (s *UserQuestionService) CheckAnswer(input *CheckAnswerInput) (*model.UserQ
 				IsTrue:     false,
 				IsChosen:   true,
 			}
-			err := s.repo.CreateUserAnswer(answer)
-			if err != nil {
+			if err := s.repo.CreateUserAnswer(answer); err != nil {
 				return nil, err
 			}
 		} else {
 			answers[index].IsChosen = true
 			answers[index].UpdatedAt = time.Now()
-			err := s.repo.UpdateUserAnswer(&answers[index])
-			if err != nil {
+			if err := s.repo.UpdateUserAnswer(&answers[index]); err != nil {
 				return nil, err
 			}
 
 			isTrue = true
 		}
+	}
 
-		question.IsTrue = null.BoolFrom(isTrue)
-		question.UpdatedAt = time.Now()
-		err = s.repo.UpdateUserQuestion(&question)
-		if err != nil {
+	question.IsTrue = null.BoolFrom(isTrue)
+	question.UpdatedAt = time.Now()
+	if err = s.repo.UpdateUserQuestion(&question); err != nil {
+		return nil, err
+	}
+
+	if !isTrue {
+		if err = s.addQuestionToCourseWithErrors(input, question, answers); err != nil {
 			return nil, err
 		}
 	}
 
-	course := &model.UserCourse{
-		Model: model.Model{
-			ID:        question.CourseID,
-			UpdatedAt: time.Now(),
-		},
-		LastQuestionID: null.IntFrom(int64(question.ID)),
-	}
-	err = s.repo.UpdateUserCourse(course)
-	if err != nil {
+	course := &model.UserCourse{}
+	course.ID = question.CourseID
+	course.UpdatedAt = time.Now()
+	course.LastQuestionID = null.IntFrom(int64(question.ID))
+	if err = s.repo.UpdateUserCourse(course); err != nil {
 		return nil, err
 	}
 
 	question.Answers = answers
 
 	return &question, nil
+}
+
+func (s *UserQuestionService) addQuestionToCourseWithErrors(
+	input *CheckAnswerInput, question model.UserQuestion, answers []model.UserAnswer,
+) error {
+	course, err := s.userCourses.GetUserCourseByTypeAndUserID(model.ErrorUserCourseType, input.UserID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			original, err := s.userCourses.GetUserCourseByID(question.CourseID)
+			if err != nil {
+				return err
+			}
+			course.UUID = util.GenerateUUID()
+			course.Name = original.Name
+			course.Type = model.ErrorUserCourseType
+			course.UserID = input.UserID
+			course.CourseID = original.CourseID
+			course.CreatedAt = time.Now()
+			course.UpdatedAt = time.Now()
+			if err = s.courses.CreateUserCourse(&course); err != nil {
+				return err
+			}
+		} else {
+			return err
+		}
+	}
+
+	newQ := &model.UserQuestion{
+		Model: model.Model{
+			CreatedAt: time.Now(),
+			UpdatedAt: time.Now(),
+		},
+		UUID:        util.GenerateUUID(),
+		Content:     question.Content,
+		Explanation: question.Explanation,
+		Type:        question.Type,
+		Sort:        0,
+		CourseID:    course.ID,
+		QuestionID:  question.QuestionID,
+		ModuleID:    question.ModuleID,
+		FileID:      question.FileID,
+	}
+	if err = s.userCourses.CreateUserQuestion(newQ); err != nil {
+		return err
+	}
+
+	newA := make([]model.UserAnswer, len(answers))
+	for i, answer := range answers {
+		newA[i] = model.UserAnswer{
+			Model: model.Model{
+				CreatedAt: time.Now(),
+				UpdatedAt: time.Now(),
+			},
+			Content:    answer.Content,
+			QuestionID: question.ID,
+			IsTrue:     answer.IsTrue,
+			IsChosen:   false,
+			Sort:       answer.Sort,
+		}
+	}
+	if err = s.courses.CreateUserAnswers(newA); err != nil {
+		return err
+	}
+
+	return nil
 }

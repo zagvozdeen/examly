@@ -68,7 +68,7 @@ func (r *UserQuestionRepository) UpdateUserCourse(course *model.UserCourse) (err
 
 func (r *UserQuestionRepository) CreateUserAnswer(answer *model.UserAnswer) error {
 	_, err := r.db.NamedQuery(
-		"INSERT INTO user_answers (content, question_id, is_true, is_chosen, created_at, updated_at) VALUES (:content, :question_id, :is_true, :is_chosen, :created_at, :updated_at)",
+		"INSERT INTO user_answers (content, question_id, is_true, is_chosen, sort, created_at, updated_at) VALUES (:content, :question_id, :is_true, :is_chosen, :sort, :created_at, :updated_at)",
 		answer,
 	)
 

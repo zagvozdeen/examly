@@ -28,3 +28,13 @@ func (r *FileRepository) CreateFile(file *model.File) (id int, err error) {
 
 	return id, err
 }
+
+func (r *FileRepository) GetFileByID(id int) (file model.File, err error) {
+	err = r.db.Get(
+		&file,
+		"SELECT * FROM files WHERE id = $1 AND deleted_at IS NULL",
+		id,
+	)
+
+	return file, err
+}

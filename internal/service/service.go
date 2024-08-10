@@ -21,6 +21,7 @@ type Courses interface {
 	GetModuleCourses(modules []model.Module) ([]model.Course, error)
 	CreateCourse(user *model.User, input *CreateCourseInput) (int, error)
 	GetCourseByUUID(uuid string) (model.Course, error)
+	GetStatsByUserID(id int) ([]repository.CourseStats, error)
 	CreateUserCourse(input *CreateUserCourseInput) (string, error)
 	GetQuestionsAnswers(questions []model.Question) ([]model.Answer, error)
 }
@@ -45,6 +46,7 @@ type Files interface {
 
 type UserCourses interface {
 	GetUserCourseByUUID(uuid string) (model.UserCourse, error)
+	GetUserCourseByTypeAndUserID(t string, id int) (model.UserCourse, error)
 }
 
 type UserQuestions interface {
@@ -66,9 +68,9 @@ func NewService(repos *repository.Repository) *Service {
 		Auth:          NewAuthService(repos.Auth),
 		Courses:       NewCourseService(repos.Courses),
 		Modules:       NewModuleService(repos.Modules),
-		Questions:     NewQuestionService(repos.Questions),
+		Questions:     NewQuestionService(repos.Questions, repos.Files),
 		Files:         NewFileService(repos.Files),
 		UserCourses:   NewUserCourseService(repos.UserCourses),
-		UserQuestions: NewUserQuestionService(repos.UserQuestionsInterface),
+		UserQuestions: NewUserQuestionService(repos.UserQuestionsInterface, repos.Courses, repos.UserCourses),
 	}
 }

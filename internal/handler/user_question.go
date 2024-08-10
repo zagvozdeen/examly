@@ -1,37 +1,33 @@
 package handler
 
 import (
-	"encoding/json"
+	"fmt"
 	"github.com/Den4ik117/examly/internal/service"
 	"github.com/gorilla/mux"
 	"net/http"
 )
 
 func (h *Handler) checkAnswer(w http.ResponseWriter, r *http.Request) {
-	uuid := mux.Vars(r)["uuid"]
-
-	if uuid == "" {
-		http.Error(w, "empty uuid", http.StatusBadRequest)
+	uuid, found := mux.Vars(r)["uuid"]
+	if !found {
+		encode(w, r, http.StatusBadRequest, fmt.Errorf("empty uuid"))
 		return
 	}
 
-	var input service.CheckAnswerInput
-	err := json.NewDecoder(r.Body).Decode(&input)
+	input, err := decode[service.CheckAnswerInput](r)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		encode(w, r, http.StatusBadRequest, err)
 		return
 	}
+	user := current(r)
 	input.QuestionUUID = uuid
+	input.UserID = user.ID
 
 	question, err := h.services.UserQuestions.CheckAnswer(&input)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusInternalServerError)
+		encode(w, r, http.StatusInternalServerError, err)
 		return
 	}
 
-	w.Header().Add("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	json.NewEncoder(w).Encode(map[string]interface{}{
-		"data": question,
-	})
+	encode(w, r, http.StatusOK, question)
 }

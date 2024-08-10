@@ -54,7 +54,10 @@
         </n-button>
       </router-link>
 
-      <n-button type="error">
+      <n-button
+        type="error"
+        @click="handleCreateExam"
+      >
         Экзамен
       </n-button>
       <n-button
@@ -63,12 +66,20 @@
       >
         Модули
       </n-button>
-      <n-button
-        secondary
-        type="success"
+      <router-link
+        :to="{
+          name: 'tests.show',
+          params: { uuid: errorsCourse?.uuid }
+        }"
       >
-        Ошибки
-      </n-button>
+        <n-button
+          secondary
+          type="success"
+          class="!w-full"
+        >
+          Ошибки
+        </n-button>
+      </router-link>
       <n-button
         type="primary"
         class="col-span-2"
@@ -83,18 +94,34 @@
 import { Course, CourseStats, PageExpose } from '@/types.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'
 import { onMounted, ref } from 'vue'
-import { useRoute } from 'vue-router'
-import { NButton } from 'naive-ui'
+import { useRoute, useRouter } from 'vue-router'
+import { NButton, useMessage } from 'naive-ui'
 
 defineExpose<PageExpose>({
   title: 'Курс',
 })
 
 const route = useRoute()
+const router = useRouter()
+const message = useMessage()
 const courseStore = useCourseStore()
 
 const course = ref<Course>()
 const stats = ref<CourseStats>()
+const errorsCourse = ref<Course>()
+
+const handleCreateExam = () => {
+  courseStore
+    .createExam(route.params.uuid as string)
+    .then(data => {
+      message.success('Экзамен начат!')
+
+      router.push({
+        name: 'tests.show',
+        params: { uuid: data.data },
+      })
+    })
+}
 
 onMounted(() => {
   courseStore
@@ -102,6 +129,7 @@ onMounted(() => {
     .then(data => {
       course.value = data.data
       stats.value = data.stats
+      errorsCourse.value = data.errors
     })
 })
 </script>
