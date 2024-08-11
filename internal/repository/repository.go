@@ -27,7 +27,8 @@ type Courses interface {
 	CreateUserCourse(course *model.UserCourse) error
 	CreateUserModules(modules []model.UserModule) error
 	CreateUserAnswers(answers []model.UserAnswer) error
-	GetUserStatsByCourse(id int) (d []CourseStats, err error)
+	GetUserStatsByCourse(id int) ([]CourseStats, error)
+	GetCourseStatsByUUID(params *model.CourseStatsParams) (s []model.FullCourseStats, err error)
 }
 
 type Modules interface {

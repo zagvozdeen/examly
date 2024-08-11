@@ -24,6 +24,7 @@ type Courses interface {
 	GetStatsByUserID(id int) ([]repository.CourseStats, error)
 	CreateUserCourse(input *CreateUserCourseInput) (string, error)
 	GetQuestionsAnswers(questions []model.Question) ([]model.Answer, error)
+	GetCourseStatsByUUID(params *model.CourseStatsParams) ([]model.FullCourseStats, error)
 }
 
 type Modules interface {

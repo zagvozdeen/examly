@@ -16,6 +16,10 @@ import (
 )
 
 func main() {
+	if err := os.Setenv("TZ", "UTC"); err != nil {
+		log.Fatalf("Failed to set timezone: %s", err)
+	}
+
 	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 

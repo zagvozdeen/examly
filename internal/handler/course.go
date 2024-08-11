@@ -105,6 +105,10 @@ func (h *Handler) getCourseByUUID(w http.ResponseWriter, r *http.Request) {
 
 	user := current(r)
 	stats, err := h.services.Courses.GetStatsByUserID(user.ID)
+	if err != nil {
+		encode(w, r, http.StatusInternalServerError, err)
+		return
+	}
 
 	errorCourse, err := h.services.UserCourses.GetUserCourseByTypeAndUserID(model.ErrorUserCourseType, user.ID)
 	if err != nil {
@@ -117,6 +121,45 @@ func (h *Handler) getCourseByUUID(w http.ResponseWriter, r *http.Request) {
 		"stats":  stats,
 		"errors": errorCourse,
 	})
+}
+
+func (h *Handler) getCourseStats(w http.ResponseWriter, r *http.Request) {
+	uuid, found := mux.Vars(r)["uuid"]
+	if !found {
+		encode(w, r, http.StatusBadRequest, fmt.Errorf("empty uuid"))
+		return
+	}
+
+	course, err := h.services.Courses.GetCourseByUUID(uuid)
+	if err != nil {
+		encode(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	user := current(r)
+	stats, err := h.services.Courses.GetCourseStatsByUUID(&model.CourseStatsParams{
+		CourseID: course.ID,
+		UserID:   user.ID,
+	})
+	if err != nil {
+		encode(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	encode(w, r, http.StatusOK, stats)
+}
+
+func (h *Handler) getStats(w http.ResponseWriter, r *http.Request) {
+	user := current(r)
+	stats, err := h.services.Courses.GetCourseStatsByUUID(&model.CourseStatsParams{
+		UserID: user.ID,
+	})
+	if err != nil {
+		encode(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	encode(w, r, http.StatusOK, stats)
 }
 
 func (h *Handler) createMarathon(w http.ResponseWriter, r *http.Request) {

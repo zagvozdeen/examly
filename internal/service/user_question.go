@@ -220,7 +220,7 @@ func (s *UserQuestionService) addQuestionToCourseWithErrors(
 				UpdatedAt: time.Now(),
 			},
 			Content:    answer.Content,
-			QuestionID: question.ID,
+			QuestionID: newQ.ID,
 			IsTrue:     answer.IsTrue,
 			IsChosen:   false,
 			Sort:       answer.Sort,

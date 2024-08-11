@@ -44,6 +44,8 @@
       v-model:value="form.input"
       size="small"
       placeholder="Введите ответ"
+      :disabled="currentQuestion.is_true !== null"
+      @keydown.enter="checkAnswer"
     />
 
     <ul
@@ -224,6 +226,9 @@ watch(currentQuestion, (question: UserQuestion | undefined) => {
       break
     case QuestionType.MultiplyAnswersType:
       form.answers_ids = question.answers.filter(answer => answer.is_chosen).map(answer => answer.id)
+      break
+    case QuestionType.InputType:
+      form.input = question.answers.find(answer => answer.is_chosen)?.content || ''
       break
     }
   }

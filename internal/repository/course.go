@@ -179,37 +179,74 @@ func (r *CourseRepository) CreateUserAnswers(answers []model.UserAnswer) error {
 
 type CourseStats struct {
 	Name      string `json:"name"`
-	Type      string `json:"-"`
-	Total     int    `json:"total"`
-	Completed int    `json:"completed"`
+	Type      string `json:"-" db:"type"`
+	Total     int    `json:"total" db:"total"`
+	Completed int    `json:"completed" db:"completed"`
 	Sort      int    `json:"-"`
 }
 
 func (r *CourseRepository) GetUserStatsByCourse(id int) (d []CourseStats, err error) {
-	rows, err := r.db.Query(
+	err = r.db.Select(
+		&d,
 		`
 SELECT c.type as type, COUNT(q.*) as total, COUNT(q.is_true) as completed
 FROM (SELECT id,
              type,
              RANK() OVER (PARTITION BY type ORDER BY created_at DESC) AS rank
-      FROM user_courses WHERE user_id = $1) c
+      FROM user_courses WHERE user_id = $1 AND deleted_at IS NULL) c
          JOIN user_questions q on q.course_id = c.id
 WHERE c.rank = 1
 GROUP BY c.type
 `,
 		id,
 	)
-	if err != nil {
-		return d, err
-	}
-
-	for rows.Next() {
-		s := CourseStats{}
-		if err = rows.Scan(&s.Type, &s.Total, &s.Completed); err != nil {
-			return d, err
-		}
-		d = append(d, s)
-	}
 
 	return d, err
+}
+
+func (r *CourseRepository) GetCourseStatsByUUID(params *model.CourseStatsParams) (s []model.FullCourseStats, err error) {
+	if params.CourseID == 0 {
+		err = r.db.Select(
+			&s,
+			`
+			SELECT c.id                                           AS id,
+				   c.uuid                                         AS uuid,
+				   c.type                                         AS type,
+				   c.created_at                                   AS created_at,
+				   COUNT(q.*) FILTER ( WHERE q.is_true is true )  AS correct,
+				   COUNT(q.*) FILTER ( WHERE q.is_true is false ) AS incorrect,
+				   COUNT(q.*)                                     AS total
+			FROM user_courses c
+					 JOIN public.user_questions q on c.id = q.course_id
+			WHERE c.user_id = $1 AND c.deleted_at IS NULL
+			GROUP BY c.id, c.uuid, c.type, c.created_at
+			ORDER BY c.id DESC;
+			`,
+			params.UserID,
+		)
+
+		return s, err
+	}
+
+	err = r.db.Select(
+		&s,
+		`
+		SELECT c.id                                           AS id,
+			   c.uuid                                         AS uuid,
+			   c.type                                         AS type,
+			   c.created_at                                   AS created_at,
+			   COUNT(q.*) FILTER ( WHERE q.is_true is true )  AS correct,
+			   COUNT(q.*) FILTER ( WHERE q.is_true is false ) AS incorrect,
+			   COUNT(q.*)                                     AS total
+		FROM user_courses c
+				 JOIN public.user_questions q on c.id = q.course_id
+		WHERE c.course_id = $1 AND c.user_id = $2 AND c.deleted_at IS NULL
+		GROUP BY c.id, c.uuid, c.type, c.created_at
+		ORDER BY c.id DESC;
+		`,
+		params.CourseID,
+		params.UserID,
+	)
+
+	return s, err
 }

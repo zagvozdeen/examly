@@ -34,7 +34,7 @@
           :key="question.id"
         >
           <td>{{ question.content }}</td>
-          <td>{{ question.status }}</td>
+          <td>{{ CourseStatusTranslates[question.status] }}</td>
         </tr>
       </tbody>
     </n-table>
@@ -49,7 +49,7 @@
 import { NTable, NButton } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { PageExpose, Question } from '@/types.ts'
+import { CourseStatusTranslates, PageExpose, Question } from '@/types.ts'
 import { useQuestionStore } from '@/composables/useQuestionStore.ts'
 
 const router = useRouter()

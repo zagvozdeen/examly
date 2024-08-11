@@ -109,6 +109,11 @@ export const createRoutes = (): Array<RouteRecordRaw> => {
           name: 'courses.show.marathon',
         },
         {
+          path: '/courses/:uuid/stats',
+          component: PageStats,
+          name: 'courses.stats',
+        },
+        {
           path: '/stats',
           component: PageStats,
           name: 'stats',

@@ -6,7 +6,10 @@
     <span class="text-2xl text-center py-8">Курс «{{ course.name }}»</span>
 
     <router-link
-      :to="{ name: 'stats', query: { course_uuid: course.uuid } }"
+      :to="{
+        name: 'courses.stats',
+        params: { uuid: course.uuid },
+      }"
       class="bg-obscure-600 hover:bg-obscure-550 cursor-pointer rounded px-2 pt-2 pb-4"
     >
       <img
@@ -60,17 +63,18 @@
       >
         Экзамен
       </n-button>
-      <n-button
-        secondary
-        type="success"
-      >
-        Модули
-      </n-button>
+      <!--      <n-button-->
+      <!--        secondary-->
+      <!--        type="success"-->
+      <!--      >-->
+      <!--        Модули-->
+      <!--      </n-button>-->
       <router-link
         :to="{
           name: 'tests.show',
           params: { uuid: errorsCourse?.uuid }
         }"
+        class="col-span-full"
       >
         <n-button
           secondary
@@ -80,12 +84,12 @@
           Ошибки
         </n-button>
       </router-link>
-      <n-button
-        type="primary"
-        class="col-span-2"
-      >
-        База
-      </n-button>
+      <!--      <n-button-->
+      <!--        type="primary"-->
+      <!--        class="col-span-2"-->
+      <!--      >-->
+      <!--        База-->
+      <!--      </n-button>-->
     </div>
   </div>
 </template>

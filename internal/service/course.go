@@ -232,3 +232,14 @@ func (s *CourseService) GetStatsByUserID(id int) ([]repository.CourseStats, erro
 
 	return stats, nil
 }
+
+func (s *CourseService) GetCourseStatsByUUID(params *model.CourseStatsParams) ([]model.FullCourseStats, error) {
+	stats, err := s.repo.GetCourseStatsByUUID(params)
+	if err != nil {
+		return stats, err
+	}
+	for i, stat := range stats {
+		stats[i].CreatedAtUnix = stat.CreatedAt.UnixMilli()
+	}
+	return stats, err
+}

@@ -106,7 +106,15 @@ export interface Question {
 export enum UserCourseType {
   MarathonUserCourseType = 'MARATHON',
   ModuleUserCourseType = 'MODULE',
+  ErrorUserCourseType = 'ERROR',
   ExamUserCourseType = 'EXAM',
+}
+
+export const UserCourseTypeTranslates: Record<UserCourseType, string> = {
+  [UserCourseType.MarathonUserCourseType]: 'Марафон',
+  [UserCourseType.ModuleUserCourseType]: 'Модуль',
+  [UserCourseType.ErrorUserCourseType]: 'Ошибки',
+  [UserCourseType.ExamUserCourseType]: 'Экзамен',
 }
 
 export interface UserCourse {
@@ -155,4 +163,14 @@ export interface UserAnswer {
   is_true: boolean
   created_at: string
   updated_at: string
+}
+
+export interface FullCourseStats {
+  id: number
+  uuid: string
+  type: UserCourseType
+  created_at: number
+  correct: number
+  incorrect: number
+  total: number
 }
