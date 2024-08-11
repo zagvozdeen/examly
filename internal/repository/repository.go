@@ -29,6 +29,7 @@ type Courses interface {
 	CreateUserAnswers(answers []model.UserAnswer) error
 	GetUserStatsByCourse(id int) ([]CourseStats, error)
 	GetCourseStatsByUUID(params *model.CourseStatsParams) (s []model.FullCourseStats, err error)
+	GetAllEntities() ([]model.Course, []model.Module, []model.Question, []model.Answer, error)
 }
 
 type Modules interface {

@@ -45,6 +45,18 @@
       v-else
       class="text-center text-gray-400"
     >Пока ничего</span>
+
+    <n-button @click="handleExportCourses">
+      Экспортировать курсы
+    </n-button>
+
+    <a
+      v-if="filePath"
+      class="text-center underline"
+      :href="filePath"
+    >
+      Ссылка на скачивание файла
+    </a>
   </div>
 </template>
 
@@ -59,11 +71,20 @@ const router = useRouter()
 const courseStore = useCourseStore()
 
 const courses = ref<Course[]>([])
+const filePath = ref<string>()
 
 defineExpose<PageExpose>({
   title: 'Мои курсы',
   back: router.resolve({ name: 'me' }),
 })
+
+const handleExportCourses = () => {
+  courseStore
+    .exportCourses()
+    .then((data) => {
+      filePath.value = data.data
+    })
+}
 
 onMounted(() => {
   courseStore

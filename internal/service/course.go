@@ -2,12 +2,16 @@ package service
 
 import (
 	"cmp"
+	"encoding/json"
 	"fmt"
 	"github.com/Den4ik117/examly/internal/model"
 	"github.com/Den4ik117/examly/internal/repository"
 	"github.com/Den4ik117/examly/internal/util"
 	"github.com/google/uuid"
+	"github.com/guregu/null/v5"
+	"os"
 	"slices"
+	"strings"
 	"time"
 )
 
@@ -242,4 +246,88 @@ func (s *CourseService) GetCourseStatsByUUID(params *model.CourseStatsParams) ([
 		stats[i].CreatedAtUnix = stat.CreatedAt.UnixMilli()
 	}
 	return stats, err
+}
+
+type CourseExport struct {
+	Name        string           `json:"name"`
+	Description string           `json:"description"`
+	Modules     []ModuleExport   `json:"modules"`
+	Questions   []QuestionExport `json:"questions"`
+}
+
+type ModuleExport struct {
+	Name string `json:"name"`
+}
+
+type QuestionExport struct {
+	Content     string         `json:"content"`
+	Explanation null.String    `json:"explanation"`
+	Type        string         `json:"type"`
+	Module      null.String    `json:"module"`
+	Answers     []AnswerExport `json:"answers"`
+}
+
+type AnswerExport struct {
+	Content string `json:"content"`
+	IsTrue  bool   `json:"is_true"`
+}
+
+func (s *CourseService) ExportCourses() (path string, err error) {
+	courses, modules, questions, answers, err := s.repo.GetAllEntities()
+	if err != nil {
+		return path, err
+	}
+
+	answersByQuestion := map[int][]AnswerExport{}
+	for _, answer := range answers {
+		answersByQuestion[answer.QuestionID] = append(answersByQuestion[answer.QuestionID], AnswerExport{
+			Content: answer.Content,
+			IsTrue:  answer.IsTrue,
+		})
+	}
+
+	moduleNameByID := map[int]string{}
+	for _, module := range modules {
+		moduleNameByID[module.ID] = module.Name
+	}
+
+	questionsByCourse := map[int][]QuestionExport{}
+	for _, question := range questions {
+		moduleName, ok := moduleNameByID[int(question.ModuleID.Int64)]
+		questionsByCourse[question.CourseID] = append(questionsByCourse[question.CourseID], QuestionExport{
+			Content:     question.Content,
+			Explanation: question.Explanation,
+			Type:        question.Type,
+			Module:      null.NewString(moduleName, ok),
+			Answers:     answersByQuestion[question.ID],
+		})
+	}
+
+	modulesByCourse := map[int][]ModuleExport{}
+	for _, module := range modules {
+		modulesByCourse[module.CourseID] = append(modulesByCourse[module.CourseID], ModuleExport{
+			Name: module.Name,
+		})
+	}
+
+	var coursesSlice []CourseExport
+	for _, course := range courses {
+		coursesSlice = append(coursesSlice, CourseExport{
+			Name:        course.Name,
+			Description: course.Description,
+			Questions:   questionsByCourse[course.ID],
+			Modules:     modulesByCourse[course.ID],
+		})
+	}
+
+	b, err := json.MarshalIndent(coursesSlice, "", "  ")
+	if err != nil {
+		return path, err
+	}
+	path = fmt.Sprintf("public/files/courses-%s.json", util.GenerateUUID())
+	if err = os.WriteFile(path, b, 0666); err != nil {
+		return path, err
+	}
+	path = strings.ReplaceAll(path, "public", "")
+	return path, err
 }

@@ -43,6 +43,7 @@ func (h *Handler) InitRoutes() *mux.Router {
 	authRouter.HandleFunc("/courses/{uuid}/stats", h.getCourseStats).Methods("GET")
 	authRouter.HandleFunc("/courses/{uuid}/marathon", h.createMarathon).Methods("POST")
 	authRouter.HandleFunc("/courses/{uuid}/exam", h.createExam).Methods("POST")
+	authRouter.HandleFunc("/courses/export", h.exportCourses).Methods("POST")
 
 	authRouter.HandleFunc("/modules", h.getModules).Methods("GET")
 	authRouter.HandleFunc("/my-modules", h.getMyModules).Methods("GET")

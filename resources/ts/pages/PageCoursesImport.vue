@@ -18,7 +18,7 @@
       </n-form-item>
 
       <n-form-item
-        label="Файл (YAML)"
+        label="Файл (JSON)"
         path="file_id"
       >
         <AppUploadFile

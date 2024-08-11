@@ -209,3 +209,13 @@ func (h *Handler) createExam(w http.ResponseWriter, r *http.Request) {
 
 	encode(w, r, http.StatusCreated, uuid)
 }
+
+func (h *Handler) exportCourses(w http.ResponseWriter, r *http.Request) {
+	path, err := h.services.Courses.ExportCourses()
+	if err != nil {
+		encode(w, r, http.StatusInternalServerError, err)
+		return
+	}
+
+	encode(w, r, http.StatusOK, path)
+}

@@ -64,6 +64,12 @@ export const useCourseStore = () => {
       .json<{ data: UserQuestion }>()
   }
 
+  const exportCourses = () => {
+    return ky
+      .post('courses/export')
+      .json<{ data: string }>()
+  }
+
   return {
     getCourses,
     getMyCourses,
@@ -74,5 +80,6 @@ export const useCourseStore = () => {
     createMarathon,
     createExam,
     checkAnswer,
+    exportCourses,
   }
 }

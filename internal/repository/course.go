@@ -250,3 +250,29 @@ func (r *CourseRepository) GetCourseStatsByUUID(params *model.CourseStatsParams)
 
 	return s, err
 }
+
+func (r *CourseRepository) GetAllEntities() (
+	courses []model.Course,
+	modules []model.Module,
+	questions []model.Question,
+	answers []model.Answer,
+	err error,
+) {
+	if err = r.db.Select(&courses, "SELECT * FROM courses WHERE deleted_at IS NULL"); err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	if err = r.db.Select(&modules, "SELECT * FROM modules WHERE deleted_at IS NULL"); err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	if err = r.db.Select(&questions, "SELECT * FROM questions WHERE deleted_at IS NULL"); err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	if err = r.db.Select(&answers, "SELECT * FROM answers WHERE deleted_at IS NULL"); err != nil {
+		return nil, nil, nil, nil, err
+	}
+
+	return courses, modules, questions, answers, err
+}
