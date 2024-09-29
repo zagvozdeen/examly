@@ -1,10 +1,12 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"github.com/Den4ik117/examly/config"
 	"github.com/Den4ik117/examly/internal/model"
 	"github.com/Den4ik117/examly/internal/repository"
+	"github.com/Den4ik117/examly/internal/util"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/guregu/null/v5"
 	"golang.org/x/crypto/bcrypt"
@@ -58,10 +60,11 @@ func (s *AuthService) CreateUser(u RegisterInput) (int, error) {
 	}
 
 	user := model.User{
+		UUID:      util.GenerateUUID(),
 		Email:     null.StringFrom(u.Email),
 		FirstName: null.StringFrom(u.FirstName),
 		LastName:  null.StringFrom(u.LastName),
-		Role:      model.SimpleUserRole,
+		Role:      model.MemberRole,
 		Password:  null.StringFrom(string(bytes)),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
@@ -93,6 +96,10 @@ func (s *AuthService) GetGuestToken() (string, error) {
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
+
+	ctx := context.Background()
+	context.WithValue(ctx, "fdsf", "fdsf")
+	context.with
 
 	id, err := s.repo.CreateUser(user)
 	if err != nil {

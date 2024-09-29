@@ -65,6 +65,10 @@ type Service struct {
 	UserQuestions
 }
 
+type AdvService struct {
+	Auth
+}
+
 func NewService(repos *repository.Repository) *Service {
 	return &Service{
 		Auth:          NewAuthService(repos.Auth),
@@ -74,5 +78,11 @@ func NewService(repos *repository.Repository) *Service {
 		Files:         NewFileService(repos.Files),
 		UserCourses:   NewUserCourseService(repos.UserCourses),
 		UserQuestions: NewUserQuestionService(repos.UserQuestionsInterface, repos.Courses, repos.UserCourses),
+	}
+}
+
+func NewAdvService(repos *repository.Repository) *AdvService {
+	return &AdvService{
+		Auth: NewAuthService(repos.Auth),
 	}
 }

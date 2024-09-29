@@ -17,7 +17,8 @@ func (r *AuthRepository) CreateUser(user model.User) (int, error) {
 	var id int
 
 	err := r.db.QueryRow(
-		"INSERT INTO users (email, first_name, last_name, role, password, avatar_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
+		"INSERT INTO users (uuid, email, first_name, last_name, role, password, avatar_id, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id",
+		user.UUID,
 		user.Email,
 		user.FirstName,
 		user.LastName,

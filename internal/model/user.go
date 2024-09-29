@@ -7,6 +7,7 @@ import (
 
 type User struct {
 	ID        int         `json:"id" db:"id"`
+	UUID      string      `json:"uuid" db:"uuid"`
 	Email     null.String `json:"email" db:"email"`
 	FirstName null.String `json:"first_name" db:"first_name"`
 	LastName  null.String `json:"last_name" db:"last_name"`

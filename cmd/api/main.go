@@ -32,13 +32,16 @@ func main() {
 
 	repos := repository.NewRepository(db)
 	services := service.NewService(repos)
+	services2 := service.NewAdvService(repos)
 	handlers := handler.NewHandler(services)
+	handlers2 := handler.NewMuxHandler(services2)
 
-	router := handlers.InitRoutes()
+	_ = handlers.InitRoutes()
+	router2 := handlers2.InitRoutes()
 
 	go func() {
 		slog.Info("Starting server on :8080")
-		if err = http.ListenAndServe(":8080", router); err != nil {
+		if err = http.ListenAndServe(":8080", router2); err != nil {
 			log.Fatalf("Failed to start server: %s", err)
 		}
 	}()

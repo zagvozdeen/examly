@@ -3,16 +3,37 @@ package handler
 import (
 	"github.com/Den4ik117/examly/internal/service"
 	"github.com/gorilla/mux"
+	"net/http"
 )
 
 type Handler struct {
 	services *service.Service
 }
 
+type MuxHandler struct {
+	services *service.AdvService
+}
+
 func NewHandler(services *service.Service) *Handler {
 	return &Handler{
 		services: services,
 	}
+}
+
+func NewMuxHandler(services *service.AdvService) *MuxHandler {
+	return &MuxHandler{
+		services: services,
+	}
+}
+
+func (h *MuxHandler) InitRoutes() *http.ServeMux {
+	router := http.NewServeMux()
+
+	router.HandleFunc("POST /api/v2/auth/register", h.register)
+	router.HandleFunc("POST /api/v2/auth/login", h.login)
+	router.HandleFunc("GET /api/v2/auth/guest-token", h.getGuestToken)
+
+	return router
 }
 
 func (h *Handler) InitRoutes() *mux.Router {
