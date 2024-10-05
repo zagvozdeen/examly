@@ -2,7 +2,7 @@ package store
 
 import (
 	"errors"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var (
@@ -20,7 +20,7 @@ type Storage struct {
 	UserAnswersStore  UserAnswersStore
 }
 
-func NewStorage(conn *pgx.Conn) Storage {
+func NewStorage(conn *pgxpool.Pool) Storage {
 	return Storage{
 		UsersStore:        &UserStore{conn},
 		CoursesStore:      &CourseStore{conn},

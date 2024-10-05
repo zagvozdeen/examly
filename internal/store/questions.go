@@ -9,6 +9,7 @@ import (
 	"github.com/den4ik117/examly/internal/enum"
 	"github.com/guregu/null/v5"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"strings"
 	"time"
 )
@@ -73,7 +74,7 @@ type QuestionsStore interface {
 }
 
 type QuestionStore struct {
-	conn *pgx.Conn
+	conn *pgxpool.Pool
 }
 
 func (s *QuestionStore) Get(ctx context.Context) (questions []Question, err error) {

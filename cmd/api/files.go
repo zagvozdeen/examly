@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"github.com/den4ik117/examly/internal/enum"
 	"github.com/den4ik117/examly/internal/store"
 	"github.com/google/uuid"
 	"io"
@@ -16,6 +17,10 @@ import (
 const FileDir = "files"
 
 func (app *application) uploadFile(w http.ResponseWriter, r *http.Request) {
+	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
+		return
+	}
+
 	err := r.ParseMultipartForm(10 << 20)
 	if err != nil {
 		app.badRequestResponse(w, r, err)

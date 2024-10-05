@@ -13,15 +13,23 @@ import (
 func (app *application) getCourses(w http.ResponseWriter, r *http.Request) {
 	var filter store.GetCoursesFilter
 	query := r.URL.Query()
+	user := getUserFromRequest(r)
 	if query.Has("user_id") {
 		id, err := strconv.Atoi(query.Get("user_id"))
 		if err != nil {
 			app.badRequestResponse(w, r, err)
 			return
 		}
+		if id != user.ID && user.Role.Level() < enum.ModeratorRole.Level() {
+			app.forbiddenErrorResponse(w, r, errors.New("forbidden"))
+			return
+		}
 		filter.UserID = id
 	}
 	if query.Has("trashed") {
+		if ok := app.checkRole(w, r, enum.ModeratorRole); !ok {
+			return
+		}
 		trashed, err := strconv.ParseBool(query.Get("trashed"))
 		if err != nil {
 			app.badRequestResponse(w, r, err)
@@ -104,6 +112,7 @@ func (app *application) getCourse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
+	user := getUserFromRequest(r)
 
 	course, err := app.store.CoursesStore.GetByUUID(ctx, uid)
 	if err != nil {
@@ -112,6 +121,10 @@ func (app *application) getCourse(w http.ResponseWriter, r *http.Request) {
 		} else {
 			app.internalServerError(w, r, err)
 		}
+		return
+	}
+	if course.CreatedBy != user.ID && user.Role.Level() < enum.ModeratorRole.Level() {
+		app.forbiddenErrorResponse(w, r, errors.New("forbidden"))
 		return
 	}
 

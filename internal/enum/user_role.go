@@ -57,3 +57,7 @@ func (u UserRole) Value() (driver.Value, error) {
 func (u UserRole) Level() int8 {
 	return u.level
 }
+
+func (u UserRole) MarshalJSON() ([]byte, error) {
+	return []byte("\"" + u.String() + "\""), nil
+}

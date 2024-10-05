@@ -11,7 +11,7 @@ export const useKy = () => {
       ],
       afterResponse: [
         async (request, _, response) => {
-          if (response.status === 401) {
+          if (response.status === 401 || (request.url.endsWith('/api/v1/me') && response.status === 404)) {
             const token = await ky('/api/v1/auth/guest-token').json<{data: string}>()
 
             localStorage.setItem('token', token.data)
@@ -21,6 +21,9 @@ export const useKy = () => {
           }
         },
       ],
+    },
+    retry: {
+      limit: 0,
     },
   })
 }

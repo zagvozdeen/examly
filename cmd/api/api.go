@@ -32,6 +32,8 @@ func (app *application) mount() *mux.Router {
 
 	router.Use(app.loggerMiddleware)
 
+	router.HandleFunc("/", app.viewIndex)
+
 	subRouter := router.PathPrefix("/api/v1").Subrouter()
 	subRouter.HandleFunc("/auth/register", app.register).Methods("POST")
 	subRouter.HandleFunc("/auth/login", app.login).Methods("POST")
@@ -54,7 +56,7 @@ func (app *application) mount() *mux.Router {
 	authRouter.HandleFunc("/questions", app.roleMiddleware(enum.MemberRole, app.createQuestion)).Methods("POST")
 	authRouter.HandleFunc("/questions/{uuid}", app.roleMiddleware(enum.MemberRole, app.updateQuestion)).Methods("PATCH")
 
-	authRouter.HandleFunc("/files", app.roleMiddleware(enum.MemberRole, app.uploadFile)).Methods("POST")
+	authRouter.HandleFunc("/files", app.uploadFile).Methods("POST")
 
 	authRouter.HandleFunc("/test-sessions", app.createTestSession).Methods("POST")
 	authRouter.HandleFunc("/test-sessions/stats", app.getUserStats).Methods("GET")
@@ -63,11 +65,6 @@ func (app *application) mount() *mux.Router {
 	authRouter.HandleFunc("/user-answers", app.checkAnswer).Methods("POST")
 
 	authRouter.HandleFunc("/users", app.getUsers).Methods("GET")
-
-	//adminRouter := authRouter.PathPrefix("/admin").Subrouter()
-	//adminRouter.Use(app.adminMiddleware)
-	//
-	//adminRouter.HandleFunc("/users", app.getUsers).Methods("GET")
 
 	return router
 }

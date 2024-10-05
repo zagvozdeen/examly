@@ -23,7 +23,7 @@ func NewStatus(s any) (Status, error) {
 		return InactiveStatus, nil
 	}
 
-	return UnknownStatus, errors.New("unknown role: " + role)
+	return UnknownStatus, errors.New("unknown status: " + role)
 }
 
 var (

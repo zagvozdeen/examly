@@ -7,6 +7,7 @@ import (
 	"github.com/den4ik117/examly/internal/util"
 	"github.com/guregu/null/v5"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"time"
 )
 
@@ -31,7 +32,7 @@ type CoursesStore interface {
 }
 
 type CourseStore struct {
-	conn *pgx.Conn
+	conn *pgxpool.Pool
 }
 
 type GetCoursesFilter struct {

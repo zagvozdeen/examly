@@ -6,7 +6,7 @@ export const useStatsStore = () => {
 
   const getStats = () => {
     return ky
-      .get('stats')
+      .get('test-sessions/stats')
       .json<{ data: FullCourseStats[] }>()
   }
 

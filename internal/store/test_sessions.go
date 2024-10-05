@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/den4ik117/examly/internal/enum"
 	"github.com/guregu/null/v5"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"time"
 )
 
@@ -43,7 +43,7 @@ type TestSessionsStore interface {
 }
 
 type TestSessionStore struct {
-	conn *pgx.Conn
+	conn *pgxpool.Pool
 }
 
 func (s *TestSessionStore) GetByID(ctx context.Context, id int) (TestSession, error) {
@@ -76,7 +76,7 @@ func (s *TestSessionStore) GetStats(ctx context.Context, userID int) (stats []Te
 				   c.created_at                                      AS created_at,
 				   COUNT(q.*) FILTER ( WHERE q.is_correct is true )  AS correct,
 				   COUNT(q.*) FILTER ( WHERE q.is_correct is false ) AS incorrect,
-				   LENGTH(c.question_ids)                            AS total
+				   array_length(c.question_ids, 1)                   AS total
 			FROM test_sessions c
 					 JOIN user_answers q on c.id = q.test_session_id
 			WHERE c.user_id = $1 AND c.deleted_at IS NULL

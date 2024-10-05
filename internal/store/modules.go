@@ -4,7 +4,7 @@ import (
 	"context"
 	"github.com/den4ik117/examly/internal/enum"
 	"github.com/guregu/null/v5"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"time"
 )
 
@@ -27,7 +27,7 @@ type ModulesStore interface {
 }
 
 type ModuleStore struct {
-	conn *pgx.Conn
+	conn *pgxpool.Pool
 }
 
 func (s *ModuleStore) Get(ctx context.Context) (modules []Module, err error) {

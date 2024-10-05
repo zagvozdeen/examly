@@ -3,7 +3,7 @@ package store
 import (
 	"context"
 	"github.com/guregu/null/v5"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"time"
 )
 
@@ -25,7 +25,7 @@ type FilesStore interface {
 }
 
 type FileStore struct {
-	conn *pgx.Conn
+	conn *pgxpool.Pool
 }
 
 func (s *FileStore) Create(ctx context.Context, file *File) error {

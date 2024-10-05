@@ -2,11 +2,11 @@ package db
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
-func New(ctx context.Context, addr string) (*pgx.Conn, error) {
-	conn, err := pgx.Connect(ctx, addr)
+func New(ctx context.Context, addr string) (*pgxpool.Pool, error) {
+	conn, err := pgxpool.New(ctx, addr)
 	if err != nil {
 		return nil, err
 	}

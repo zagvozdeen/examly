@@ -6,6 +6,7 @@ import (
 	"github.com/den4ik117/examly/internal/enum"
 	"github.com/guregu/null/v5"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"time"
 )
 
@@ -32,7 +33,7 @@ type UsersStore interface {
 }
 
 type UserStore struct {
-	conn *pgx.Conn
+	conn *pgxpool.Pool
 }
 
 func (s *UserStore) Get(ctx context.Context) (users []User, err error) {

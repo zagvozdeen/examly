@@ -68,9 +68,9 @@ func (_c *MockCoursesStore_Create_Call) RunAndReturn(run func(context.Context, *
 	return _c
 }
 
-// Get provides a mock function with given fields: ctx
-func (_m *MockCoursesStore) Get(ctx context.Context) ([]Course, error) {
-	ret := _m.Called(ctx)
+// Get provides a mock function with given fields: ctx, filter
+func (_m *MockCoursesStore) Get(ctx context.Context, filter GetCoursesFilter) ([]Course, error) {
+	ret := _m.Called(ctx, filter)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Get")
@@ -78,19 +78,19 @@ func (_m *MockCoursesStore) Get(ctx context.Context) ([]Course, error) {
 
 	var r0 []Course
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) ([]Course, error)); ok {
-		return rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, GetCoursesFilter) ([]Course, error)); ok {
+		return rf(ctx, filter)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) []Course); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, GetCoursesFilter) []Course); ok {
+		r0 = rf(ctx, filter)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]Course)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
+	if rf, ok := ret.Get(1).(func(context.Context, GetCoursesFilter) error); ok {
+		r1 = rf(ctx, filter)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -105,13 +105,14 @@ type MockCoursesStore_Get_Call struct {
 
 // Get is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockCoursesStore_Expecter) Get(ctx interface{}) *MockCoursesStore_Get_Call {
-	return &MockCoursesStore_Get_Call{Call: _e.mock.On("Get", ctx)}
+//   - filter GetCoursesFilter
+func (_e *MockCoursesStore_Expecter) Get(ctx interface{}, filter interface{}) *MockCoursesStore_Get_Call {
+	return &MockCoursesStore_Get_Call{Call: _e.mock.On("Get", ctx, filter)}
 }
 
-func (_c *MockCoursesStore_Get_Call) Run(run func(ctx context.Context)) *MockCoursesStore_Get_Call {
+func (_c *MockCoursesStore_Get_Call) Run(run func(ctx context.Context, filter GetCoursesFilter)) *MockCoursesStore_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		run(args[0].(context.Context), args[1].(GetCoursesFilter))
 	})
 	return _c
 }
@@ -121,7 +122,7 @@ func (_c *MockCoursesStore_Get_Call) Return(_a0 []Course, _a1 error) *MockCourse
 	return _c
 }
 
-func (_c *MockCoursesStore_Get_Call) RunAndReturn(run func(context.Context) ([]Course, error)) *MockCoursesStore_Get_Call {
+func (_c *MockCoursesStore_Get_Call) RunAndReturn(run func(context.Context, GetCoursesFilter) ([]Course, error)) *MockCoursesStore_Get_Call {
 	_c.Call.Return(run)
 	return _c
 }

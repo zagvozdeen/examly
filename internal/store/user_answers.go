@@ -2,7 +2,7 @@ package store
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"time"
 )
 
@@ -20,7 +20,7 @@ type UserAnswersStore interface {
 }
 
 type UserAnswerStore struct {
-	conn *pgx.Conn
+	conn *pgxpool.Pool
 }
 
 func (s *UserAnswerStore) Create(ctx context.Context, answer *UserAnswer) error {

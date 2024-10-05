@@ -56,6 +56,10 @@ func (app *application) authMiddleware(next http.Handler) http.Handler {
 
 		user, err := app.store.UsersStore.GetByID(ctx, claims.UserID)
 		if err != nil {
+			if errors.Is(err, store.ErrNotFound) {
+				app.notFoundErrorResponse(w, r, err)
+				return
+			}
 			app.internalServerError(w, r, err)
 			return
 		}
