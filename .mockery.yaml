@@ -1,0 +1,9 @@
+with-expecter: True
+packages:
+  github.com/den4ik117/examly/internal/store:
+    config:
+      all: True
+      filename:  "mock_{{.InterfaceName | snakecase}}.go"
+      dir: "{{.InterfaceDir}}"
+      outpkg: "{{.PackageName}}"
+      inpackage: True

@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS questions
     course_id         INTEGER references courses (id)   not null,
     module_id         INTEGER references modules (id)   null,
     created_by        INTEGER references users (id)     not null,
-    moderated_by      INTEGER references users (id)     not null,
+    moderated_by      INTEGER references users (id)     null,
     prev_question_id  INTEGER references questions (id) null,
     next_question_id  INTEGER references questions (id) null,
     options           jsonb                             not null,
@@ -93,6 +93,7 @@ CREATE TABLE IF NOT EXISTS questions
 
 CREATE UNIQUE INDEX questions_uuid_unique_index ON questions (uuid);
 CREATE INDEX questions_deleted_at_not_null_index ON questions (deleted_at) WHERE deleted_at IS NOT NULL;
+CREATE INDEX questions_course_id_index ON questions (course_id);
 
 CREATE TABLE IF NOT EXISTS test_sessions
 (
@@ -101,7 +102,7 @@ CREATE TABLE IF NOT EXISTS test_sessions
     name             VARCHAR(255)                      NOT NULL,
     type             VARCHAR(50)                       NOT NULL,
     user_id          INTEGER references users (id)     not null,
-    course_id        INTEGER references courses (id)   not null,
+    course_id        INTEGER references courses (id)   null,
     question_ids     integer[]                         not null,
     last_question_id INTEGER references questions (id) NULL,
     deleted_at       TIMESTAMP                         NULL,

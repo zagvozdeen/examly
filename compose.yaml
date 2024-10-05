@@ -1,7 +1,7 @@
 services:
   db:
     container_name: examly-postgres
-    image: postgres
+    image: postgres:latest
     restart: always
     environment:
       POSTGRES_DB: ${DB_DATABASE}
@@ -12,14 +12,14 @@ services:
     ports:
       - "5432:5432"
 
-  node:
-    container_name: examly-node
-    image: node:alpine
-    entrypoint: /bin/sh
-    working_dir: /app
-    tty: true
-    volumes:
-      - ./resources:/app
-      - ./.env:/app/.env
-    ports:
-      - "5173:5173"
+#  node:
+#    container_name: examly-node
+#    image: node:alpine
+#    entrypoint: /bin/sh
+#    working_dir: /app
+#    tty: true
+#    volumes:
+#      - ./resources:/app
+#      - ./.env:/app/.env
+#    ports:
+#      - "5173:5173"
