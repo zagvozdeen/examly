@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"github.com/den4ik117/examly/internal/enum"
 	"github.com/den4ik117/examly/internal/store"
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/net/context"
@@ -72,30 +71,4 @@ func (app *application) authMiddleware(next http.Handler) http.Handler {
 
 func getUserFromRequest(r *http.Request) store.User {
 	return r.Context().Value("user").(store.User)
-}
-
-func (app *application) roleMiddleware(role enum.UserRole, next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		user := getUserFromRequest(r)
-
-		if user.Role.Level() < role.Level() {
-			app.forbiddenErrorResponse(w, r, errors.New("you do not have permissions"))
-			return
-		}
-
-		next.ServeHTTP(w, r)
-	}
-}
-
-func (app *application) adminMiddleware(next http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		user := getUserFromRequest(r)
-
-		if user.Role == enum.AdminRole || user.Role == enum.ModeratorRole {
-			next.ServeHTTP(w, r)
-			return
-		}
-
-		app.forbiddenErrorResponse(w, r, errors.New("you do not have permissions"))
-	})
 }

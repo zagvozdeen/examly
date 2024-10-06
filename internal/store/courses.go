@@ -12,23 +12,28 @@ import (
 )
 
 type Course struct {
-	ID          int         `json:"id"`
-	UUID        string      `json:"uuid"`
-	Name        string      `json:"name"`
-	Description string      `json:"description"`
-	Color       string      `json:"color"`
-	Icon        string      `json:"icon"`
-	Status      enum.Status `json:"status"`
-	CreatedBy   int         `json:"created_by"`
-	DeletedAt   null.Time   `json:"deleted_at"`
-	CreatedAt   time.Time   `json:"created_at"`
-	UpdatedAt   time.Time   `json:"updated_at"`
+	ID               int         `json:"id"`
+	UUID             string      `json:"uuid"`
+	Name             string      `json:"name"`
+	Description      string      `json:"description"`
+	Color            string      `json:"color"`
+	Icon             string      `json:"icon"`
+	Status           enum.Status `json:"status"`
+	ModerationReason null.String `json:"moderation_reason"`
+	CreatedBy        int         `json:"created_by"`
+	ModeratedBy      null.Int    `json:"moderated_by"`
+	DeletedAt        null.Time   `json:"deleted_at"`
+	CreatedAt        time.Time   `json:"created_at"`
+	UpdatedAt        time.Time   `json:"updated_at"`
 }
 
 type CoursesStore interface {
 	Get(ctx context.Context, filter GetCoursesFilter) ([]Course, error)
 	Create(ctx context.Context, course *Course) error
 	GetByUUID(ctx context.Context, uuid string) (Course, error)
+	Update(ctx context.Context, course *Course) error
+	UpdateStatus(ctx context.Context, course *Course) error
+	Delete(ctx context.Context, course *Course) error
 }
 
 type CourseStore struct {
@@ -128,4 +133,42 @@ func (s *CourseStore) GetByUUID(ctx context.Context, uuid string) (course Course
 	}
 
 	return course, err
+}
+
+func (s *CourseStore) Update(ctx context.Context, course *Course) error {
+	_, err := s.conn.Exec(
+		ctx,
+		"UPDATE courses SET name = $1, description = $2, color = $3, icon = $4, updated_at = $5 WHERE id = $6 AND deleted_at IS NULL",
+		course.Name,
+		course.Description,
+		course.Color,
+		course.Icon,
+		course.UpdatedAt,
+		course.ID,
+	)
+	return err
+}
+
+func (s *CourseStore) UpdateStatus(ctx context.Context, course *Course) error {
+	_, err := s.conn.Exec(
+		ctx,
+		"UPDATE courses SET moderation_reason = $1, status = $2, moderated_by = $3, updated_at = $4 WHERE id = $5 AND deleted_at IS NULL",
+		course.ModerationReason,
+		course.Status,
+		course.ModeratedBy,
+		course.UpdatedAt,
+		course.ID,
+	)
+	return err
+}
+
+func (s *CourseStore) Delete(ctx context.Context, course *Course) error {
+	_, err := s.conn.Exec(
+		ctx,
+		"UPDATE courses SET updated_at = $1, deleted_at = $2 WHERE id = $3 AND deleted_at IS NULL",
+		course.UpdatedAt,
+		course.DeletedAt,
+		course.ID,
+	)
+	return err
 }

@@ -7,6 +7,10 @@ import (
 )
 
 func (app *application) getCurrentUser(w http.ResponseWriter, r *http.Request) {
+	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
+		return
+	}
+
 	user := getUserFromRequest(r)
 
 	app.jsonResponse(w, r, http.StatusOK, map[string]any{

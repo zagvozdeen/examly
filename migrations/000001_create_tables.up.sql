@@ -30,24 +30,27 @@ CREATE TABLE IF NOT EXISTS users
     updated_at TIMESTAMP                     NOT NULL
 );
 
-ALTER TABLE files ADD CONSTRAINT files_created_by_foreign FOREIGN KEY (created_by) REFERENCES users (id);
+ALTER TABLE files
+    ADD CONSTRAINT files_created_by_foreign FOREIGN KEY (created_by) REFERENCES users (id);
 
 CREATE UNIQUE INDEX users_uuid_unique_index ON users (uuid);
 CREATE INDEX users_deleted_at_not_null_index ON users (deleted_at) WHERE deleted_at IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS courses
 (
-    id          SERIAL PRIMARY KEY,
-    uuid        uuid                          NOT NULL,
-    name        VARCHAR(255)                  NOT NULL,
-    description text                          NOT NULL,
-    color       VARCHAR(50)                   NOT NULL,
-    icon        VARCHAR(50)                   NOT NULL,
-    status      VARCHAR(50)                   NOT NULL,
-    created_by  INTEGER references users (id) not null,
-    deleted_at  TIMESTAMP                     NULL,
-    created_at  TIMESTAMP                     NOT NULL,
-    updated_at  TIMESTAMP                     NOT NULL
+    id                SERIAL PRIMARY KEY,
+    uuid              uuid                          NOT NULL,
+    name              VARCHAR(255)                  NOT NULL,
+    description       text                          NOT NULL,
+    color             VARCHAR(50)                   NOT NULL,
+    icon              VARCHAR(50)                   NOT NULL,
+    status            VARCHAR(50)                   NOT NULL,
+    moderation_reason TEXT                          null,
+    created_by        INTEGER references users (id) not null,
+    moderated_by      INTEGER references users (id) null,
+    deleted_at        TIMESTAMP                     NULL,
+    created_at        TIMESTAMP                     NOT NULL,
+    updated_at        TIMESTAMP                     NOT NULL
 );
 
 CREATE UNIQUE INDEX courses_uuid_unique_index ON courses (uuid);
@@ -55,15 +58,17 @@ CREATE INDEX courses_deleted_at_not_null_index ON courses (deleted_at) WHERE del
 
 CREATE TABLE IF NOT EXISTS modules
 (
-    id         SERIAL PRIMARY KEY,
-    uuid       uuid                            NOT NULL,
-    name       varchar(255)                    not null,
-    status     VARCHAR(50)                     NOT NULL,
-    course_id  INTEGER references courses (id) not null,
-    created_by INTEGER references users (id)   not null,
-    deleted_at TIMESTAMP                       NULL,
-    created_at TIMESTAMP                       NOT NULL,
-    updated_at TIMESTAMP                       NOT NULL
+    id                SERIAL PRIMARY KEY,
+    uuid              uuid                            NOT NULL,
+    name              varchar(255)                    not null,
+    status            VARCHAR(50)                     NOT NULL,
+    moderation_reason TEXT                            null,
+    course_id         INTEGER references courses (id) not null,
+    created_by        INTEGER references users (id)   not null,
+    moderated_by      INTEGER references users (id)   null,
+    deleted_at        TIMESTAMP                       NULL,
+    created_at        TIMESTAMP                       NOT NULL,
+    updated_at        TIMESTAMP                       NOT NULL
 );
 
 CREATE UNIQUE INDEX modules_uuid_unique_index ON modules (uuid);

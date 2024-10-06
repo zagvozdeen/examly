@@ -39,6 +39,10 @@ type CreateQuestionPayload struct {
 }
 
 func (app *application) createQuestion(w http.ResponseWriter, r *http.Request) {
+	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
+		return
+	}
+
 	var payload CreateQuestionPayload
 	if err := readJSON(w, r, &payload); err != nil {
 		app.badRequestResponse(w, r, err)
@@ -98,6 +102,36 @@ func (app *application) createQuestion(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
+func (app *application) getQuestion(w http.ResponseWriter, r *http.Request) {
+	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
+		return
+	}
+
+	uid, ok := mux.Vars(r)["uuid"]
+	if !ok {
+		app.badRequestResponse(w, r, errors.New("missing uuid"))
+		return
+	}
+
+	ctx := r.Context()
+	user := getUserFromRequest(r)
+
+	question, err := app.store.QuestionsStore.GetByUUID(ctx, uid)
+	if err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	if question.CreatedBy != user.ID && user.Role.Level() < enum.ModeratorRole.Level() {
+		app.forbiddenErrorResponse(w, r, errors.New("you are not allowed to view this question"))
+		return
+	}
+
+	app.jsonResponse(w, r, http.StatusOK, map[string]any{
+		"data": question,
+	})
+}
+
 type UpdateQuestionPayload struct {
 	Title       string `json:"title" validate:"required"`
 	Content     string `json:"content" validate:""`
@@ -114,6 +148,10 @@ type UpdateQuestionPayload struct {
 }
 
 func (app *application) updateQuestion(w http.ResponseWriter, r *http.Request) {
+	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
+		return
+	}
+
 	var payload UpdateQuestionPayload
 	if err := readJSON(w, r, &payload); err != nil {
 		app.badRequestResponse(w, r, err)
@@ -198,6 +236,100 @@ func (app *application) updateQuestion(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.jsonResponse(w, r, http.StatusCreated, map[string]any{
+		"data": question,
+	})
+}
+
+func (app *application) deleteQuestion(w http.ResponseWriter, r *http.Request) {
+	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
+		return
+	}
+
+	uid, ok := mux.Vars(r)["uuid"]
+	if !ok {
+		app.badRequestResponse(w, r, errors.New("empty uuid"))
+		return
+	}
+
+	ctx := r.Context()
+	user := getUserFromRequest(r)
+
+	question, err := app.store.QuestionsStore.GetByUUID(ctx, uid)
+	if err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+	if question.CreatedBy != user.ID && user.Role.Level() < enum.ModeratorRole.Level() {
+		app.forbiddenErrorResponse(w, r, errors.New("you are not allowed to delete this question"))
+		return
+	}
+
+	question.DeletedAt = null.TimeFrom(time.Now())
+	question.UpdatedAt = time.Now()
+
+	err = app.store.QuestionsStore.Delete(ctx, &question)
+	if err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+type ModerateQuestionPayload struct {
+	ModerationReason string `json:"moderation_reason" validate:"max=1024"`
+	Status           string `json:"status" validate:"required"`
+}
+
+func (app *application) moderateQuestion(w http.ResponseWriter, r *http.Request) {
+	if ok := app.checkRole(w, r, enum.ModeratorRole); !ok {
+		return
+	}
+
+	var payload ModerateQuestionPayload
+	if err := readJSON(w, r, &payload); err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	if err := Validate.Struct(payload); err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	uid, ok := mux.Vars(r)["uuid"]
+	if !ok {
+		app.badRequestResponse(w, r, errors.New("empty uuid"))
+		return
+	}
+
+	ctx := r.Context()
+	user := getUserFromRequest(r)
+
+	question, err := app.store.QuestionsStore.GetByUUID(ctx, uid)
+	if err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	s, err := enum.NewStatus(payload.Status)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	question.ModerationReason = null.StringFrom(payload.ModerationReason)
+	question.Status = s
+	question.UpdatedAt = time.Now()
+	question.ModeratedBy = null.IntFrom(int64(user.ID))
+
+	err = app.store.QuestionsStore.UpdateStatus(ctx, &question)
+	if err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	app.jsonResponse(w, r, http.StatusOK, map[string]any{
 		"data": question,
 	})
 }

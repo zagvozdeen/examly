@@ -6,8 +6,10 @@ import (
 	"github.com/den4ik117/examly/internal/store"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/guregu/null/v5"
 	"net/http"
 	"strconv"
+	"time"
 )
 
 func (app *application) getCourses(w http.ResponseWriter, r *http.Request) {
@@ -68,6 +70,10 @@ type CreateCoursePayload struct {
 }
 
 func (app *application) createCourse(w http.ResponseWriter, r *http.Request) {
+	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
+		return
+	}
+
 	var payload CreateCoursePayload
 	if err := readJSON(w, r, &payload); err != nil {
 		app.badRequestResponse(w, r, err)
@@ -101,7 +107,9 @@ func (app *application) createCourse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	app.jsonResponse(w, r, http.StatusCreated, course)
+	app.jsonResponse(w, r, http.StatusCreated, map[string]any{
+		"data": course,
+	})
 }
 
 func (app *application) getCourse(w http.ResponseWriter, r *http.Request) {
@@ -140,4 +148,164 @@ func (app *application) getCourse(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-//func (app *application) name(w http.ResponseWriter, r *http.Request) {}
+type UpdateCoursePayload struct {
+	Name        string `json:"name" validate:"required,max=255"`
+	Description string `json:"description" validate:"required,max=2048"`
+	Color       string `json:"color" validate:"required,max=255"`
+	Icon        string `json:"icon" validate:"required,max=255"`
+}
+
+func (app *application) updateCourse(w http.ResponseWriter, r *http.Request) {
+	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
+		return
+	}
+
+	uid, ok := mux.Vars(r)["uuid"]
+	if !ok {
+		app.badRequestResponse(w, r, errors.New("empty uuid"))
+		return
+	}
+
+	var payload UpdateCoursePayload
+	if err := readJSON(w, r, &payload); err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	if err := Validate.Struct(payload); err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	ctx := r.Context()
+	user := getUserFromRequest(r)
+
+	course, err := app.store.CoursesStore.GetByUUID(ctx, uid)
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			app.notFoundErrorResponse(w, r, err)
+		} else {
+			app.internalServerError(w, r, err)
+		}
+		return
+	}
+	if course.CreatedBy != user.ID && user.Role.Level() < enum.ModeratorRole.Level() {
+		app.forbiddenErrorResponse(w, r, errors.New("forbidden"))
+		return
+	}
+
+	course.Name = payload.Name
+	course.Description = payload.Description
+	course.Color = payload.Color
+	course.Icon = payload.Icon
+	course.UpdatedAt = time.Now()
+
+	err = app.store.CoursesStore.Update(ctx, &course)
+	if err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	app.jsonResponse(w, r, http.StatusOK, map[string]any{
+		"data": course,
+	})
+}
+
+func (app *application) deleteCourse(w http.ResponseWriter, r *http.Request) {
+	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
+		return
+	}
+
+	uid, ok := mux.Vars(r)["uuid"]
+	if !ok {
+		app.badRequestResponse(w, r, errors.New("empty uuid"))
+		return
+	}
+
+	ctx := r.Context()
+	user := getUserFromRequest(r)
+
+	course, err := app.store.CoursesStore.GetByUUID(ctx, uid)
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			app.notFoundErrorResponse(w, r, err)
+		} else {
+			app.internalServerError(w, r, err)
+		}
+		return
+	}
+	if course.CreatedBy != user.ID && user.Role.Level() < enum.ModeratorRole.Level() {
+		app.forbiddenErrorResponse(w, r, errors.New("forbidden"))
+		return
+	}
+
+	err = app.store.CoursesStore.Delete(ctx, &course)
+	if err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+type ModerateCoursePayload struct {
+	ModerationReason string `json:"moderation_reason" validate:"max=1024"`
+	Status           string `json:"status" validate:"required"`
+}
+
+func (app *application) moderateCourse(w http.ResponseWriter, r *http.Request) {
+	if ok := app.checkRole(w, r, enum.ModeratorRole); !ok {
+		return
+	}
+
+	uid, ok := mux.Vars(r)["uuid"]
+	if !ok {
+		app.badRequestResponse(w, r, errors.New("empty uuid"))
+		return
+	}
+
+	var payload ModerateCoursePayload
+	if err := readJSON(w, r, &payload); err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	if err := Validate.Struct(payload); err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	ctx := r.Context()
+	user := getUserFromRequest(r)
+
+	course, err := app.store.CoursesStore.GetByUUID(ctx, uid)
+	if err != nil {
+		if errors.Is(err, store.ErrNotFound) {
+			app.notFoundErrorResponse(w, r, err)
+		} else {
+			app.internalServerError(w, r, err)
+		}
+		return
+	}
+
+	s, err := enum.NewStatus(payload.Status)
+	if err != nil {
+		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	course.Status = s
+	course.ModeratedBy = null.IntFrom(int64(user.ID))
+	course.ModerationReason = null.StringFrom(payload.ModerationReason)
+	course.UpdatedAt = time.Now()
+
+	err = app.store.CoursesStore.UpdateStatus(ctx, &course)
+	if err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	app.jsonResponse(w, r, http.StatusOK, map[string]any{
+		"data": course,
+	})
+}

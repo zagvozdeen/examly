@@ -71,6 +71,8 @@ type QuestionsStore interface {
 	GetByCourseID(ctx context.Context, id int) ([]Question, error)
 	GetByIDs(ctx context.Context, ids []int) ([]Question, error)
 	Update(ctx context.Context, question *Question) error
+	UpdateStatus(ctx context.Context, question *Question) error
+	Delete(ctx context.Context, question *Question) error
 }
 
 type QuestionStore struct {
@@ -141,9 +143,28 @@ func (s *QuestionStore) GetByID(ctx context.Context, id int) (question Question,
 func (s *QuestionStore) GetByUUID(ctx context.Context, uuid string) (question Question, err error) {
 	err = s.conn.QueryRow(
 		ctx,
-		"SELECT id FROM questions WHERE id = $1 AND deleted_at IS NULL",
+		"SELECT id, uuid, title, content, explanation, moderation_reason, type, status, course_id, module_id, created_by, moderated_by, prev_question_id, next_question_id, options, deleted_at, created_at, updated_at FROM questions WHERE id = $1 AND deleted_at IS NULL",
 		uuid,
-	).Scan(&question.ID)
+	).Scan(
+		question.ID,
+		question.UUID,
+		question.Title,
+		question.Content,
+		question.Explanation,
+		question.ModerationReason,
+		question.Type,
+		question.Status,
+		question.CourseID,
+		question.ModuleID,
+		question.CreatedBy,
+		question.ModeratedBy,
+		question.PrevQuestionID,
+		question.NextQuestionID,
+		question.Options,
+		question.DeletedAt,
+		question.CreatedAt,
+		question.UpdatedAt,
+	)
 
 	if errors.Is(err, pgx.ErrNoRows) {
 		err = ErrNotFound
@@ -272,6 +293,30 @@ func (s *QuestionStore) Update(ctx context.Context, question *Question) error {
 		ctx,
 		"UPDATE questions SET next_question_id = $1, updated_at = $2 WHERE id = $3 AND deleted_at IS NULL",
 		question.NextQuestionID,
+		question.UpdatedAt,
+		question.ID,
+	)
+	return err
+}
+
+func (s *QuestionStore) UpdateStatus(ctx context.Context, question *Question) error {
+	_, err := s.conn.Exec(
+		ctx,
+		"UPDATE questions SET moderation_reason = $1, status = $2, updated_at = $3, moderated_by = $4 WHERE id = $5 AND deleted_at IS NULL",
+		question.ModerationReason,
+		question.Status,
+		question.UpdatedAt,
+		question.ModeratedBy,
+		question.ID,
+	)
+	return err
+}
+
+func (s *QuestionStore) Delete(ctx context.Context, question *Question) error {
+	_, err := s.conn.Exec(
+		ctx,
+		"UPDATE questions SET deleted_at = $1, updated_at = $2 WHERE id = $3 AND deleted_at IS NULL",
+		question.DeletedAt,
 		question.UpdatedAt,
 		question.ID,
 	)

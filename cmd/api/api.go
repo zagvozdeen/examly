@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"errors"
-	"github.com/den4ik117/examly/internal/enum"
 	"github.com/den4ik117/examly/internal/store"
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
@@ -43,18 +42,28 @@ func (app *application) mount() *mux.Router {
 	authRouter.Use(app.authMiddleware)
 
 	authRouter.HandleFunc("/me", app.getCurrentUser).Methods("GET")
-	authRouter.HandleFunc("/me", app.roleMiddleware(enum.MemberRole, app.getCurrentUser)).Methods("PATCH")
+	authRouter.HandleFunc("/me", app.getCurrentUser).Methods("PATCH")
 
 	authRouter.HandleFunc("/courses", app.getCourses).Methods("GET")
-	authRouter.HandleFunc("/courses", app.roleMiddleware(enum.MemberRole, app.createCourse)).Methods("POST")
+	authRouter.HandleFunc("/courses", app.createCourse).Methods("POST")
 	authRouter.HandleFunc("/courses/{uuid}", app.getCourse).Methods("GET")
+	authRouter.HandleFunc("/courses/{uuid}", app.updateCourse).Methods("PATCH")
+	authRouter.HandleFunc("/courses/{uuid}", app.deleteCourse).Methods("DELETE")
+	authRouter.HandleFunc("/courses/{uuid}/moderate", app.moderateCourse).Methods("PATCH")
 
 	authRouter.HandleFunc("/modules", app.getModules).Methods("GET")
-	authRouter.HandleFunc("/modules", app.roleMiddleware(enum.MemberRole, app.createModule)).Methods("POST")
+	authRouter.HandleFunc("/modules", app.createModule).Methods("POST")
+	authRouter.HandleFunc("/modules/{uuid}", app.getModule).Methods("GET")
+	authRouter.HandleFunc("/modules/{uuid}", app.updateModule).Methods("PATCH")
+	authRouter.HandleFunc("/modules/{uuid}", app.deleteModule).Methods("DELETE")
+	authRouter.HandleFunc("/modules/{uuid}/moderate", app.moderateModule).Methods("PATCH")
 
 	authRouter.HandleFunc("/questions", app.getQuestions).Methods("GET")
-	authRouter.HandleFunc("/questions", app.roleMiddleware(enum.MemberRole, app.createQuestion)).Methods("POST")
-	authRouter.HandleFunc("/questions/{uuid}", app.roleMiddleware(enum.MemberRole, app.updateQuestion)).Methods("PATCH")
+	authRouter.HandleFunc("/questions", app.createQuestion).Methods("POST")
+	authRouter.HandleFunc("/questions/{uuid}", app.getQuestion).Methods("GET")
+	authRouter.HandleFunc("/questions/{uuid}", app.updateQuestion).Methods("PATCH")
+	authRouter.HandleFunc("/questions/{uuid}", app.deleteQuestion).Methods("DELETE")
+	authRouter.HandleFunc("/questions/{uuid}/moderate", app.moderateQuestion).Methods("PATCH")
 
 	authRouter.HandleFunc("/files", app.uploadFile).Methods("POST")
 
