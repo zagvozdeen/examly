@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"errors"
@@ -18,7 +18,7 @@ type CreateTestSessionPayload struct {
 	Shuffle    bool   `json:"shuffle" validate:""`
 }
 
-func (app *application) createTestSession(w http.ResponseWriter, r *http.Request) {
+func (app *Application) createTestSession(w http.ResponseWriter, r *http.Request) {
 	var payload CreateTestSessionPayload
 	if err := readJSON(w, r, &payload); err != nil {
 		app.badRequestResponse(w, r, err)
@@ -92,7 +92,7 @@ func (app *application) createTestSession(w http.ResponseWriter, r *http.Request
 	app.jsonResponse(w, r, http.StatusCreated, course)
 }
 
-func (app *application) getUserStats(w http.ResponseWriter, r *http.Request) {
+func (app *Application) getUserStats(w http.ResponseWriter, r *http.Request) {
 	user := getUserFromRequest(r)
 
 	stats, err := app.store.TestSessionsStore.GetStats(r.Context(), user.ID)
@@ -106,7 +106,7 @@ func (app *application) getUserStats(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (app *application) getTestSession(w http.ResponseWriter, r *http.Request) {
+func (app *Application) getTestSession(w http.ResponseWriter, r *http.Request) {
 	uid, ok := mux.Vars(r)["uuid"]
 	if !ok {
 		app.badRequestResponse(w, r, errors.New("uuid is required"))
@@ -131,4 +131,4 @@ func (app *application) getTestSession(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-//func (app *application) name(w http.ResponseWriter, r *http.Request) {}
+//func (app *Application) name(w http.ResponseWriter, r *http.Request) {}

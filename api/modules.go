@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"errors"
@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func (app *application) getModules(w http.ResponseWriter, r *http.Request) {
+func (app *Application) getModules(w http.ResponseWriter, r *http.Request) {
 	modules, err := app.store.ModulesStore.Get(r.Context())
 	if err != nil {
 		app.internalServerError(w, r, err)
@@ -28,7 +28,7 @@ type CreateModulePayload struct {
 	CourseID int    `json:"course_id" validate:"required"`
 }
 
-func (app *application) createModule(w http.ResponseWriter, r *http.Request) {
+func (app *Application) createModule(w http.ResponseWriter, r *http.Request) {
 	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
 		return
 	}
@@ -72,7 +72,7 @@ func (app *application) createModule(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (app *application) getModule(w http.ResponseWriter, r *http.Request) {
+func (app *Application) getModule(w http.ResponseWriter, r *http.Request) {
 	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
 		return
 	}
@@ -106,7 +106,7 @@ type UpdateModulePayload struct {
 	Name string `json:"name" validate:"required,max=255"`
 }
 
-func (app *application) updateModule(w http.ResponseWriter, r *http.Request) {
+func (app *Application) updateModule(w http.ResponseWriter, r *http.Request) {
 	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
 		return
 	}
@@ -159,7 +159,7 @@ func (app *application) updateModule(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (app *application) deleteModule(w http.ResponseWriter, r *http.Request) {
+func (app *Application) deleteModule(w http.ResponseWriter, r *http.Request) {
 	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
 		return
 	}
@@ -204,7 +204,7 @@ type ModerateModulePayload struct {
 	ModerationReason string `json:"moderation_reason" validate:""`
 }
 
-func (app *application) moderateModule(w http.ResponseWriter, r *http.Request) {
+func (app *Application) moderateModule(w http.ResponseWriter, r *http.Request) {
 	if ok := app.checkRole(w, r, enum.ModeratorRole); !ok {
 		return
 	}

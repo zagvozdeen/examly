@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"errors"
@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-func (app *application) badRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
+func (app *Application) badRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
 	app.log.
 		Err(err).
 		Str("method", r.Method).
@@ -23,7 +23,7 @@ func (app *application) badRequestResponse(w http.ResponseWriter, r *http.Reques
 	}
 }
 
-func (app *application) internalServerError(w http.ResponseWriter, r *http.Request, err error) {
+func (app *Application) internalServerError(w http.ResponseWriter, r *http.Request, err error) {
 	app.log.
 		Err(err).
 		Str("method", r.Method).
@@ -40,7 +40,7 @@ func (app *application) internalServerError(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func (app *application) unauthorizedErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
+func (app *Application) unauthorizedErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	app.log.
 		Err(err).
 		Str("method", r.Method).
@@ -57,7 +57,7 @@ func (app *application) unauthorizedErrorResponse(w http.ResponseWriter, r *http
 	}
 }
 
-func (app *application) notFoundErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
+func (app *Application) notFoundErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	app.log.
 		Err(err).
 		Str("method", r.Method).
@@ -74,7 +74,7 @@ func (app *application) notFoundErrorResponse(w http.ResponseWriter, r *http.Req
 	}
 }
 
-func (app *application) forbiddenErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
+func (app *Application) forbiddenErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
 	app.log.
 		Err(err).
 		Str("method", r.Method).
@@ -91,7 +91,7 @@ func (app *application) forbiddenErrorResponse(w http.ResponseWriter, r *http.Re
 	}
 }
 
-func (app *application) checkRole(w http.ResponseWriter, r *http.Request, role enum.UserRole) bool {
+func (app *Application) checkRole(w http.ResponseWriter, r *http.Request, role enum.UserRole) bool {
 	user := getUserFromRequest(r)
 
 	ok := user.Role.Level() >= role.Level()

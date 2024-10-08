@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"errors"
@@ -25,7 +25,7 @@ type RegisterUserPayload struct {
 	PasswordConfirmation string `json:"password_confirmation" validate:"required"`
 }
 
-func (app *application) register(w http.ResponseWriter, r *http.Request) {
+func (app *Application) register(w http.ResponseWriter, r *http.Request) {
 	var payload RegisterUserPayload
 	if err := readJSON(w, r, &payload); err != nil {
 		app.badRequestResponse(w, r, err)
@@ -76,7 +76,7 @@ type LoginPayload struct {
 	Password string `json:"password" validate:"required,max=255"`
 }
 
-func (app *application) login(w http.ResponseWriter, r *http.Request) {
+func (app *Application) login(w http.ResponseWriter, r *http.Request) {
 	var payload LoginPayload
 	if err := readJSON(w, r, &payload); err != nil {
 		app.badRequestResponse(w, r, err)
@@ -115,7 +115,7 @@ func (app *application) login(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (app *application) getGuestToken(w http.ResponseWriter, r *http.Request) {
+func (app *Application) getGuestToken(w http.ResponseWriter, r *http.Request) {
 	uid, err := uuid.NewV7()
 	if err != nil {
 		app.internalServerError(w, r, err)

@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"errors"
@@ -12,7 +12,7 @@ import (
 	"time"
 )
 
-func (app *application) getCourses(w http.ResponseWriter, r *http.Request) {
+func (app *Application) getCourses(w http.ResponseWriter, r *http.Request) {
 	var filter store.GetCoursesFilter
 	query := r.URL.Query()
 	user := getUserFromRequest(r)
@@ -69,7 +69,7 @@ type CreateCoursePayload struct {
 	Icon        string `json:"icon" validate:"required,max=255"`
 }
 
-func (app *application) createCourse(w http.ResponseWriter, r *http.Request) {
+func (app *Application) createCourse(w http.ResponseWriter, r *http.Request) {
 	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
 		return
 	}
@@ -112,7 +112,7 @@ func (app *application) createCourse(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (app *application) getCourse(w http.ResponseWriter, r *http.Request) {
+func (app *Application) getCourse(w http.ResponseWriter, r *http.Request) {
 	uid, ok := mux.Vars(r)["uuid"]
 	if !ok {
 		app.badRequestResponse(w, r, errors.New("empty uuid"))
@@ -155,7 +155,7 @@ type UpdateCoursePayload struct {
 	Icon        string `json:"icon" validate:"required,max=255"`
 }
 
-func (app *application) updateCourse(w http.ResponseWriter, r *http.Request) {
+func (app *Application) updateCourse(w http.ResponseWriter, r *http.Request) {
 	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
 		return
 	}
@@ -211,7 +211,7 @@ func (app *application) updateCourse(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-func (app *application) deleteCourse(w http.ResponseWriter, r *http.Request) {
+func (app *Application) deleteCourse(w http.ResponseWriter, r *http.Request) {
 	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
 		return
 	}
@@ -253,7 +253,7 @@ type ModerateCoursePayload struct {
 	Status           string `json:"status" validate:"required"`
 }
 
-func (app *application) moderateCourse(w http.ResponseWriter, r *http.Request) {
+func (app *Application) moderateCourse(w http.ResponseWriter, r *http.Request) {
 	if ok := app.checkRole(w, r, enum.ModeratorRole); !ok {
 		return
 	}

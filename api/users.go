@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"github.com/den4ik117/examly/internal/enum"
@@ -6,11 +6,7 @@ import (
 	"net/http"
 )
 
-func (app *application) getCurrentUser(w http.ResponseWriter, r *http.Request) {
-	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
-		return
-	}
-
+func (app *Application) getCurrentUser(w http.ResponseWriter, r *http.Request) {
 	user := getUserFromRequest(r)
 
 	app.jsonResponse(w, r, http.StatusOK, map[string]any{
@@ -24,7 +20,7 @@ type UpdateUserPayload struct {
 	Email     string `json:"email" validate:"required,email,max=255"`
 }
 
-func (app *application) updateCurrentUser(w http.ResponseWriter, r *http.Request) {
+func (app *Application) updateCurrentUser(w http.ResponseWriter, r *http.Request) {
 	var payload UpdateUserPayload
 	if err := readJSON(w, r, &payload); err != nil {
 		app.badRequestResponse(w, r, err)
@@ -51,7 +47,7 @@ func (app *application) updateCurrentUser(w http.ResponseWriter, r *http.Request
 	})
 }
 
-func (app *application) getUsers(w http.ResponseWriter, r *http.Request) {
+func (app *Application) getUsers(w http.ResponseWriter, r *http.Request) {
 	if ok := app.checkRole(w, r, enum.ModeratorRole); !ok {
 		return
 	}

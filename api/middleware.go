@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"errors"
@@ -10,7 +10,7 @@ import (
 	"time"
 )
 
-func (app *application) loggerMiddleware(next http.Handler) http.Handler {
+func (app *Application) loggerMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		next.ServeHTTP(w, r)
@@ -24,7 +24,7 @@ func (app *application) loggerMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (app *application) authMiddleware(next http.Handler) http.Handler {
+func (app *Application) authMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		header := r.Header.Get("Authorization")
 		if header == "" {

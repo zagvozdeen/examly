@@ -1,11 +1,11 @@
-package main
+package api
 
 import (
 	"html/template"
 	"net/http"
 )
 
-func (app *application) viewIndex(w http.ResponseWriter, r *http.Request) {
+func (app *Application) viewIndex(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("resources/views/index.html")
 	if err != nil {
 		app.internalServerError(w, r, err)

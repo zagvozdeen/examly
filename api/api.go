@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"context"
@@ -13,20 +13,28 @@ import (
 	"time"
 )
 
-type application struct {
+type Application struct {
 	log    zerolog.Logger
-	config config
+	config Config
 	store  store.Storage
 }
 
-type config struct {
+type Config struct {
 	AppEnv    string
 	AppURL    string
 	DBAddr    string
 	SecretKey string
 }
 
-func (app *application) mount() *mux.Router {
+func NewApplication(log zerolog.Logger, config Config, store store.Storage) *Application {
+	return &Application{
+		log:    log,
+		config: config,
+		store:  store,
+	}
+}
+
+func (app *Application) Mount() *mux.Router {
 	router := mux.NewRouter()
 
 	router.Use(app.loggerMiddleware)
@@ -78,7 +86,7 @@ func (app *application) mount() *mux.Router {
 	return router
 }
 
-func (app *application) run(router *mux.Router) error {
+func (app *Application) Run(router *mux.Router) error {
 	server := &http.Server{
 		Addr:         app.config.AppURL,
 		Handler:      router,
@@ -86,6 +94,8 @@ func (app *application) run(router *mux.Router) error {
 		WriteTimeout: time.Second * 30,
 		IdleTimeout:  time.Minute,
 	}
+
+	initValidator()
 
 	shutdown := make(chan error)
 

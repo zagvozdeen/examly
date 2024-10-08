@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"encoding/json"
@@ -19,7 +19,7 @@ type CheckAnswerPayload struct {
 	Plaintext     string `json:"plaintext" validate:""`
 }
 
-func (app *application) checkAnswer(w http.ResponseWriter, r *http.Request) {
+func (app *Application) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	var payload CheckAnswerPayload
 	if err := readJSON(w, r, &payload); err != nil {
 		app.badRequestResponse(w, r, err)
@@ -172,4 +172,4 @@ func (app *application) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	})
 }
 
-//func (app *application) name(w http.ResponseWriter, r *http.Request) {}
+//func (app *Application) name(w http.ResponseWriter, r *http.Request) {}

@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"errors"
@@ -16,7 +16,7 @@ import (
 
 const FileDir = "files"
 
-func (app *application) uploadFile(w http.ResponseWriter, r *http.Request) {
+func (app *Application) uploadFile(w http.ResponseWriter, r *http.Request) {
 	if ok := app.checkRole(w, r, enum.MemberRole); !ok {
 		return
 	}

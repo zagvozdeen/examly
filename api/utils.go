@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"github.com/den4ik117/examly/internal/store"
@@ -9,7 +9,7 @@ import (
 	"testing"
 )
 
-func newTestApplication(t *testing.T) *application {
+func newTestApplication(t *testing.T) *Application {
 	t.Helper()
 
 	initValidator()
@@ -21,9 +21,9 @@ func newTestApplication(t *testing.T) *application {
 
 	storage := store.NewMockStorage(t)
 
-	return &application{
+	return &Application{
 		log: logger,
-		config: config{
+		config: Config{
 			AppEnv:    "testing",
 			AppURL:    "127.0.0.1:8888",
 			SecretKey: "qwert12345",

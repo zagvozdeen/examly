@@ -2,7 +2,7 @@ include .env
 export
 
 run:
-	@go run cmd/api/*.go
+	@go run cmd/api/main.go
 
 up:
 	@docker compose up -d

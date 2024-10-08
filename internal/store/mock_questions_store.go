@@ -68,6 +68,53 @@ func (_c *MockQuestionsStore_Create_Call) RunAndReturn(run func(context.Context,
 	return _c
 }
 
+// Delete provides a mock function with given fields: ctx, question
+func (_m *MockQuestionsStore) Delete(ctx context.Context, question *Question) error {
+	ret := _m.Called(ctx, question)
+
+	if len(ret) == 0 {
+		panic("no return value specified for Delete")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *Question) error); ok {
+		r0 = rf(ctx, question)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockQuestionsStore_Delete_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'Delete'
+type MockQuestionsStore_Delete_Call struct {
+	*mock.Call
+}
+
+// Delete is a helper method to define mock.On call
+//   - ctx context.Context
+//   - question *Question
+func (_e *MockQuestionsStore_Expecter) Delete(ctx interface{}, question interface{}) *MockQuestionsStore_Delete_Call {
+	return &MockQuestionsStore_Delete_Call{Call: _e.mock.On("Delete", ctx, question)}
+}
+
+func (_c *MockQuestionsStore_Delete_Call) Run(run func(ctx context.Context, question *Question)) *MockQuestionsStore_Delete_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*Question))
+	})
+	return _c
+}
+
+func (_c *MockQuestionsStore_Delete_Call) Return(_a0 error) *MockQuestionsStore_Delete_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockQuestionsStore_Delete_Call) RunAndReturn(run func(context.Context, *Question) error) *MockQuestionsStore_Delete_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // Get provides a mock function with given fields: ctx
 func (_m *MockQuestionsStore) Get(ctx context.Context) ([]Question, error) {
 	ret := _m.Called(ctx)
@@ -401,6 +448,53 @@ func (_c *MockQuestionsStore_Update_Call) Return(_a0 error) *MockQuestionsStore_
 }
 
 func (_c *MockQuestionsStore_Update_Call) RunAndReturn(run func(context.Context, *Question) error) *MockQuestionsStore_Update_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
+// UpdateStatus provides a mock function with given fields: ctx, question
+func (_m *MockQuestionsStore) UpdateStatus(ctx context.Context, question *Question) error {
+	ret := _m.Called(ctx, question)
+
+	if len(ret) == 0 {
+		panic("no return value specified for UpdateStatus")
+	}
+
+	var r0 error
+	if rf, ok := ret.Get(0).(func(context.Context, *Question) error); ok {
+		r0 = rf(ctx, question)
+	} else {
+		r0 = ret.Error(0)
+	}
+
+	return r0
+}
+
+// MockQuestionsStore_UpdateStatus_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'UpdateStatus'
+type MockQuestionsStore_UpdateStatus_Call struct {
+	*mock.Call
+}
+
+// UpdateStatus is a helper method to define mock.On call
+//   - ctx context.Context
+//   - question *Question
+func (_e *MockQuestionsStore_Expecter) UpdateStatus(ctx interface{}, question interface{}) *MockQuestionsStore_UpdateStatus_Call {
+	return &MockQuestionsStore_UpdateStatus_Call{Call: _e.mock.On("UpdateStatus", ctx, question)}
+}
+
+func (_c *MockQuestionsStore_UpdateStatus_Call) Run(run func(ctx context.Context, question *Question)) *MockQuestionsStore_UpdateStatus_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].(*Question))
+	})
+	return _c
+}
+
+func (_c *MockQuestionsStore_UpdateStatus_Call) Return(_a0 error) *MockQuestionsStore_UpdateStatus_Call {
+	_c.Call.Return(_a0)
+	return _c
+}
+
+func (_c *MockQuestionsStore_UpdateStatus_Call) RunAndReturn(run func(context.Context, *Question) error) *MockQuestionsStore_UpdateStatus_Call {
 	_c.Call.Return(run)
 	return _c
 }

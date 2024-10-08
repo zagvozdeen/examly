@@ -1,4 +1,4 @@
-package main
+package api
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 
 func TestUserRegister(t *testing.T) {
 	app := newTestApplication(t)
-	mux := app.mount()
+	mux := app.Mount()
 
 	t.Run("check response if body is empty", func(t *testing.T) {
 		r, err := http.NewRequest(http.MethodPost, "/api/v1/auth/register", nil)
@@ -103,7 +103,7 @@ func TestUserRegister(t *testing.T) {
 
 func TestGetGuestToken(t *testing.T) {
 	app := newTestApplication(t)
-	mux := app.mount()
+	mux := app.Mount()
 
 	t.Run("check response code is 200", func(t *testing.T) {
 		r, err := http.NewRequest(http.MethodGet, "/api/v1/auth/guest-token", nil)
@@ -119,7 +119,7 @@ func TestGetGuestToken(t *testing.T) {
 
 func TestLogin(t *testing.T) {
 	app := newTestApplication(t)
-	mux := app.mount()
+	mux := app.Mount()
 
 	t.Run("check response code if body is empty", func(t *testing.T) {
 		r, err := http.NewRequest(http.MethodPost, "/api/v1/auth/login", nil)
