@@ -37,7 +37,7 @@ export enum Status {
   Inactive = 'inactive',
 }
 
-export const CourseStatusTranslates: Record<Status, string> = {
+export const StatusTranslates: Record<Status, string> = {
   [Status.Created]: 'Новый',
   [Status.Active]: 'Активен',
   [Status.Inactive]: 'Неактивен',
@@ -48,6 +48,7 @@ export interface Course {
   uuid: string
   name: string
   description: string | null
+  moderation_reason: string | null
   color: string
   icon: string
   status: Status
@@ -96,7 +97,8 @@ export const QuestionTypeTranslates: Record<QuestionType, string> = {
 export interface Question {
   id: number
   uuid: string
-  content: string
+  title: string
+  content: string | null
   type: QuestionType
   status: Status
   created_at: string

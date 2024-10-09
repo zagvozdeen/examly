@@ -29,6 +29,9 @@
         <tr>
           <th>Название</th>
           <th>Статус</th>
+          <th class="!text-right">
+            Действия
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -38,6 +41,16 @@
         >
           <td>{{ course.name }}</td>
           <td>{{ StatusTranslates[course.status] }}</td>
+          <td class="text-right">
+            <router-link :to="{ name: 'courses.edit', params: {uuid: course.uuid} }">
+              <n-button
+                type="warning"
+                size="tiny"
+              >
+                Редактировать
+              </n-button>
+            </router-link>
+          </td>
         </tr>
       </tbody>
     </n-table>
@@ -66,7 +79,6 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Course, StatusTranslates, PageExpose } from '@/types.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'
-import { me } from '@/composables/useAuthStore.ts'
 
 const router = useRouter()
 const courseStore = useCourseStore()
@@ -75,22 +87,14 @@ const courses = ref<Course[]>([])
 const filePath = ref<string>()
 
 defineExpose<PageExpose>({
-  title: 'Мои курсы',
+  title: 'Все курсы',
   back: router.resolve({ name: 'me' }),
 })
-
-const handleExportCourses = () => {
-  courseStore
-    .exportCourses()
-    .then((data) => {
-      filePath.value = data.data
-    })
-}
 
 onMounted(() => {
   courseStore
     .getCourses({
-      'created_by': me.value?.id,
+      all: true,
     })
     .then(data => {
       courses.value = data.data

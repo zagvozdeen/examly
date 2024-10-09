@@ -1,9 +1,10 @@
 import { useKy } from '@/composables/useKy.ts'
-import { User } from '@/types.ts'
+import { User, UserRole } from '@/types.ts'
 import { ref } from 'vue'
 
 export const me = ref<User>()
 export const isAuthenticated = ref<boolean>(false)
+export const isModerator = ref<boolean>(false)
 
 export const useAuthStore = () => {
   const ky = useKy()
@@ -15,6 +16,7 @@ export const useAuthStore = () => {
 
     me.value = data.data
     isAuthenticated.value = true
+    isModerator.value = data.data.role === UserRole.Moderator || data.data.role === UserRole.Admin
   }
 
   const updateMe = async (json: object) => {

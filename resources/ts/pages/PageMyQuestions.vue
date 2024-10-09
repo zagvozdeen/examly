@@ -7,7 +7,7 @@
     </span>
 
     <router-link
-      :to="{ name: 'my.questions.create' }"
+      :to="{ name: 'questions.create' }"
       class="sm:self-center"
     >
       <n-button
@@ -33,8 +33,8 @@
           v-for="question in questions"
           :key="question.id"
         >
-          <td>{{ question.content }}</td>
-          <td>{{ CourseStatusTranslates[question.status] }}</td>
+          <td>{{ question.title }}</td>
+          <td>{{ StatusTranslates[question.status] }}</td>
         </tr>
       </tbody>
     </n-table>
@@ -49,8 +49,9 @@
 import { NTable, NButton } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { CourseStatusTranslates, PageExpose, Question } from '@/types.ts'
+import { StatusTranslates, PageExpose, Question } from '@/types.ts'
 import { useQuestionStore } from '@/composables/useQuestionStore.ts'
+import { me } from '@/composables/useAuthStore.ts'
 
 const router = useRouter()
 const questionStore = useQuestionStore()
@@ -64,9 +65,13 @@ defineExpose<PageExpose>({
 
 onMounted(() => {
   questionStore
-    .getMyQuestions()
+    .getQuestions({
+      created_by: me.value?.id,
+    })
     .then(data => {
-      questions.value = data.data
+      if (data.data) {
+        questions.value = data.data
+      }
     })
 })
 </script>

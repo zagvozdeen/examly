@@ -23,7 +23,7 @@
 
     <template v-else>
       <router-link
-        :to="{ name: 'my.settings' }"
+        :to="{ name: 'settings' }"
         class="bg-obscure-700 rounded-md p-2 hover:bg-obscure-500 bg-opacity-50"
       >
         <div class="grid grid-cols-[min-content_1fr_min-content] items-center gap-2">
@@ -41,7 +41,7 @@
           <router-link
             class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
             :to="{
-              name: 'my.courses',
+              name: 'courses',
             }"
           >
             <div class="bg-blue-400 rounded w-full py-0.5 text-center">
@@ -56,7 +56,7 @@
           <router-link
             class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
             :to="{
-              name: 'my.modules',
+              name: 'modules',
             }"
           >
             <div class="bg-red-400 rounded w-full py-0.5 text-center">
@@ -71,7 +71,7 @@
           <router-link
             class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
             :to="{
-              name: 'my.questions',
+              name: 'questions',
             }"
           >
             <div class="bg-green-400 rounded w-full py-0.5 text-center">
@@ -86,7 +86,72 @@
           <router-link
             class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
             :to="{
-              name: 'my.questions.import',
+              name: 'questions.import',
+            }"
+          >
+            <div class="bg-purple-400 rounded w-full py-0.5 text-center">
+              <i class="bi bi-file-earmark-arrow-up-fill" />
+            </div>
+            <span>Импортировать вопросы</span>
+            <i class="bi bi-chevron-right" />
+          </router-link>
+        </li>
+      </ul>
+
+      <ul
+        v-if="me.role === UserRole.Admin || me.role === UserRole.Moderator"
+        class="flex flex-col bg-obscure-700 rounded-md overflow-hidden"
+      >
+        <li>
+          <router-link
+            class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
+            :to="{
+              name: 'admin.courses',
+            }"
+          >
+            <div class="bg-blue-400 rounded w-full py-0.5 text-center">
+              <i class="bi bi-card-checklist" />
+            </div>
+            <span>Все курсы</span>
+            <i class="bi bi-chevron-right" />
+          </router-link>
+        </li>
+        <li class="h-px w-[calc(100%-28px-1rem)] ml-auto bg-obscure-500" />
+        <li>
+          <router-link
+            class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
+            :to="{
+              name: 'modules',
+            }"
+          >
+            <div class="bg-red-400 rounded w-full py-0.5 text-center">
+              <i class="bi bi-bar-chart-steps" />
+            </div>
+            <span>Добавленные модули</span>
+            <i class="bi bi-chevron-right" />
+          </router-link>
+        </li>
+        <li class="h-px w-[calc(100%-28px-1rem)] ml-auto bg-obscure-500" />
+        <li>
+          <router-link
+            class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
+            :to="{
+              name: 'questions',
+            }"
+          >
+            <div class="bg-green-400 rounded w-full py-0.5 text-center">
+              <i class="bi bi-question-circle-fill" />
+            </div>
+            <span>Созданные вопросы</span>
+            <i class="bi bi-chevron-right" />
+          </router-link>
+        </li>
+        <li class="h-px w-[calc(100%-28px-1rem)] ml-auto bg-obscure-500" />
+        <li>
+          <router-link
+            class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
+            :to="{
+              name: 'questions.import',
             }"
           >
             <div class="bg-purple-400 rounded w-full py-0.5 text-center">

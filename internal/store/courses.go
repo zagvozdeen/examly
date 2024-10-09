@@ -3,11 +3,13 @@ package store
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/den4ik117/examly/internal/enum"
-	"github.com/den4ik117/examly/internal/util"
 	"github.com/guregu/null/v5"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rs/zerolog"
+	"strings"
 	"time"
 )
 
@@ -31,6 +33,7 @@ type CoursesStore interface {
 	Get(ctx context.Context, filter GetCoursesFilter) ([]Course, error)
 	Create(ctx context.Context, course *Course) error
 	GetByUUID(ctx context.Context, uuid string) (Course, error)
+	GetByIDs(ctx context.Context, ids []any) ([]Course, error)
 	Update(ctx context.Context, course *Course) error
 	UpdateStatus(ctx context.Context, course *Course) error
 	Delete(ctx context.Context, course *Course) error
@@ -38,28 +41,36 @@ type CoursesStore interface {
 
 type CourseStore struct {
 	conn *pgxpool.Pool
+	log  zerolog.Logger
 }
 
 type GetCoursesFilter struct {
-	Trashed   bool
-	Statuses  []any
-	CreatedBy int
+	CreatedBy   int
+	OrCreatedBy int
+	All         bool
 }
 
 func (s *CourseStore) Get(ctx context.Context, filter GetCoursesFilter) (courses []Course, err error) {
-	b := util.NewQueryBuilder("SELECT id, uuid, name, description, color, icon, status, created_by, deleted_at, created_at, updated_at FROM courses")
-	if !filter.Trashed {
-		b.WhereNull("deleted_at")
-	}
-	if filter.CreatedBy != 0 && filter.Statuses != nil {
-		b.WhereFunc(func(b *util.QueryBuilder) {
-			b.WhereIn("status", filter.Statuses).OrWhere("user_id", "=", filter.CreatedBy)
-		})
-	} else if filter.CreatedBy != 0 {
-		b.Where("created_by", "=", filter.CreatedBy)
+	var sql string
+	var params []any
+
+	if filter.CreatedBy != 0 {
+		sql = "SELECT id, uuid, name, description, color, icon, status, created_by, deleted_at, created_at, updated_at FROM courses WHERE created_by = $1 AND deleted_at IS NULL"
+		params = []any{filter.CreatedBy}
+	} else if filter.OrCreatedBy != 0 {
+		sql = "SELECT id, uuid, name, description, color, icon, status, created_by, deleted_at, created_at, updated_at FROM courses WHERE (created_by = $1 OR status = $2) AND deleted_at IS NULL"
+		params = []any{filter.OrCreatedBy, enum.ActiveStatus.String()}
+	} else if filter.All {
+		sql = "SELECT id, uuid, name, description, color, icon, status, created_by, deleted_at, created_at, updated_at FROM courses"
+		params = []any{}
+	} else {
+		sql = "SELECT id, uuid, name, description, color, icon, status, created_by, deleted_at, created_at, updated_at FROM courses WHERE status = $1 AND deleted_at IS NULL"
+		params = []any{enum.ActiveStatus.String()}
 	}
 
-	rows, err := s.conn.Query(ctx, b.String(), b.Params()...)
+	s.log.Trace().Str("sql", sql).Str("params", fmt.Sprintf("%v", params)).Msg("Query")
+
+	rows, err := s.conn.Query(ctx, sql, params...)
 	if err != nil {
 		return nil, err
 	}
@@ -133,6 +144,46 @@ func (s *CourseStore) GetByUUID(ctx context.Context, uuid string) (course Course
 	}
 
 	return course, err
+}
+
+func (s *CourseStore) GetByIDs(ctx context.Context, ids []any) (courses []Course, err error) {
+	placeholders := make([]string, len(ids))
+	for i := range ids {
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
+	}
+
+	rows, err := s.conn.Query(
+		ctx,
+		fmt.Sprintf("SELECT id, uuid, name, description, color, icon, status, created_by, deleted_at, created_at, updated_at FROM courses WHERE id IN (%s) AND deleted_at IS NULL", strings.Join(placeholders, ",")),
+		ids...,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var course Course
+		err = rows.Scan(
+			&course.ID,
+			&course.UUID,
+			&course.Name,
+			&course.Description,
+			&course.Color,
+			&course.Icon,
+			&course.Status,
+			&course.CreatedBy,
+			&course.DeletedAt,
+			&course.CreatedAt,
+			&course.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		courses = append(courses, course)
+	}
+
+	return courses, nil
 }
 
 func (s *CourseStore) Update(ctx context.Context, course *Course) error {

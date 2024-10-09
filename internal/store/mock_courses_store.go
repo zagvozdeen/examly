@@ -174,6 +174,65 @@ func (_c *MockCoursesStore_Get_Call) RunAndReturn(run func(context.Context, GetC
 	return _c
 }
 
+// GetByIDs provides a mock function with given fields: ctx, ids
+func (_m *MockCoursesStore) GetByIDs(ctx context.Context, ids []any) ([]Course, error) {
+	ret := _m.Called(ctx, ids)
+
+	if len(ret) == 0 {
+		panic("no return value specified for GetByIDs")
+	}
+
+	var r0 []Course
+	var r1 error
+	if rf, ok := ret.Get(0).(func(context.Context, []any) ([]Course, error)); ok {
+		return rf(ctx, ids)
+	}
+	if rf, ok := ret.Get(0).(func(context.Context, []any) []Course); ok {
+		r0 = rf(ctx, ids)
+	} else {
+		if ret.Get(0) != nil {
+			r0 = ret.Get(0).([]Course)
+		}
+	}
+
+	if rf, ok := ret.Get(1).(func(context.Context, []any) error); ok {
+		r1 = rf(ctx, ids)
+	} else {
+		r1 = ret.Error(1)
+	}
+
+	return r0, r1
+}
+
+// MockCoursesStore_GetByIDs_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetByIDs'
+type MockCoursesStore_GetByIDs_Call struct {
+	*mock.Call
+}
+
+// GetByIDs is a helper method to define mock.On call
+//   - ctx context.Context
+//   - ids []any
+func (_e *MockCoursesStore_Expecter) GetByIDs(ctx interface{}, ids interface{}) *MockCoursesStore_GetByIDs_Call {
+	return &MockCoursesStore_GetByIDs_Call{Call: _e.mock.On("GetByIDs", ctx, ids)}
+}
+
+func (_c *MockCoursesStore_GetByIDs_Call) Run(run func(ctx context.Context, ids []any)) *MockCoursesStore_GetByIDs_Call {
+	_c.Call.Run(func(args mock.Arguments) {
+		run(args[0].(context.Context), args[1].([]any))
+	})
+	return _c
+}
+
+func (_c *MockCoursesStore_GetByIDs_Call) Return(_a0 []Course, _a1 error) *MockCoursesStore_GetByIDs_Call {
+	_c.Call.Return(_a0, _a1)
+	return _c
+}
+
+func (_c *MockCoursesStore_GetByIDs_Call) RunAndReturn(run func(context.Context, []any) ([]Course, error)) *MockCoursesStore_GetByIDs_Call {
+	_c.Call.Return(run)
+	return _c
+}
+
 // GetByUUID provides a mock function with given fields: ctx, uuid
 func (_m *MockCoursesStore) GetByUUID(ctx context.Context, uuid string) (Course, error) {
 	ret := _m.Called(ctx, uuid)

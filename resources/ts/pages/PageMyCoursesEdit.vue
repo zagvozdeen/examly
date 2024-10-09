@@ -1,5 +1,12 @@
 <template>
   <div class="flex flex-col gap-4">
+    <AppModerationForm
+      v-if="isModerator && course"
+      :status="course.status"
+      :reason="course.moderation_reason"
+      :callback="courseStore.moderateCourse"
+    />
+
     <n-form
       ref="formRef"
       :rules="formRules"
@@ -86,26 +93,29 @@
 </template>
 
 <script lang="ts" setup>
-import { NForm, NFormItem, NInput, NButton, FormInst, FormRules, useMessage } from 'naive-ui'
+import { NForm, NFormItem, NInput, NButton, FormInst, FormRules, useMessage, NSelect } from 'naive-ui'
 import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { PageExpose } from '@/types.ts'
+import { StatusTranslates, PageExpose, Status, Course } from '@/types.ts'
 import { useForm } from '@/composables/useForm.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'
 import AppColorSelector from '@/components/AppColorSelector.vue'
 import AppIconSelector from '@/components/AppIconSelector.vue'
+import { isModerator } from '@/composables/useAuthStore.ts'
+import AppModerationForm from '@/components/AppModerationForm.vue'
 
 const form = useForm()
 const route = useRoute()
 const router = useRouter()
 const courseStore = useCourseStore()
 const message = useMessage()
+const course = ref<Course>()
 
 const isCreating = String(route.name).endsWith('create')
 
 defineExpose<PageExpose>({
   title: isCreating ? 'Создание курса' : 'Редактирование курса',
-  back: router.resolve({ name: 'my.courses' }),
+  back: router.resolve({ name: 'courses' }),
 })
 
 const formRef = ref<FormInst>()
@@ -150,19 +160,23 @@ const onSubmit = () => {
 
     message.success('Курс успешно создан')
     clearForm()
-    await router.push({ name: 'my.courses' })
+    await router.push({ name: 'courses' })
   }, async () => {
     console.log('NOT IMPLEMENTED')
   })
 }
 
-// const setForm = () => {
-//   formValue.first_name = me.value?.first_name || null
-//   formValue.last_name = me.value?.last_name || null
-//   formValue.email = me.value?.email || null
-// }
-
 onMounted(() => {
-  // setForm()
+  if (!isCreating) {
+    courseStore
+      .getCourseByUuid(route.params.uuid as string)
+      .then(data => {
+        course.value = data.data
+        formValue.name = data.data.name
+        formValue.description = data.data.description
+        formValue.color = data.data.color
+        formValue.icon = data.data.icon
+      })
+  }
 })
 </script>

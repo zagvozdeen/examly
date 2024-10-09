@@ -3,6 +3,7 @@ package store
 import (
 	"errors"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rs/zerolog"
 )
 
 var (
@@ -20,11 +21,11 @@ type Storage struct {
 	UserAnswersStore  UserAnswersStore
 }
 
-func NewStorage(conn *pgxpool.Pool) Storage {
+func NewStorage(conn *pgxpool.Pool, log zerolog.Logger) Storage {
 	return Storage{
 		UsersStore:        &UserStore{conn},
-		CoursesStore:      &CourseStore{conn},
-		ModulesStore:      &ModuleStore{conn},
+		CoursesStore:      &CourseStore{conn, log},
+		ModulesStore:      &ModuleStore{conn, log},
 		QuestionsStore:    &QuestionStore{conn},
 		FilesStore:        &FileStore{conn},
 		TestSessionsStore: &TestSessionStore{conn},

@@ -115,9 +115,9 @@ func (_c *MockModulesStore_Delete_Call) RunAndReturn(run func(context.Context, *
 	return _c
 }
 
-// Get provides a mock function with given fields: ctx
-func (_m *MockModulesStore) Get(ctx context.Context) ([]Module, error) {
-	ret := _m.Called(ctx)
+// Get provides a mock function with given fields: ctx, filter
+func (_m *MockModulesStore) Get(ctx context.Context, filter GetModulesFilter) ([]Module, error) {
+	ret := _m.Called(ctx, filter)
 
 	if len(ret) == 0 {
 		panic("no return value specified for Get")
@@ -125,19 +125,19 @@ func (_m *MockModulesStore) Get(ctx context.Context) ([]Module, error) {
 
 	var r0 []Module
 	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context) ([]Module, error)); ok {
-		return rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, GetModulesFilter) ([]Module, error)); ok {
+		return rf(ctx, filter)
 	}
-	if rf, ok := ret.Get(0).(func(context.Context) []Module); ok {
-		r0 = rf(ctx)
+	if rf, ok := ret.Get(0).(func(context.Context, GetModulesFilter) []Module); ok {
+		r0 = rf(ctx, filter)
 	} else {
 		if ret.Get(0) != nil {
 			r0 = ret.Get(0).([]Module)
 		}
 	}
 
-	if rf, ok := ret.Get(1).(func(context.Context) error); ok {
-		r1 = rf(ctx)
+	if rf, ok := ret.Get(1).(func(context.Context, GetModulesFilter) error); ok {
+		r1 = rf(ctx, filter)
 	} else {
 		r1 = ret.Error(1)
 	}
@@ -152,13 +152,14 @@ type MockModulesStore_Get_Call struct {
 
 // Get is a helper method to define mock.On call
 //   - ctx context.Context
-func (_e *MockModulesStore_Expecter) Get(ctx interface{}) *MockModulesStore_Get_Call {
-	return &MockModulesStore_Get_Call{Call: _e.mock.On("Get", ctx)}
+//   - filter GetModulesFilter
+func (_e *MockModulesStore_Expecter) Get(ctx interface{}, filter interface{}) *MockModulesStore_Get_Call {
+	return &MockModulesStore_Get_Call{Call: _e.mock.On("Get", ctx, filter)}
 }
 
-func (_c *MockModulesStore_Get_Call) Run(run func(ctx context.Context)) *MockModulesStore_Get_Call {
+func (_c *MockModulesStore_Get_Call) Run(run func(ctx context.Context, filter GetModulesFilter)) *MockModulesStore_Get_Call {
 	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context))
+		run(args[0].(context.Context), args[1].(GetModulesFilter))
 	})
 	return _c
 }
@@ -168,66 +169,7 @@ func (_c *MockModulesStore_Get_Call) Return(_a0 []Module, _a1 error) *MockModule
 	return _c
 }
 
-func (_c *MockModulesStore_Get_Call) RunAndReturn(run func(context.Context) ([]Module, error)) *MockModulesStore_Get_Call {
-	_c.Call.Return(run)
-	return _c
-}
-
-// GetByCreatedBy provides a mock function with given fields: ctx, id
-func (_m *MockModulesStore) GetByCreatedBy(ctx context.Context, id int) ([]Module, error) {
-	ret := _m.Called(ctx, id)
-
-	if len(ret) == 0 {
-		panic("no return value specified for GetByCreatedBy")
-	}
-
-	var r0 []Module
-	var r1 error
-	if rf, ok := ret.Get(0).(func(context.Context, int) ([]Module, error)); ok {
-		return rf(ctx, id)
-	}
-	if rf, ok := ret.Get(0).(func(context.Context, int) []Module); ok {
-		r0 = rf(ctx, id)
-	} else {
-		if ret.Get(0) != nil {
-			r0 = ret.Get(0).([]Module)
-		}
-	}
-
-	if rf, ok := ret.Get(1).(func(context.Context, int) error); ok {
-		r1 = rf(ctx, id)
-	} else {
-		r1 = ret.Error(1)
-	}
-
-	return r0, r1
-}
-
-// MockModulesStore_GetByCreatedBy_Call is a *mock.Call that shadows Run/Return methods with type explicit version for method 'GetByCreatedBy'
-type MockModulesStore_GetByCreatedBy_Call struct {
-	*mock.Call
-}
-
-// GetByCreatedBy is a helper method to define mock.On call
-//   - ctx context.Context
-//   - id int
-func (_e *MockModulesStore_Expecter) GetByCreatedBy(ctx interface{}, id interface{}) *MockModulesStore_GetByCreatedBy_Call {
-	return &MockModulesStore_GetByCreatedBy_Call{Call: _e.mock.On("GetByCreatedBy", ctx, id)}
-}
-
-func (_c *MockModulesStore_GetByCreatedBy_Call) Run(run func(ctx context.Context, id int)) *MockModulesStore_GetByCreatedBy_Call {
-	_c.Call.Run(func(args mock.Arguments) {
-		run(args[0].(context.Context), args[1].(int))
-	})
-	return _c
-}
-
-func (_c *MockModulesStore_GetByCreatedBy_Call) Return(_a0 []Module, _a1 error) *MockModulesStore_GetByCreatedBy_Call {
-	_c.Call.Return(_a0, _a1)
-	return _c
-}
-
-func (_c *MockModulesStore_GetByCreatedBy_Call) RunAndReturn(run func(context.Context, int) ([]Module, error)) *MockModulesStore_GetByCreatedBy_Call {
+func (_c *MockModulesStore_Get_Call) RunAndReturn(run func(context.Context, GetModulesFilter) ([]Module, error)) *MockModulesStore_Get_Call {
 	_c.Call.Return(run)
 	return _c
 }

@@ -8,38 +8,68 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/guregu/null/v5"
 	"net/http"
+	"slices"
 	"strconv"
 	"time"
 )
 
 func (app *Application) getModules(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Query().Has("created_by") {
-		id, err := strconv.Atoi(r.URL.Query().Get("created_by"))
+	var filter store.GetModulesFilter
+	user := getUserFromRequest(r)
+	ctx := r.Context()
+	query := r.URL.Query()
+
+	if query.Has("created_by") {
+		id, err := strconv.Atoi(query.Get("created_by"))
 		if err != nil {
 			app.badRequestResponse(w, r, err)
 			return
 		}
-		user := getUserFromRequest(r)
 		if id != user.ID && user.Role.Level() < enum.ModeratorRole.Level() {
 			app.forbiddenErrorResponse(w, r, errors.New("forbidden"))
 			return
 		}
-		modules, err := app.store.ModulesStore.GetByCreatedBy(r.Context(), id)
+		filter.CreatedBy = id
+	}
+	if query.Has("or_created_by") {
+		id, err := strconv.Atoi(query.Get("or_created_by"))
+		if err != nil {
+			app.badRequestResponse(w, r, err)
+			return
+		}
+		if id != user.ID && user.Role.Level() < enum.ModeratorRole.Level() {
+			app.forbiddenErrorResponse(w, r, errors.New("forbidden"))
+			return
+		}
+		filter.OrCreatedBy = id
+	}
+
+	modules, err := app.store.ModulesStore.Get(ctx, filter)
+	if err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	if filter.CreatedBy != 0 {
+		ids := make([]any, 0, len(modules))
+		for _, module := range modules {
+			if !slices.Contains(ids, any(module.ID)) {
+				ids = append(ids, module.CourseID)
+			}
+		}
+		courses, err := app.store.CoursesStore.GetByIDs(ctx, ids)
 		if err != nil {
 			app.internalServerError(w, r, err)
 			return
 		}
-
-		app.jsonResponse(w, r, http.StatusOK, map[string]any{
-			"data": modules,
-		})
-		return
-	}
-
-	modules, err := app.store.ModulesStore.Get(r.Context())
-	if err != nil {
-		app.internalServerError(w, r, err)
-		return
+		m := make(map[int]store.Course, len(courses))
+		for _, course := range courses {
+			m[course.ID] = course
+		}
+		for i, module := range modules {
+			mod, valid := m[module.CourseID]
+			modules[i].Course = null.NewValue(mod, valid)
+		}
 	}
 
 	app.jsonResponse(w, r, http.StatusOK, map[string]any{

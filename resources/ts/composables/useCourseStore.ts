@@ -1,10 +1,16 @@
 import { useKy } from '@/composables/useKy.ts'
 import { Course, CourseStats, UserCourse, UserQuestion } from '@/types.ts'
 
+interface GetParams {
+  created_by?: number
+  or_created_by?: number
+  all?: boolean
+}
+
 export const useCourseStore = () => {
   const ky = useKy()
 
-  const getCourses = (params: object) => {
+  const getCourses = (params: GetParams) => {
     return ky
       .get('courses', { searchParams: params as Record<string, string> })
       .json<{ data: Course[] }>()
@@ -31,6 +37,12 @@ export const useCourseStore = () => {
   const createCourse = (json: object) => {
     return ky
       .post('courses', { json })
+      .json()
+  }
+
+  const moderateCourse = (uuid: string, json: object) => {
+    return ky
+      .patch(`courses/${uuid}/moderate`, { json })
       .json()
   }
 
@@ -63,6 +75,7 @@ export const useCourseStore = () => {
     getCourseByUuid,
     getUserCourseByUuid,
     createCourse,
+    moderateCourse,
     createMarathon,
     createExam,
     checkAnswer,

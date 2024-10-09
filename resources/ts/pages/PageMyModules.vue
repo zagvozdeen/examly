@@ -7,7 +7,7 @@
     </span>
 
     <router-link
-      :to="{ name: 'my.modules.create' }"
+      :to="{ name: 'modules.create' }"
       class="sm:self-center"
     >
       <n-button
@@ -36,7 +36,7 @@
         >
           <td>{{ module.name }}</td>
           <td>{{ module.course?.name }}</td>
-          <td>{{ CourseStatusTranslates[module.status] }}</td>
+          <td>{{ StatusTranslates[module.status] }}</td>
         </tr>
       </tbody>
     </n-table>
@@ -51,7 +51,7 @@
 import { NTable, NButton } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { CourseStatusTranslates, Module, PageExpose } from '@/types.ts'
+import { StatusTranslates, Module, PageExpose } from '@/types.ts'
 import { useModuleStore } from '@/composables/useModuleStore.ts'
 import { me } from '@/composables/useAuthStore.ts'
 

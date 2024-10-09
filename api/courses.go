@@ -16,6 +16,8 @@ func (app *Application) getCourses(w http.ResponseWriter, r *http.Request) {
 	var filter store.GetCoursesFilter
 	query := r.URL.Query()
 	user := getUserFromRequest(r)
+	ctx := r.Context()
+
 	if query.Has("created_by") {
 		id, err := strconv.Atoi(query.Get("created_by"))
 		if err != nil {
@@ -28,30 +30,27 @@ func (app *Application) getCourses(w http.ResponseWriter, r *http.Request) {
 		}
 		filter.CreatedBy = id
 	}
-	if query.Has("trashed") {
-		if ok := app.checkRole(w, r, enum.ModeratorRole); !ok {
-			return
-		}
-		trashed, err := strconv.ParseBool(query.Get("trashed"))
+	if query.Has("or_created_by") {
+		id, err := strconv.Atoi(query.Get("or_created_by"))
 		if err != nil {
 			app.badRequestResponse(w, r, err)
 			return
 		}
-		filter.Trashed = trashed
-	}
-	if query.Has("statuses") {
-		statuses := query["statuses"]
-		filter.Statuses = make([]any, len(statuses))
-		for i, status := range statuses {
-			if _, err := enum.NewStatus(status); err != nil {
-				app.badRequestResponse(w, r, errors.New("invalid status"))
-				return
-			}
-			filter.Statuses[i] = status
+		if id != user.ID && user.Role.Level() < enum.ModeratorRole.Level() {
+			app.forbiddenErrorResponse(w, r, errors.New("forbidden"))
+			return
 		}
+		filter.OrCreatedBy = id
+	}
+	if query.Has("all") {
+		if user.Role.Level() < enum.ModeratorRole.Level() {
+			app.forbiddenErrorResponse(w, r, errors.New("forbidden"))
+			return
+		}
+		filter.All = true
 	}
 
-	courses, err := app.store.CoursesStore.Get(r.Context(), filter)
+	courses, err := app.store.CoursesStore.Get(ctx, filter)
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return
@@ -145,7 +144,7 @@ func (app *Application) getCourse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	app.jsonResponse(w, r, http.StatusOK, map[string]any{
-		"course":    course,
+		"data":      course,
 		"questions": questions,
 	})
 }

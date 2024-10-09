@@ -35,7 +35,7 @@ func main() {
 	}
 	logger.Info().Msg("Successfully connected to PostgreSQL")
 
-	storage := store.NewStorage(conn)
+	storage := store.NewStorage(conn, logger)
 
 	app := api.NewApplication(logger, cfg, storage)
 

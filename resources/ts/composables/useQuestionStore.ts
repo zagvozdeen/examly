@@ -1,12 +1,16 @@
 import { useKy } from '@/composables/useKy.ts'
 import { Question } from '@/types.ts'
 
+interface GetParams {
+  created_by?: number
+}
+
 export const useQuestionStore = () => {
   const ky = useKy()
 
-  const getMyQuestions = () => {
+  const getQuestions = (params: GetParams) => {
     return ky
-      .get('my-questions')
+      .get('questions', { searchParams: params as Record<string, string> })
       .json<{data: Question[]}>()
   }
 
@@ -29,7 +33,7 @@ export const useQuestionStore = () => {
   }
 
   return {
-    getMyQuestions,
+    getQuestions,
     createQuestion,
     getQuestionByUuid,
     importQuestions,

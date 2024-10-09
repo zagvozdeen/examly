@@ -68,8 +68,10 @@ func (app *Application) createQuestion(w http.ResponseWriter, r *http.Request) {
 
 	user := getUserFromRequest(r)
 
+	correct := false
 	var options store.Options
 	for _, answer := range payload.Answers {
+		correct = correct || answer.IsCorrect
 		options = append(options, store.Option{
 			ID:        answer.ID,
 			Content:   answer.Content,
@@ -77,15 +79,20 @@ func (app *Application) createQuestion(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
+	if !correct {
+		app.badRequestResponse(w, r, errors.New("at least one answer should be correct"))
+		return
+	}
+
 	question := &store.Question{
 		UUID:        uid.String(),
 		Title:       payload.Title,
-		Content:     null.StringFrom(payload.Content),
-		Explanation: null.StringFrom(payload.Explanation),
+		Content:     null.NewString(payload.Content, payload.Content != ""),
+		Explanation: null.NewString(payload.Explanation, payload.Explanation != ""),
 		Type:        t,
 		Status:      enum.CreatedStatus,
 		CourseID:    payload.CourseID,
-		ModuleID:    null.IntFrom(int64(payload.ModuleID)),
+		ModuleID:    null.NewInt(int64(payload.ModuleID), payload.ModuleID != 0),
 		CreatedBy:   user.ID,
 		Options:     options,
 		CreatedAt:   time.Now(),
@@ -195,13 +202,20 @@ func (app *Application) updateQuestion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	correct := false
 	var options store.Options
 	for _, answer := range payload.Answers {
+		correct = correct || answer.IsCorrect
 		options = append(options, store.Option{
 			ID:        answer.ID,
 			Content:   answer.Content,
 			IsCorrect: answer.IsCorrect,
 		})
+	}
+
+	if !correct {
+		app.badRequestResponse(w, r, errors.New("at least one answer should be correct"))
+		return
 	}
 
 	nextQuestion := &store.Question{

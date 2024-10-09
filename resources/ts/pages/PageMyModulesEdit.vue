@@ -51,6 +51,7 @@ import { Course, PageExpose } from '@/types.ts'
 import { useForm } from '@/composables/useForm.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'
 import { useModuleStore } from '@/composables/useModuleStore.ts'
+import { me } from '@/composables/useAuthStore.ts'
 
 const form = useForm()
 const route = useRoute()
@@ -63,7 +64,7 @@ const isCreating = String(route.name).endsWith('create')
 
 defineExpose<PageExpose>({
   title: isCreating ? 'Создание модуля' : 'Редактирование модуля',
-  back: router.resolve({ name: 'my.modules' }),
+  back: router.resolve({ name: 'modules' }),
 })
 
 const formRef = ref<FormInst>()
@@ -100,7 +101,7 @@ const onSubmit = () => {
 
     message.success('Модуль успешно создан')
     clearForm()
-    await router.push({ name: 'my.modules' })
+    await router.push({ name: 'modules' })
   }, async () => {
     console.log('NOT IMPLEMENTED')
   })
@@ -109,7 +110,9 @@ const onSubmit = () => {
 
 onMounted(() => {
   courseStore
-    .getAllCourses()
+    .getCourses({
+      or_created_by: me.value?.id,
+    })
     .then(data => {
       courses.value = data.data
     })

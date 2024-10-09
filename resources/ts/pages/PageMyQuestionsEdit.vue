@@ -69,10 +69,10 @@
 
       <n-form-item
         label="Вопрос"
-        path="content"
+        path="title"
       >
         <n-input
-          v-model:value="formValue.content"
+          v-model:value="formValue.title"
           placeholder="Задайте вопрос"
           type="textarea"
           :rows="2"
@@ -81,7 +81,7 @@
 
       <n-form-item
         label="Варианты ответа"
-        path="content"
+        path="answers"
       >
         <div class="flex flex-col gap-2 w-full">
           <template
@@ -90,13 +90,13 @@
           >
             <div class="flex items-center gap-3">
               <n-checkbox
-                v-if="formValue.type === QuestionType.MultiplyAnswersType"
-                v-model:checked="answer.is_true"
+                v-if="formValue.type === QuestionType.MultipleChoice"
+                v-model:checked="answer.is_correct"
                 tabindex="-1"
               />
               <n-radio
-                v-if="formValue.type === QuestionType.OneAnswerType"
-                :checked="answer.is_true"
+                v-if="formValue.type === QuestionType.SingleChoice"
+                :checked="answer.is_correct"
                 name="questions-radio-button"
                 :value="answer.id"
                 tabindex="-1"
@@ -166,6 +166,7 @@ import { useModuleStore } from '@/composables/useModuleStore.ts'
 import { useQuestionStore } from '@/composables/useQuestionStore.ts'
 import AppAnswerInput from '@/components/AppAnswerInput.vue'
 import AppUploadFile from '@/components/AppUploadFile.vue'
+import { me } from '@/composables/useAuthStore.ts'
 
 const form = useForm()
 const route = useRoute()
@@ -179,7 +180,7 @@ const isCreating = String(route.name).endsWith('create')
 
 defineExpose<PageExpose>({
   title: isCreating ? 'Создание вопроса' : 'Редактирование вопроса',
-  back: router.resolve({ name: 'my.questions' }),
+  back: router.resolve({ name: 'questions' }),
 })
 
 const answerCreator = (start: number = 1) => {
@@ -188,7 +189,7 @@ const answerCreator = (start: number = 1) => {
   return () => ({
     id: id++,
     content: null,
-    is_true: false,
+    is_correct: false,
   })
 }
 
@@ -199,12 +200,13 @@ const formValue = reactive({
   course_id: null as number | null,
   module_id: null as number | null,
   file_id: null as number | null,
+  title: null as string | null,
   content: null as string | null,
-  type: QuestionType.OneAnswerType,
+  type: QuestionType.SingleChoice,
   answers: [createAnswer(), createAnswer()] as Array<{
     id: number
     content: string | null
-    is_true: boolean
+    is_correct: boolean
   }>,
   explanation: null as string | null,
 })
@@ -219,7 +221,7 @@ const formRules: FormRules = {
     type: 'string',
     message: 'Выберите количество правильных ответов',
   },
-  content: {
+  title: {
     required: true,
     type: 'string',
     message: 'Введите вопрос',
@@ -247,10 +249,11 @@ const typesOptions = Object
   }))
 
 const clearForm = () => {
+  formValue.title = null
   formValue.content = null
   formValue.file_id = null
   formValue.explanation = null
-  formValue.type = QuestionType.OneAnswerType
+  formValue.type = QuestionType.SingleChoice
   formValue.answers = [
     createAnswer(),
     createAnswer(),
@@ -262,6 +265,7 @@ const onSubmit = () => {
     course_id: formValue.course_id,
     module_id: formValue.module_id,
     file_id: formValue.file_id,
+    title: formValue.title,
     content: formValue.content,
     type: formValue.type,
     answers: formValue.answers.filter(answer => answer.content),
@@ -289,7 +293,7 @@ const onSecondToLastUpdated = () => {
 const onChange = (id: number) => {
   formValue.answers
     .forEach(answer => {
-      answer.is_true = answer.id === id
+      answer.is_correct = answer.id === id
     })
 }
 
@@ -300,19 +304,23 @@ watch(() => formValue.course_id, () => {
 watch(() => formValue.type, () => {
   formValue.answers
     .forEach(answer => {
-      answer.is_true = false
+      answer.is_correct = false
     })
 })
 
 onMounted(() => {
   courseStore
-    .getAllCourses()
+    .getCourses({
+      or_created_by: me.value?.id,
+    })
     .then(data => {
       courses.value = data.data
     })
 
   moduleStore
-    .getAllModules()
+    .getModules({
+      or_created_by: me.value?.id,
+    })
     .then(data => {
       modules.value = data.data
     })

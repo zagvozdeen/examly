@@ -49,3 +49,7 @@ func (u *QuestionType) Scan(src any) error {
 func (u QuestionType) Value() (driver.Value, error) {
 	return u.String(), nil
 }
+
+func (u QuestionType) MarshalJSON() ([]byte, error) {
+	return []byte("\"" + u.String() + "\""), nil
+}

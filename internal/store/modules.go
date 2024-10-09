@@ -3,10 +3,12 @@ package store
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/den4ik117/examly/internal/enum"
 	"github.com/guregu/null/v5"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rs/zerolog"
 	"time"
 )
 
@@ -26,9 +28,8 @@ type Module struct {
 }
 
 type ModulesStore interface {
-	Get(ctx context.Context) ([]Module, error)
+	Get(ctx context.Context, filter GetModulesFilter) ([]Module, error)
 	GetByUUID(ctx context.Context, uuid string) (Module, error)
-	GetByCreatedBy(ctx context.Context, id int) ([]Module, error)
 	Create(ctx context.Context, module *Module) error
 	Update(ctx context.Context, module *Module) error
 	UpdateStatus(ctx context.Context, module *Module) error
@@ -37,13 +38,32 @@ type ModulesStore interface {
 
 type ModuleStore struct {
 	conn *pgxpool.Pool
+	log  zerolog.Logger
 }
 
-func (s *ModuleStore) Get(ctx context.Context) (modules []Module, err error) {
-	rows, err := s.conn.Query(
-		ctx,
-		"SELECT id, uuid, name, status, course_id, created_by, deleted_at, created_at, updated_at FROM modules WHERE deleted_at IS NULL",
-	)
+type GetModulesFilter struct {
+	CreatedBy   int
+	OrCreatedBy int
+}
+
+func (s *ModuleStore) Get(ctx context.Context, filter GetModulesFilter) (modules []Module, err error) {
+	var sql string
+	var params []any
+
+	if filter.CreatedBy != 0 {
+		sql = "SELECT id, uuid, name, status, course_id, created_by, deleted_at, created_at, updated_at FROM modules WHERE created_by = $1 AND deleted_at IS NULL"
+		params = []any{filter.CreatedBy}
+	} else if filter.OrCreatedBy != 0 {
+		sql = "SELECT id, uuid, name, status, course_id, created_by, deleted_at, created_at, updated_at FROM modules WHERE (created_by = $1 OR status = $2) AND deleted_at IS NULL"
+		params = []any{filter.OrCreatedBy, enum.ActiveStatus.String()}
+	} else {
+		sql = "SELECT id, uuid, name, status, course_id, created_by, deleted_at, created_at, updated_at FROM modules WHERE status = $1 AND deleted_at IS NULL"
+		params = []any{enum.ActiveStatus.String()}
+	}
+
+	s.log.Trace().Str("sql", sql).Str("params", fmt.Sprintf("%v", params)).Msg("Query")
+
+	rows, err := s.conn.Query(ctx, sql, params...)
 	if err != nil {
 		return nil, err
 	}
@@ -92,39 +112,6 @@ func (s *ModuleStore) GetByUUID(ctx context.Context, uuid string) (module Module
 	}
 
 	return
-}
-
-func (s *ModuleStore) GetByCreatedBy(ctx context.Context, id int) (modules []Module, err error) {
-	rows, err := s.conn.Query(
-		ctx,
-		"SELECT id, uuid, name, status, course_id, created_by, deleted_at, created_at, updated_at FROM modules WHERE created_by = $1 AND deleted_at IS NULL",
-		id,
-	)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var module Module
-		err = rows.Scan(
-			&module.ID,
-			&module.UUID,
-			&module.Name,
-			&module.Status,
-			&module.CourseID,
-			&module.CreatedBy,
-			&module.DeletedAt,
-			&module.CreatedAt,
-			&module.UpdatedAt,
-		)
-		if err != nil {
-			return nil, err
-		}
-		modules = append(modules, module)
-	}
-
-	return modules, nil
 }
 
 func (s *ModuleStore) Create(ctx context.Context, module *Module) error {
