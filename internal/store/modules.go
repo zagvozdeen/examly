@@ -28,6 +28,7 @@ type Module struct {
 type ModulesStore interface {
 	Get(ctx context.Context) ([]Module, error)
 	GetByUUID(ctx context.Context, uuid string) (Module, error)
+	GetByCreatedBy(ctx context.Context, id int) ([]Module, error)
 	Create(ctx context.Context, module *Module) error
 	Update(ctx context.Context, module *Module) error
 	UpdateStatus(ctx context.Context, module *Module) error
@@ -91,6 +92,39 @@ func (s *ModuleStore) GetByUUID(ctx context.Context, uuid string) (module Module
 	}
 
 	return
+}
+
+func (s *ModuleStore) GetByCreatedBy(ctx context.Context, id int) (modules []Module, err error) {
+	rows, err := s.conn.Query(
+		ctx,
+		"SELECT id, uuid, name, status, course_id, created_by, deleted_at, created_at, updated_at FROM modules WHERE created_by = $1 AND deleted_at IS NULL",
+		id,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var module Module
+		err = rows.Scan(
+			&module.ID,
+			&module.UUID,
+			&module.Name,
+			&module.Status,
+			&module.CourseID,
+			&module.CreatedBy,
+			&module.DeletedAt,
+			&module.CreatedAt,
+			&module.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		modules = append(modules, module)
+	}
+
+	return modules, nil
 }
 
 func (s *ModuleStore) Create(ctx context.Context, module *Module) error {

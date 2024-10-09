@@ -50,7 +50,7 @@ func (app *Application) Mount() *mux.Router {
 	authRouter.Use(app.authMiddleware)
 
 	authRouter.HandleFunc("/me", app.getCurrentUser).Methods("GET")
-	authRouter.HandleFunc("/me", app.getCurrentUser).Methods("PATCH")
+	authRouter.HandleFunc("/me", app.updateCurrentUser).Methods("PATCH")
 
 	authRouter.HandleFunc("/courses", app.getCourses).Methods("GET")
 	authRouter.HandleFunc("/courses", app.createCourse).Methods("POST")

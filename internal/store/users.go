@@ -16,6 +16,7 @@ type User struct {
 	Email     null.String   `json:"email"`
 	FirstName null.String   `json:"first_name"`
 	LastName  null.String   `json:"last_name"`
+	FullName  null.String   `json:"full_name"`
 	Role      enum.UserRole `json:"role"`
 	Password  null.String   `json:"-"`
 	AvatarID  null.Int      `json:"avatar_id"`
@@ -145,6 +146,5 @@ func (s *UserStore) Update(ctx context.Context, user *User) error {
 		user.UpdatedAt,
 		user.ID,
 	)
-
 	return err
 }

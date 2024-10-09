@@ -16,8 +16,8 @@ func (app *Application) getCourses(w http.ResponseWriter, r *http.Request) {
 	var filter store.GetCoursesFilter
 	query := r.URL.Query()
 	user := getUserFromRequest(r)
-	if query.Has("user_id") {
-		id, err := strconv.Atoi(query.Get("user_id"))
+	if query.Has("created_by") {
+		id, err := strconv.Atoi(query.Get("created_by"))
 		if err != nil {
 			app.badRequestResponse(w, r, err)
 			return
@@ -26,7 +26,7 @@ func (app *Application) getCourses(w http.ResponseWriter, r *http.Request) {
 			app.forbiddenErrorResponse(w, r, errors.New("forbidden"))
 			return
 		}
-		filter.UserID = id
+		filter.CreatedBy = id
 	}
 	if query.Has("trashed") {
 		if ok := app.checkRole(w, r, enum.ModeratorRole); !ok {
@@ -91,6 +91,9 @@ func (app *Application) createCourse(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ctx := r.Context()
+	user := getUserFromRequest(r)
+
 	course := &store.Course{
 		UUID:        uid.String(),
 		Name:        payload.Name,
@@ -98,9 +101,8 @@ func (app *Application) createCourse(w http.ResponseWriter, r *http.Request) {
 		Color:       payload.Color,
 		Icon:        payload.Icon,
 		Status:      enum.CreatedStatus,
+		CreatedBy:   user.ID,
 	}
-
-	ctx := r.Context()
 
 	if err := app.store.CoursesStore.Create(ctx, course); err != nil {
 		app.internalServerError(w, r, err)

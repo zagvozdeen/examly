@@ -46,9 +46,9 @@
       class="text-center text-gray-400"
     >Пока ничего</span>
 
-    <n-button @click="handleExportCourses">
-      Экспортировать курсы
-    </n-button>
+    <!--    <n-button @click="handleExportCourses">-->
+    <!--      Экспортировать курсы-->
+    <!--    </n-button>-->
 
     <a
       v-if="filePath"
@@ -66,6 +66,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { Course, CourseStatusTranslates, PageExpose } from '@/types.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'
+import { me } from '@/composables/useAuthStore.ts'
 
 const router = useRouter()
 const courseStore = useCourseStore()
@@ -88,7 +89,9 @@ const handleExportCourses = () => {
 
 onMounted(() => {
   courseStore
-    .getMyCourses()
+    .getCourses({
+      'created_by': me.value?.id,
+    })
     .then(data => {
       courses.value = data.data
     })

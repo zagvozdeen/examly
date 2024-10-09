@@ -1,6 +1,7 @@
 package api
 
 import (
+	"fmt"
 	"github.com/den4ik117/examly/internal/enum"
 	"github.com/guregu/null/v5"
 	"net/http"
@@ -8,6 +9,10 @@ import (
 
 func (app *Application) getCurrentUser(w http.ResponseWriter, r *http.Request) {
 	user := getUserFromRequest(r)
+
+	if user.Role.Level() > enum.GuestRole.Level() {
+		user.FullName = null.StringFrom(fmt.Sprintf("%s %s", user.LastName.String, user.FirstName.String))
+	}
 
 	app.jsonResponse(w, r, http.StatusOK, map[string]any{
 		"data": user,
@@ -35,6 +40,7 @@ func (app *Application) updateCurrentUser(w http.ResponseWriter, r *http.Request
 	user.FirstName = null.StringFrom(payload.FirstName)
 	user.LastName = null.StringFrom(payload.LastName)
 	user.Email = null.StringFrom(payload.Email)
+	user.FullName = null.StringFrom(fmt.Sprintf("%s %s", user.LastName.String, user.FirstName.String))
 
 	err := app.store.UsersStore.Update(r.Context(), &user)
 	if err != nil {

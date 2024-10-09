@@ -91,7 +91,7 @@ func (app *Application) login(w http.ResponseWriter, r *http.Request) {
 	user, err := app.store.UsersStore.GetByEmail(r.Context(), payload.Email)
 	if err != nil {
 		if errors.Is(err, store.ErrNotFound) {
-			app.unauthorizedErrorResponse(w, r, errors.New("invalid email or password"))
+			app.badRequestResponse(w, r, errors.New("invalid email or password"))
 		} else {
 			app.internalServerError(w, r, err)
 		}
@@ -100,7 +100,7 @@ func (app *Application) login(w http.ResponseWriter, r *http.Request) {
 
 	err = bcrypt.CompareHashAndPassword([]byte(user.Password.String), []byte(payload.Password))
 	if err != nil {
-		app.unauthorizedErrorResponse(w, r, errors.New("invalid email or password"))
+		app.badRequestResponse(w, r, errors.New("invalid email or password"))
 		return
 	}
 

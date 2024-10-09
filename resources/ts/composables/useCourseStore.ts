@@ -4,21 +4,9 @@ import { Course, CourseStats, UserCourse, UserQuestion } from '@/types.ts'
 export const useCourseStore = () => {
   const ky = useKy()
 
-  const getCourses = () => {
+  const getCourses = (params: object) => {
     return ky
-      .get('courses')
-      .json<{ data: Course[] }>()
-  }
-
-  const getMyCourses = () => {
-    return ky
-      .get('my-courses')
-      .json<{ data: Course[] }>()
-  }
-
-  const getAllCourses = () => {
-    return ky
-      .get('all-courses')
+      .get('courses', { searchParams: params as Record<string, string> })
       .json<{ data: Course[] }>()
   }
 
@@ -72,8 +60,6 @@ export const useCourseStore = () => {
 
   return {
     getCourses,
-    getMyCourses,
-    getAllCourses,
     getCourseByUuid,
     getUserCourseByUuid,
     createCourse,

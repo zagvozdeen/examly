@@ -6,17 +6,17 @@ export interface PageExpose {
 }
 
 export enum UserRole {
-  AdminRole = 'ADMIN',
-  ManagerRole = 'MANAGER',
-  SimpleUserRole = 'USER',
-  GuestRole = 'GUEST',
+  Guest = 'guest',
+  Member = 'member',
+  Moderator = 'moderator',
+  Admin = 'admin',
 }
 
 export const UserRoleTranslates: Record<UserRole, string> = {
-  [UserRole.AdminRole]: 'Администратор',
-  [UserRole.ManagerRole]: 'Модератор',
-  [UserRole.SimpleUserRole]: 'Пользователь',
-  [UserRole.GuestRole]: 'Гость',
+  [UserRole.Guest]: 'Гость',
+  [UserRole.Member]: 'Пользователь',
+  [UserRole.Moderator]: 'Модератор',
+  [UserRole.Admin]: 'Администратор',
 }
 
 export interface User {
@@ -31,16 +31,16 @@ export interface User {
   updated_at: string
 }
 
-export enum CourseStatus {
-  New = 'NEW',
-  Active = 'ACTIVE',
-  Inactive = 'INACTIVE',
+export enum Status {
+  Created = 'created',
+  Active = 'active',
+  Inactive = 'inactive',
 }
 
-export const CourseStatusTranslates: Record<CourseStatus, string> = {
-  [CourseStatus.New]: 'Новый',
-  [CourseStatus.Active]: 'Активен',
-  [CourseStatus.Inactive]: 'Неактивен',
+export const CourseStatusTranslates: Record<Status, string> = {
+  [Status.Created]: 'Новый',
+  [Status.Active]: 'Активен',
+  [Status.Inactive]: 'Неактивен',
 }
 
 export interface Course {
@@ -50,7 +50,7 @@ export interface Course {
   description: string | null
   color: string
   icon: string
-  status: CourseStatus
+  status: Status
   user_id: number
   created_at: string
   updated_at: string
@@ -73,7 +73,7 @@ export interface Module {
   id: number
   uuid: string
   name: string
-  status: CourseStatus
+  status: Status
   course_id: number
   user_id: number
   created_at: string
@@ -82,15 +82,15 @@ export interface Module {
 }
 
 export enum QuestionType {
-  OneAnswerType = 'ONE_ANSWER',
-  MultiplyAnswersType = 'MULTIPLY_ANSWERS',
-  InputType = 'INPUT',
+  SingleChoice = 'single_choice',
+  MultipleChoice = 'multiple_choice',
+  Plaintext = 'plaintext',
 }
 
 export const QuestionTypeTranslates: Record<QuestionType, string> = {
-  [QuestionType.OneAnswerType]: 'Один ответ',
-  [QuestionType.MultiplyAnswersType]: 'Несколько ответов',
-  [QuestionType.InputType]: 'Поле для ввода',
+  [QuestionType.SingleChoice]: 'Один ответ',
+  [QuestionType.MultipleChoice]: 'Несколько ответов',
+  [QuestionType.Plaintext]: 'Поле для ввода',
 }
 
 export interface Question {
@@ -98,30 +98,30 @@ export interface Question {
   uuid: string
   content: string
   type: QuestionType
-  status: CourseStatus
+  status: Status
   created_at: string
   updated_at: string
 }
 
-export enum UserCourseType {
-  MarathonUserCourseType = 'MARATHON',
-  ModuleUserCourseType = 'MODULE',
-  ErrorUserCourseType = 'ERROR',
-  ExamUserCourseType = 'EXAM',
+export enum TestSessionType {
+  Marathon = 'marathon',
+  Mistake = 'mistake',
+  Module = 'module',
+  Exam = 'exam',
 }
 
-export const UserCourseTypeTranslates: Record<UserCourseType, string> = {
-  [UserCourseType.MarathonUserCourseType]: 'Марафон',
-  [UserCourseType.ModuleUserCourseType]: 'Модуль',
-  [UserCourseType.ErrorUserCourseType]: 'Ошибки',
-  [UserCourseType.ExamUserCourseType]: 'Экзамен',
+export const TestSessionTypeTranslates: Record<TestSessionType, string> = {
+  [TestSessionType.Marathon]: 'Марафон',
+  [TestSessionType.Mistake]: 'Модуль',
+  [TestSessionType.Module]: 'Ошибки',
+  [TestSessionType.Exam]: 'Экзамен',
 }
 
 export interface UserCourse {
   id: number
   uuid: string
   name: string
-  type: UserCourseType
+  type: TestSessionType
   user_id: number
   course_id: number
   last_question_id: number | null
@@ -168,7 +168,7 @@ export interface UserAnswer {
 export interface FullCourseStats {
   id: number
   uuid: string
-  type: UserCourseType
+  type: TestSessionType
   created_at: number
   correct: number
   incorrect: number

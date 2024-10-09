@@ -53,6 +53,7 @@ import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { CourseStatusTranslates, Module, PageExpose } from '@/types.ts'
 import { useModuleStore } from '@/composables/useModuleStore.ts'
+import { me } from '@/composables/useAuthStore.ts'
 
 const router = useRouter()
 const moduleStore = useModuleStore()
@@ -66,9 +67,13 @@ defineExpose<PageExpose>({
 
 onMounted(() => {
   moduleStore
-    .getMyModules()
+    .getModules({
+      created_by: me.value?.id,
+    })
     .then(data => {
-      modules.value = data.data
+      if (data.data) {
+        modules.value = data.data
+      }
     })
 })
 </script>

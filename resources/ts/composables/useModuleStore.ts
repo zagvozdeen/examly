@@ -4,15 +4,9 @@ import { Module } from '@/types.ts'
 export const useModuleStore = () => {
   const ky = useKy()
 
-  const getMyModules = () => {
+  const getModules = (params: object) => {
     return ky
-      .get('my-modules')
-      .json<{data: Module[]}>()
-  }
-
-  const getAllModules = () => {
-    return ky
-      .get('all-modules')
+      .get('modules', { searchParams: params as Record<string, string> })
       .json<{data: Module[]}>()
   }
 
@@ -29,8 +23,7 @@ export const useModuleStore = () => {
   }
 
   return {
-    getMyModules,
-    getAllModules,
+    getModules,
     createModule,
     getModuleByUuid,
   }

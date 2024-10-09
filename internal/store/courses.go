@@ -41,9 +41,9 @@ type CourseStore struct {
 }
 
 type GetCoursesFilter struct {
-	Trashed  bool
-	Statuses []any
-	UserID   int
+	Trashed   bool
+	Statuses  []any
+	CreatedBy int
 }
 
 func (s *CourseStore) Get(ctx context.Context, filter GetCoursesFilter) (courses []Course, err error) {
@@ -51,12 +51,12 @@ func (s *CourseStore) Get(ctx context.Context, filter GetCoursesFilter) (courses
 	if !filter.Trashed {
 		b.WhereNull("deleted_at")
 	}
-	if filter.UserID != 0 && filter.Statuses != nil {
+	if filter.CreatedBy != 0 && filter.Statuses != nil {
 		b.WhereFunc(func(b *util.QueryBuilder) {
-			b.WhereIn("status", filter.Statuses).OrWhere("user_id", "=", filter.UserID)
+			b.WhereIn("status", filter.Statuses).OrWhere("user_id", "=", filter.CreatedBy)
 		})
-	} else if filter.UserID != 0 {
-		b.Where("user_id", "=", filter.UserID)
+	} else if filter.CreatedBy != 0 {
+		b.Where("created_by", "=", filter.CreatedBy)
 	}
 
 	rows, err := s.conn.Query(ctx, b.String(), b.Params()...)
