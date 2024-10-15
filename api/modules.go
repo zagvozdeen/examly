@@ -306,7 +306,7 @@ func (app *Application) moderateModule(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	module.ModerationReason = null.StringFrom(payload.ModerationReason)
+	module.ModerationReason = null.NewString(payload.ModerationReason, payload.ModerationReason != "")
 	module.ModeratedBy = null.IntFrom(int64(user.ID))
 	module.UpdatedAt = time.Now()
 	module.Status = s

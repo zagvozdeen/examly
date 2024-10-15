@@ -52,3 +52,7 @@ func (u *TestSessionType) Scan(src any) error {
 func (u TestSessionType) Value() (driver.Value, error) {
 	return u.String(), nil
 }
+
+func (u TestSessionType) MarshalJSON() ([]byte, error) {
+	return []byte("\"" + u.String() + "\""), nil
+}

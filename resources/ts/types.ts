@@ -116,6 +116,7 @@ export interface Question {
   type: QuestionType
   status: Status
   explanation: string | null
+  moderation_reason: string | null
   course_id: number
   module_id: number | null
   created_at: string

@@ -92,13 +92,13 @@ func (s *QuestionStore) Get(ctx context.Context, filter GetQuestionsFilter) (que
 
 	switch {
 	case filter.All:
-		sql = "SELECT id, uuid, title, content, explanation, moderation_reason, type, status, course_id, module_id, created_by, moderated_by, prev_question_id, next_question_id, options, deleted_at, created_at, updated_at FROM questions"
+		sql = "SELECT id, uuid, title, content, explanation, moderation_reason, type, status, course_id, module_id, created_by, moderated_by, prev_question_id, next_question_id, options, deleted_at, created_at, updated_at FROM questions ORDER BY created_at DESC"
 		params = []any{}
 	case filter.CreatedBy != 0:
-		sql = "SELECT id, uuid, title, content, explanation, moderation_reason, type, status, course_id, module_id, created_by, moderated_by, prev_question_id, next_question_id, options, deleted_at, created_at, updated_at FROM questions WHERE created_by = $1 AND deleted_at IS NULL"
+		sql = "SELECT id, uuid, title, content, explanation, moderation_reason, type, status, course_id, module_id, created_by, moderated_by, prev_question_id, next_question_id, options, deleted_at, created_at, updated_at FROM questions WHERE created_by = $1 AND deleted_at IS NULL ORDER BY created_at DESC"
 		params = []any{filter.CreatedBy}
 	default:
-		sql = "SELECT id, uuid, title, content, explanation, moderation_reason, type, status, course_id, module_id, created_by, moderated_by, prev_question_id, next_question_id, options, deleted_at, created_at, updated_at FROM questions WHERE status = $1 AND deleted_at IS NULL"
+		sql = "SELECT id, uuid, title, content, explanation, moderation_reason, type, status, course_id, module_id, created_by, moderated_by, prev_question_id, next_question_id, options, deleted_at, created_at, updated_at FROM questions WHERE status = $1 AND deleted_at IS NULL ORDER BY created_at DESC"
 		params = []any{enum.ActiveStatus.String()}
 	}
 

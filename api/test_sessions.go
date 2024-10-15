@@ -89,7 +89,9 @@ func (app *Application) createTestSession(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	app.jsonResponse(w, r, http.StatusCreated, course)
+	app.jsonResponse(w, r, http.StatusCreated, map[string]any{
+		"data": test,
+	})
 }
 
 func (app *Application) getUserStats(w http.ResponseWriter, r *http.Request) {

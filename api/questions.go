@@ -97,7 +97,7 @@ func (app *Application) createQuestion(w http.ResponseWriter, r *http.Request) {
 	correct := false
 	var options store.Options
 	for _, answer := range payload.Answers {
-		correct = correct || answer.IsCorrect
+		correct = correct || answer.IsCorrect || t == enum.PlaintextQuestionType
 		options = append(options, store.Option{
 			ID:        answer.ID,
 			Content:   answer.Content,
@@ -231,7 +231,7 @@ func (app *Application) updateQuestion(w http.ResponseWriter, r *http.Request) {
 	correct := false
 	var options store.Options
 	for _, answer := range payload.Answers {
-		correct = correct || answer.IsCorrect
+		correct = correct || answer.IsCorrect || t == enum.PlaintextQuestionType
 		options = append(options, store.Option{
 			ID:        answer.ID,
 			Content:   answer.Content,
@@ -247,12 +247,12 @@ func (app *Application) updateQuestion(w http.ResponseWriter, r *http.Request) {
 	nextQuestion := &store.Question{
 		UUID:           newUUID.String(),
 		Title:          payload.Title,
-		Content:        null.StringFrom(payload.Content),
-		Explanation:    null.StringFrom(payload.Explanation),
+		Content:        null.NewString(payload.Content, payload.Content != ""),
+		Explanation:    null.NewString(payload.Explanation, payload.Explanation != ""),
 		Type:           t,
 		Status:         enum.CreatedStatus,
 		CourseID:       payload.CourseID,
-		ModuleID:       null.IntFrom(int64(payload.ModuleID)),
+		ModuleID:       null.NewInt(int64(payload.ModuleID), payload.ModuleID != 0),
 		PrevQuestionID: null.IntFrom(int64(question.ID)),
 		CreatedBy:      user.ID,
 		Options:        options,
@@ -358,7 +358,7 @@ func (app *Application) moderateQuestion(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	question.ModerationReason = null.StringFrom(payload.ModerationReason)
+	question.ModerationReason = null.NewString(payload.ModerationReason, payload.ModerationReason != "")
 	question.Status = s
 	question.UpdatedAt = time.Now()
 	question.ModeratedBy = null.IntFrom(int64(user.ID))

@@ -59,7 +59,18 @@ func (s *TestSessionStore) GetByUserIDAndType(ctx context.Context, id int, t enu
 }
 
 func (s *TestSessionStore) Create(ctx context.Context, test *TestSession) error {
-	return nil
+	return s.conn.QueryRow(
+		ctx,
+		"INSERT INTO test_sessions (uuid, name, type, user_id, course_id, question_ids, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id",
+		test.UUID,
+		test.Name,
+		test.Type,
+		test.UserID,
+		test.CourseID,
+		test.QuestionIDs,
+		test.CreatedAt,
+		test.UpdatedAt,
+	).Scan(&test.ID)
 }
 
 func (s *TestSessionStore) Update(ctx context.Context, test *TestSession) error {

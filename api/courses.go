@@ -297,7 +297,7 @@ func (app *Application) moderateCourse(w http.ResponseWriter, r *http.Request) {
 
 	course.Status = s
 	course.ModeratedBy = null.IntFrom(int64(user.ID))
-	course.ModerationReason = null.StringFrom(payload.ModerationReason)
+	course.ModerationReason = null.NewString(payload.ModerationReason, payload.ModerationReason != "")
 	course.UpdatedAt = time.Now()
 
 	err = app.store.CoursesStore.UpdateStatus(ctx, &course)

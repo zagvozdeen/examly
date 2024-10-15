@@ -27,6 +27,7 @@
     >
       <thead>
         <tr>
+          <th>ID</th>
           <th>Название</th>
           <th>Статус</th>
           <th class="!text-right">
@@ -39,6 +40,7 @@
           v-for="question in questions"
           :key="question.id"
         >
+          <td>{{ question.id }}</td>
           <td>{{ question.title }}</td>
           <td>
             <span

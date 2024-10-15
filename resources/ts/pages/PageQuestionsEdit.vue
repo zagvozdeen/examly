@@ -1,5 +1,29 @@
 <template>
   <div class="flex flex-col gap-4">
+    <AppModerationForm
+      v-if="isAdminMode && question"
+      :status="question.status"
+      :reason="question.moderation_reason"
+      :callback="questionStore.moderateQuestion"
+    />
+
+    <div
+      v-if="!isCreating"
+      class="flex flex-col items-center gap-1.5 rounded-md bg-obscure-500 bg-opacity-50 p-3"
+    >
+      <div class="bg-orange-400 rounded w-9 py-0.5 text-center">
+        <i class="bi bi-exclamation-lg text-2xl" />
+      </div>
+      <span class="text-lg">Изменения создадут новый вопрос</span>
+      <span class="text-xs text-gray-100 text-center">
+        Обратите внимание, что текущий вопрос не изменится, а будет создан новый.
+        Когда вопрос пройдёт модерацию, то новый вопрос заменит старый.
+        Так как кто-то может выполнять тест в данный момент, то мы рискуем сломать обратную совместимость.
+        Поэтому в старых тестах сохранятся прошлые вопросы, но новые тесты будут обновлены.
+        Не бойтесь что-то менять — после модерации изменения вступят в силу.
+      </span>
+    </div>
+
     <n-form
       ref="formRef"
       :rules="formRules"
@@ -14,6 +38,7 @@
           v-model:value="formValue.course_id"
           placeholder="Выберите курс"
           :options="coursesOptions"
+          @update:value="onChangeCourse"
         />
       </n-form-item>
 
@@ -36,6 +61,7 @@
         <n-radio-group
           v-model:value="formValue.type"
           class="w-full sm:!flex !hidden"
+          @update:value="onChangeType"
         >
           <n-radio-button
             v-for="type in typesOptions"
@@ -54,20 +80,6 @@
       </n-form-item>
 
       <n-form-item
-        label="Иллюстрация к вопросу"
-        path="file_id"
-      >
-        <AppUploadFile
-          v-model:value="formValue.file_id"
-          accept="image/*"
-        >
-          <span class="text-xs">
-            Выберите изображение <small>(необязательно)</small>
-          </span>
-        </AppUploadFile>
-      </n-form-item>
-
-      <n-form-item
         label="Вопрос"
         path="title"
       >
@@ -77,6 +89,13 @@
           type="textarea"
           :rows="2"
         />
+      </n-form-item>
+
+      <n-form-item
+        label="Содержание вопроса в формате Markdown (не обязательно)"
+        path="content"
+      >
+        <AppTextEditor v-model="formValue.content" />
       </n-form-item>
 
       <n-form-item
@@ -159,14 +178,15 @@ import {
 } from 'naive-ui'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Course, Module, Option, PageExpose, Question, QuestionType, QuestionTypeTranslates } from '@/types.ts'
+import { Course, Module, Option, PageExpose, Question, QuestionType, QuestionTypeTranslates, UserRole } from '@/types.ts'
 import { useForm } from '@/composables/useForm.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'
 import { useModuleStore } from '@/composables/useModuleStore.ts'
 import { useQuestionStore } from '@/composables/useQuestionStore.ts'
 import AppAnswerInput from '@/components/AppAnswerInput.vue'
-import AppUploadFile from '@/components/AppUploadFile.vue'
-import { me } from '@/composables/useAuthStore.ts'
+import { isAdminMode, me } from '@/composables/useAuthStore.ts'
+import AppTextEditor from '@/components/AppTextEditor.vue'
+import AppModerationForm from '@/components/AppModerationForm.vue'
 
 const form = useForm()
 const route = useRoute()
@@ -200,8 +220,8 @@ const formRef = ref<FormInst>()
 const formValue = reactive({
   course_id: null as number | null,
   module_id: null as number | null,
-  file_id: null as number | null,
   title: null as string | null,
+  moderation_reason: null as string | null,
   content: null as string | null,
   type: QuestionType.SingleChoice,
   options: [createAnswer(), createAnswer()] as Array<Option>,
@@ -248,7 +268,6 @@ const typesOptions = Object
 const clearForm = () => {
   formValue.title = null
   formValue.content = null
-  formValue.file_id = null
   formValue.explanation = null
   formValue.type = QuestionType.SingleChoice
   formValue.options = [
@@ -261,7 +280,6 @@ const onSubmit = () => {
   const prepareData = {
     course_id: formValue.course_id,
     module_id: formValue.module_id,
-    file_id: formValue.file_id,
     title: formValue.title,
     content: formValue.content,
     type: formValue.type,
@@ -277,8 +295,7 @@ const onSubmit = () => {
   }, async () => {
     await questionStore.updateQuestion(route.params.uuid as string, prepareData)
 
-    message.success('Вопрос успешно обновлён')
-    // clearForm()
+    message.success('Новый вопрос создан, этот будет удален после модерации')
   })
 }
 
@@ -297,16 +314,17 @@ const onChange = (id: number) => {
     })
 }
 
-watch(() => formValue.course_id, () => {
+const onChangeCourse = () => {
   formValue.module_id = null
-})
+}
 
-watch(() => formValue.type, () => {
-  formValue.options
+const onChangeType = () => {
+  formValue
+    .options
     .forEach(answer => {
       answer.is_correct = false
     })
-})
+}
 
 onMounted(() => {
   if (!isCreating) {
@@ -314,14 +332,18 @@ onMounted(() => {
       .getQuestionByUuid(route.params.uuid as string)
       .then(data => {
         question.value = data.data
+        formValue.type = data.data.type
         formValue.title = data.data.title
         formValue.content = data.data.content
         formValue.options = data.data.options
         formValue.explanation = data.data.explanation
         formValue.course_id = data.data.course_id
         formValue.module_id = data.data.module_id
+        formValue.moderation_reason = data.data.moderation_reason
 
         createAnswer = answerCreator(data.data.options.at(-1)?.id || 1)
+
+        onLastUpdated()
       })
   }
 
