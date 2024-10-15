@@ -81,11 +81,11 @@
 
       <n-form-item
         label="Варианты ответа"
-        path="answers"
+        path="options"
       >
         <div class="flex flex-col gap-2 w-full">
           <template
-            v-for="(answer, index) in formValue.answers"
+            v-for="(answer, index) in formValue.options"
             :key="answer.id"
           >
             <div class="flex items-center gap-3">
@@ -104,8 +104,8 @@
               />
               <AppAnswerInput
                 v-model:value="answer.content"
-                :is-last="index === formValue.answers.length - 1"
-                :is-second-to-last="index === formValue.answers.length - 2"
+                :is-last="index === formValue.options.length - 1"
+                :is-second-to-last="index === formValue.options.length - 2"
                 @last-updated="onLastUpdated"
                 @second-to-last-updated="onSecondToLastUpdated"
               />
@@ -159,7 +159,7 @@ import {
 } from 'naive-ui'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Course, Module, PageExpose, QuestionType, QuestionTypeTranslates } from '@/types.ts'
+import { Course, Module, Option, PageExpose, Question, QuestionType, QuestionTypeTranslates } from '@/types.ts'
 import { useForm } from '@/composables/useForm.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'
 import { useModuleStore } from '@/composables/useModuleStore.ts'
@@ -175,6 +175,7 @@ const courseStore = useCourseStore()
 const moduleStore = useModuleStore()
 const questionStore = useQuestionStore()
 const message = useMessage()
+const question = ref<Question>()
 
 const isCreating = String(route.name).endsWith('create')
 
@@ -188,12 +189,12 @@ const answerCreator = (start: number = 1) => {
 
   return () => ({
     id: id++,
-    content: null,
+    content: '',
     is_correct: false,
   })
 }
 
-const createAnswer = answerCreator()
+let createAnswer = answerCreator()
 
 const formRef = ref<FormInst>()
 const formValue = reactive({
@@ -203,11 +204,7 @@ const formValue = reactive({
   title: null as string | null,
   content: null as string | null,
   type: QuestionType.SingleChoice,
-  answers: [createAnswer(), createAnswer()] as Array<{
-    id: number
-    content: string | null
-    is_correct: boolean
-  }>,
+  options: [createAnswer(), createAnswer()] as Array<Option>,
   explanation: null as string | null,
 })
 const formRules: FormRules = {
@@ -254,7 +251,7 @@ const clearForm = () => {
   formValue.file_id = null
   formValue.explanation = null
   formValue.type = QuestionType.SingleChoice
-  formValue.answers = [
+  formValue.options = [
     createAnswer(),
     createAnswer(),
   ]
@@ -268,7 +265,7 @@ const onSubmit = () => {
     title: formValue.title,
     content: formValue.content,
     type: formValue.type,
-    answers: formValue.answers.filter(answer => answer.content),
+    options: formValue.options.filter(answer => answer.content),
     explanation: formValue.explanation,
   }
 
@@ -278,20 +275,23 @@ const onSubmit = () => {
     message.success('Вопрос успешно создан')
     clearForm()
   }, async () => {
-    console.log('NOT IMPLEMENTED')
+    await questionStore.updateQuestion(route.params.uuid as string, prepareData)
+
+    message.success('Вопрос успешно обновлён')
+    // clearForm()
   })
 }
 
 const onLastUpdated = () => {
-  formValue.answers.push(createAnswer())
+  formValue.options.push(createAnswer())
 }
 
 const onSecondToLastUpdated = () => {
-  formValue.answers.pop()
+  formValue.options.pop()
 }
 
 const onChange = (id: number) => {
-  formValue.answers
+  formValue.options
     .forEach(answer => {
       answer.is_correct = answer.id === id
     })
@@ -302,13 +302,29 @@ watch(() => formValue.course_id, () => {
 })
 
 watch(() => formValue.type, () => {
-  formValue.answers
+  formValue.options
     .forEach(answer => {
       answer.is_correct = false
     })
 })
 
 onMounted(() => {
+  if (!isCreating) {
+    questionStore
+      .getQuestionByUuid(route.params.uuid as string)
+      .then(data => {
+        question.value = data.data
+        formValue.title = data.data.title
+        formValue.content = data.data.content
+        formValue.options = data.data.options
+        formValue.explanation = data.data.explanation
+        formValue.course_id = data.data.course_id
+        formValue.module_id = data.data.module_id
+
+        createAnswer = answerCreator(data.data.options.at(-1)?.id || 1)
+      })
+  }
+
   courseStore
     .getCourses({
       or_created_by: me.value?.id,

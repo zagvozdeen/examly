@@ -8,11 +8,37 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/guregu/null/v5"
 	"net/http"
+	"strconv"
 	"time"
 )
 
 func (app *Application) getQuestions(w http.ResponseWriter, r *http.Request) {
-	questions, err := app.store.QuestionsStore.Get(r.Context())
+	var filter store.GetQuestionsFilter
+	query := r.URL.Query()
+	user := getUserFromRequest(r)
+	ctx := r.Context()
+
+	if query.Has("created_by") {
+		id, err := strconv.Atoi(query.Get("created_by"))
+		if err != nil {
+			app.badRequestResponse(w, r, err)
+			return
+		}
+		if id != user.ID && user.Role.Level() < enum.ModeratorRole.Level() {
+			app.forbiddenErrorResponse(w, r, errors.New("forbidden"))
+			return
+		}
+		filter.CreatedBy = id
+	}
+	if query.Has("all") {
+		if user.Role.Level() < enum.ModeratorRole.Level() {
+			app.forbiddenErrorResponse(w, r, errors.New("forbidden"))
+			return
+		}
+		filter.All = true
+	}
+
+	questions, err := app.store.QuestionsStore.Get(ctx, filter)
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return
@@ -151,7 +177,7 @@ type UpdateQuestionPayload struct {
 		ID        int    `json:"id" validate:"required"`
 		Content   string `json:"content" validate:"required"`
 		IsCorrect bool   `json:"is_correct" validate:""`
-	} `json:"answers" validate:"required,dive,required"`
+	} `json:"options" validate:"required,dive,required"`
 }
 
 func (app *Application) updateQuestion(w http.ResponseWriter, r *http.Request) {

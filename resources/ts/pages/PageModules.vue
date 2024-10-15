@@ -21,12 +21,18 @@
       </n-button>
     </router-link>
 
-    <n-table v-if="modules.length > 0">
+    <n-table
+      v-if="modules.length > 0"
+      size="small"
+    >
       <thead>
         <tr>
           <th>Название</th>
           <th>Курс</th>
           <th>Статус</th>
+          <th class="!text-right">
+            Действия
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -36,7 +42,25 @@
         >
           <td>{{ module.name }}</td>
           <td>{{ module.course?.name }}</td>
-          <td>{{ StatusTranslates[module.status] }}</td>
+          <td>
+            <span
+              class="rounded-full text-xs px-2 py-1 font-medium"
+              :class="{
+                [StatusBackgroundColors[module.status]]: true,
+                [StatusTextColors[module.status]]: true,
+              }"
+            >{{ StatusTranslates[module.status] }}</span>
+          </td>
+          <td class="text-right">
+            <router-link :to="{ name: 'modules.edit', params: {uuid: module.uuid} }">
+              <n-button
+                type="warning"
+                size="tiny"
+              >
+                Редактировать
+              </n-button>
+            </router-link>
+          </td>
         </tr>
       </tbody>
     </n-table>
@@ -51,9 +75,9 @@
 import { NTable, NButton } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { StatusTranslates, Module, PageExpose } from '@/types.ts'
+import { StatusTranslates, Module, PageExpose, StatusBackgroundColors, StatusTextColors } from '@/types.ts'
 import { useModuleStore } from '@/composables/useModuleStore.ts'
-import { me } from '@/composables/useAuthStore.ts'
+import { isAdminMode, me } from '@/composables/useAuthStore.ts'
 
 const router = useRouter()
 const moduleStore = useModuleStore()
@@ -69,6 +93,7 @@ onMounted(() => {
   moduleStore
     .getModules({
       created_by: me.value?.id,
+      all: isAdminMode.value,
     })
     .then(data => {
       if (data.data) {

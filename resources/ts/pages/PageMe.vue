@@ -29,8 +29,8 @@
         <div class="grid grid-cols-[min-content_1fr_min-content] items-center gap-2">
           <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-gray-400 to-gray-500" />
           <div class="flex flex-col">
-            <span class="text-sm font-medium">{{ me?.full_name }}</span>
-            <span class="text-gray-400 text-xs">{{ me?.email }} • {{ UserRoleTranslates[me?.role || UserRole.Guest] }}</span>
+            <span class="text-sm font-medium">{{ me.full_name }}</span>
+            <span class="text-gray-400 text-xs">{{ me.email }} • {{ UserRoleTranslates[me.role] }}</span>
           </div>
           <i class="bi bi-chevron-right" />
         </div>
@@ -47,7 +47,7 @@
             <div class="bg-blue-400 rounded w-full py-0.5 text-center">
               <i class="bi bi-card-checklist" />
             </div>
-            <span>Мои курсы</span>
+            <span>{{ isAdminMode ? 'Список всех курсов' : 'Мои курсы' }}</span>
             <i class="bi bi-chevron-right" />
           </router-link>
         </li>
@@ -62,7 +62,7 @@
             <div class="bg-red-400 rounded w-full py-0.5 text-center">
               <i class="bi bi-bar-chart-steps" />
             </div>
-            <span>Добавленные модули</span>
+            <span>{{ isAdminMode ? 'Список модулей' : 'Добавленные модули' }}</span>
             <i class="bi bi-chevron-right" />
           </router-link>
         </li>
@@ -77,7 +77,7 @@
             <div class="bg-green-400 rounded w-full py-0.5 text-center">
               <i class="bi bi-question-circle-fill" />
             </div>
-            <span>Созданные вопросы</span>
+            <span>{{ isAdminMode ? 'Список всех вопросов' : 'Созданные вопросы' }}</span>
             <i class="bi bi-chevron-right" />
           </router-link>
         </li>
@@ -96,70 +96,17 @@
             <i class="bi bi-chevron-right" />
           </router-link>
         </li>
-      </ul>
-
-      <ul
-        v-if="me.role === UserRole.Admin || me.role === UserRole.Moderator"
-        class="flex flex-col bg-obscure-700 rounded-md overflow-hidden"
-      >
-        <li>
-          <router-link
-            class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
-            :to="{
-              name: 'admin.courses',
-            }"
-          >
-            <div class="bg-blue-400 rounded w-full py-0.5 text-center">
-              <i class="bi bi-card-checklist" />
-            </div>
-            <span>Все курсы</span>
-            <i class="bi bi-chevron-right" />
-          </router-link>
-        </li>
         <li class="h-px w-[calc(100%-28px-1rem)] ml-auto bg-obscure-500" />
         <li>
-          <router-link
-            class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
-            :to="{
-              name: 'modules',
-            }"
+          <div
+            class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 bg-opacity-50 p-2"
           >
-            <div class="bg-red-400 rounded w-full py-0.5 text-center">
-              <i class="bi bi-bar-chart-steps" />
+            <div class="bg-orange-400 rounded w-full py-0.5 text-center">
+              <i class="bi bi-arrow-left-right" />
             </div>
-            <span>Добавленные модули</span>
-            <i class="bi bi-chevron-right" />
-          </router-link>
-        </li>
-        <li class="h-px w-[calc(100%-28px-1rem)] ml-auto bg-obscure-500" />
-        <li>
-          <router-link
-            class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
-            :to="{
-              name: 'questions',
-            }"
-          >
-            <div class="bg-green-400 rounded w-full py-0.5 text-center">
-              <i class="bi bi-question-circle-fill" />
-            </div>
-            <span>Созданные вопросы</span>
-            <i class="bi bi-chevron-right" />
-          </router-link>
-        </li>
-        <li class="h-px w-[calc(100%-28px-1rem)] ml-auto bg-obscure-500" />
-        <li>
-          <router-link
-            class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
-            :to="{
-              name: 'questions.import',
-            }"
-          >
-            <div class="bg-purple-400 rounded w-full py-0.5 text-center">
-              <i class="bi bi-file-earmark-arrow-up-fill" />
-            </div>
-            <span>Импортировать вопросы</span>
-            <i class="bi bi-chevron-right" />
-          </router-link>
+            <span class="select-none">Режим администратора</span>
+            <AppAdminMode />
+          </div>
         </li>
       </ul>
     </template>
@@ -167,8 +114,9 @@
 </template>
 
 <script lang="ts" setup>
-import { me } from '../composables/useAuthStore.ts'
+import { isAdminMode, me } from '../composables/useAuthStore.ts'
 import { PageExpose, UserRole, UserRoleTranslates } from '@/types.ts'
+import AppAdminMode from '@/components/AppAdminMode.vue'
 
 defineExpose<PageExpose>({
   title: 'Личный кабинет',

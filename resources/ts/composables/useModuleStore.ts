@@ -4,6 +4,7 @@ import { Module } from '@/types.ts'
 interface GetParams {
   created_by?: number
   or_created_by?: number
+  all?: boolean
 }
 
 export const useModuleStore = () => {
@@ -21,6 +22,18 @@ export const useModuleStore = () => {
       .json<{data: Module}>()
   }
 
+  const moderateModule = (uuid: string, json: object) => {
+    return ky
+      .patch(`modules/${uuid}/moderate`, { json })
+      .json()
+  }
+
+  const updateModule = (uuid: string, json: object) => {
+    return ky
+      .patch(`modules/${uuid}`, { json })
+      .json()
+  }
+
   const getModuleByUuid = (uuid: string) => {
     return ky
       .get(`modules/${uuid}`)
@@ -30,6 +43,8 @@ export const useModuleStore = () => {
   return {
     getModules,
     createModule,
+    moderateModule,
+    updateModule,
     getModuleByUuid,
   }
 }

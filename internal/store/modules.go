@@ -44,19 +44,24 @@ type ModuleStore struct {
 type GetModulesFilter struct {
 	CreatedBy   int
 	OrCreatedBy int
+	All         bool
 }
 
 func (s *ModuleStore) Get(ctx context.Context, filter GetModulesFilter) (modules []Module, err error) {
 	var sql string
 	var params []any
 
-	if filter.CreatedBy != 0 {
+	switch {
+	case filter.All:
+		sql = "SELECT id, uuid, name, status, course_id, created_by, deleted_at, created_at, updated_at FROM modules"
+		params = []any{}
+	case filter.CreatedBy != 0:
 		sql = "SELECT id, uuid, name, status, course_id, created_by, deleted_at, created_at, updated_at FROM modules WHERE created_by = $1 AND deleted_at IS NULL"
 		params = []any{filter.CreatedBy}
-	} else if filter.OrCreatedBy != 0 {
+	case filter.OrCreatedBy != 0:
 		sql = "SELECT id, uuid, name, status, course_id, created_by, deleted_at, created_at, updated_at FROM modules WHERE (created_by = $1 OR status = $2) AND deleted_at IS NULL"
 		params = []any{filter.OrCreatedBy, enum.ActiveStatus.String()}
-	} else {
+	default:
 		sql = "SELECT id, uuid, name, status, course_id, created_by, deleted_at, created_at, updated_at FROM modules WHERE status = $1 AND deleted_at IS NULL"
 		params = []any{enum.ActiveStatus.String()}
 	}
@@ -71,7 +76,7 @@ func (s *ModuleStore) Get(ctx context.Context, filter GetModulesFilter) (modules
 
 	for rows.Next() {
 		var module Module
-		err = rows.Scan(
+		if err = rows.Scan(
 			&module.ID,
 			&module.UUID,
 			&module.Name,
@@ -81,8 +86,7 @@ func (s *ModuleStore) Get(ctx context.Context, filter GetModulesFilter) (modules
 			&module.DeletedAt,
 			&module.CreatedAt,
 			&module.UpdatedAt,
-		)
-		if err != nil {
+		); err != nil {
 			return nil, err
 		}
 		modules = append(modules, module)
@@ -95,6 +99,7 @@ func (s *ModuleStore) GetByUUID(ctx context.Context, uuid string) (module Module
 	err = s.conn.QueryRow(
 		ctx,
 		"SELECT id, uuid, name, status, course_id, created_by, deleted_at, created_at, updated_at FROM modules WHERE uuid = $1 AND deleted_at IS NULL",
+		uuid,
 	).Scan(
 		&module.ID,
 		&module.UUID,

@@ -10,6 +10,7 @@ import (
 	"github.com/guregu/null/v5"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/rs/zerolog"
 	"strings"
 	"time"
 )
@@ -64,7 +65,7 @@ func (u Options) Value() (driver.Value, error) {
 }
 
 type QuestionsStore interface {
-	Get(ctx context.Context) ([]Question, error)
+	Get(ctx context.Context, filter GetQuestionsFilter) ([]Question, error)
 	GetByID(ctx context.Context, id int) (Question, error)
 	GetByUUID(ctx context.Context, uuid string) (Question, error)
 	Create(ctx context.Context, question *Question) error
@@ -77,14 +78,33 @@ type QuestionsStore interface {
 
 type QuestionStore struct {
 	conn *pgxpool.Pool
+	log  zerolog.Logger
 }
 
-func (s *QuestionStore) Get(ctx context.Context) (questions []Question, err error) {
-	rows, err := s.conn.Query(
-		ctx,
-		`SELECT id, uuid, title, content, explanation, moderation_reason, type, status, course_id, module_id, created_by, moderated_by, prev_question_id, next_question_id, options, deleted_at, created_at, updated_at
-			 FROM questions WHERE deleted_at IS NULL`,
-	)
+type GetQuestionsFilter struct {
+	CreatedBy int
+	All       bool
+}
+
+func (s *QuestionStore) Get(ctx context.Context, filter GetQuestionsFilter) (questions []Question, err error) {
+	var sql string
+	var params []any
+
+	switch {
+	case filter.All:
+		sql = "SELECT id, uuid, title, content, explanation, moderation_reason, type, status, course_id, module_id, created_by, moderated_by, prev_question_id, next_question_id, options, deleted_at, created_at, updated_at FROM questions"
+		params = []any{}
+	case filter.CreatedBy != 0:
+		sql = "SELECT id, uuid, title, content, explanation, moderation_reason, type, status, course_id, module_id, created_by, moderated_by, prev_question_id, next_question_id, options, deleted_at, created_at, updated_at FROM questions WHERE created_by = $1 AND deleted_at IS NULL"
+		params = []any{filter.CreatedBy}
+	default:
+		sql = "SELECT id, uuid, title, content, explanation, moderation_reason, type, status, course_id, module_id, created_by, moderated_by, prev_question_id, next_question_id, options, deleted_at, created_at, updated_at FROM questions WHERE status = $1 AND deleted_at IS NULL"
+		params = []any{enum.ActiveStatus.String()}
+	}
+
+	s.log.Trace().Str("sql", sql).Str("params", fmt.Sprintf("%v", params)).Msg("Query")
+
+	rows, err := s.conn.Query(ctx, sql, params...)
 	if err != nil {
 		return nil, err
 	}
@@ -143,27 +163,27 @@ func (s *QuestionStore) GetByID(ctx context.Context, id int) (question Question,
 func (s *QuestionStore) GetByUUID(ctx context.Context, uuid string) (question Question, err error) {
 	err = s.conn.QueryRow(
 		ctx,
-		"SELECT id, uuid, title, content, explanation, moderation_reason, type, status, course_id, module_id, created_by, moderated_by, prev_question_id, next_question_id, options, deleted_at, created_at, updated_at FROM questions WHERE id = $1 AND deleted_at IS NULL",
+		"SELECT id, uuid, title, content, explanation, moderation_reason, type, status, course_id, module_id, created_by, moderated_by, prev_question_id, next_question_id, options, deleted_at, created_at, updated_at FROM questions WHERE uuid = $1 AND deleted_at IS NULL",
 		uuid,
 	).Scan(
-		question.ID,
-		question.UUID,
-		question.Title,
-		question.Content,
-		question.Explanation,
-		question.ModerationReason,
-		question.Type,
-		question.Status,
-		question.CourseID,
-		question.ModuleID,
-		question.CreatedBy,
-		question.ModeratedBy,
-		question.PrevQuestionID,
-		question.NextQuestionID,
-		question.Options,
-		question.DeletedAt,
-		question.CreatedAt,
-		question.UpdatedAt,
+		&question.ID,
+		&question.UUID,
+		&question.Title,
+		&question.Content,
+		&question.Explanation,
+		&question.ModerationReason,
+		&question.Type,
+		&question.Status,
+		&question.CourseID,
+		&question.ModuleID,
+		&question.CreatedBy,
+		&question.ModeratedBy,
+		&question.PrevQuestionID,
+		&question.NextQuestionID,
+		&question.Options,
+		&question.DeletedAt,
+		&question.CreatedAt,
+		&question.UpdatedAt,
 	)
 
 	if errors.Is(err, pgx.ErrNoRows) {

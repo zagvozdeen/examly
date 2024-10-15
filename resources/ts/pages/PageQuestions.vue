@@ -1,13 +1,13 @@
 <template>
   <div class="flex flex-col gap-4">
     <span class="text-gray-400 text-center text-xs">
-      Здесь Вы можете посмотреть список созданных курсов и их статус.
+      Вопросы и ответы тоже проходят проверку модерацией
       <br>
-      Созданные курсы проходят модерацию, прежде чем попадут в общий доступ.
+      перед тем как попасть в общий доступ.
     </span>
 
     <router-link
-      :to="{ name: 'courses.create' }"
+      :to="{ name: 'questions.create' }"
       class="sm:self-center"
     >
       <n-button
@@ -16,13 +16,13 @@
       >
         <div class="flex items-center gap-2">
           <i class="bi bi-plus-square-fill" />
-          <span>Создать курс</span>
+          <span>Создать вопрос</span>
         </div>
       </n-button>
     </router-link>
 
     <n-table
-      v-if="courses.length > 0"
+      v-if="questions.length > 0"
       size="small"
     >
       <thead>
@@ -36,13 +36,21 @@
       </thead>
       <tbody>
         <tr
-          v-for="course in courses"
-          :key="course.id"
+          v-for="question in questions"
+          :key="question.id"
         >
-          <td>{{ course.name }}</td>
-          <td>{{ StatusTranslates[course.status] }}</td>
+          <td>{{ question.title }}</td>
+          <td>
+            <span
+              class="rounded-full text-xs px-2 py-1 font-medium"
+              :class="{
+                [StatusBackgroundColors[question.status]]: true,
+                [StatusTextColors[question.status]]: true,
+              }"
+            >{{ StatusTranslates[question.status] }}</span>
+          </td>
           <td class="text-right">
-            <router-link :to="{ name: 'courses.edit', params: {uuid: course.uuid} }">
+            <router-link :to="{ name: 'questions.edit', params: {uuid: question.uuid} }">
               <n-button
                 type="warning"
                 size="tiny"
@@ -58,18 +66,6 @@
       v-else
       class="text-center text-gray-400"
     >Пока ничего</span>
-
-    <!--    <n-button @click="handleExportCourses">-->
-    <!--      Экспортировать курсы-->
-    <!--    </n-button>-->
-
-    <a
-      v-if="filePath"
-      class="text-center underline"
-      :href="filePath"
-    >
-      Ссылка на скачивание файла
-    </a>
   </div>
 </template>
 
@@ -77,27 +73,28 @@
 import { NTable, NButton } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Course, StatusTranslates, PageExpose } from '@/types.ts'
-import { useCourseStore } from '@/composables/useCourseStore.ts'
+import { StatusTranslates, PageExpose, Question, StatusBackgroundColors, StatusTextColors } from '@/types.ts'
+import { useQuestionStore } from '@/composables/useQuestionStore.ts'
+import { isAdminMode, me } from '@/composables/useAuthStore.ts'
 
 const router = useRouter()
-const courseStore = useCourseStore()
+const questionStore = useQuestionStore()
 
-const courses = ref<Course[]>([])
-const filePath = ref<string>()
+const questions = ref<Question[]>([])
 
 defineExpose<PageExpose>({
-  title: 'Все курсы',
+  title: 'Созданные вопросы',
   back: router.resolve({ name: 'me' }),
 })
 
 onMounted(() => {
-  courseStore
-    .getCourses({
-      all: true,
+  questionStore
+    .getQuestions({
+      created_by: me.value?.id,
+      all: isAdminMode.value,
     })
     .then(data => {
-      courses.value = data.data
+      questions.value = data.data || []
     })
 })
 </script>

@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-4">
     <AppModerationForm
-      v-if="isModerator && course"
+      v-if="isAdminMode && course"
       :status="course.status"
       :reason="course.moderation_reason"
       :callback="courseStore.moderateCourse"
@@ -101,7 +101,7 @@ import { useForm } from '@/composables/useForm.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'
 import AppColorSelector from '@/components/AppColorSelector.vue'
 import AppIconSelector from '@/components/AppIconSelector.vue'
-import { isModerator } from '@/composables/useAuthStore.ts'
+import { isAdminMode, isModerator } from '@/composables/useAuthStore.ts'
 import AppModerationForm from '@/components/AppModerationForm.vue'
 
 const form = useForm()

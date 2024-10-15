@@ -43,6 +43,18 @@ export const StatusTranslates: Record<Status, string> = {
   [Status.Inactive]: 'Неактивен',
 }
 
+export const StatusBackgroundColors: Record<Status, string> = {
+  [Status.Created]: 'bg-blue-300',
+  [Status.Active]: 'bg-green-300',
+  [Status.Inactive]: 'bg-red-300',
+}
+
+export const StatusTextColors: Record<Status, string> = {
+  [Status.Created]: 'text-blue-700',
+  [Status.Active]: 'text-green-700',
+  [Status.Inactive]: 'text-red-700',
+}
+
 export interface Course {
   id: number
   uuid: string
@@ -75,6 +87,7 @@ export interface Module {
   uuid: string
   name: string
   status: Status
+  moderation_reason: string | null
   course_id: number
   user_id: number
   created_at: string
@@ -99,10 +112,20 @@ export interface Question {
   uuid: string
   title: string
   content: string | null
+  options: Option[]
   type: QuestionType
   status: Status
+  explanation: string | null
+  course_id: number
+  module_id: number | null
   created_at: string
   updated_at: string
+}
+
+export interface Option {
+  id: number
+  content: string
+  is_correct: boolean
 }
 
 export enum TestSessionType {

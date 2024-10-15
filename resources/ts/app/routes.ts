@@ -7,16 +7,15 @@ import PageRegister from '@/pages/PageRegister.vue'
 import PageMe from '@/pages/PageMe.vue'
 import PageMySettings from '@/pages/PageMySettings.vue'
 import PageCoursesImport from '@/pages/PageCoursesImport.vue'
-import PageMyCourses from '@/pages/PageMyCourses.vue'
-import PageMyCoursesEdit from '@/pages/PageMyCoursesEdit.vue'
-import PageMyModulesEdit from '@/pages/PageMyModulesEdit.vue'
-import PageMyModules from '@/pages/PageMyModules.vue'
-import PageMyQuestionsEdit from '@/pages/PageMyQuestionsEdit.vue'
-import PageMyQuestions from '@/pages/PageMyQuestions.vue'
+import PageMyCourses from '@/pages/PageCourses.vue'
+import PageMyCoursesEdit from '@/pages/PageCoursesEdit.vue'
+import PageMyModulesEdit from '@/pages/PageModulesEdit.vue'
+import PageMyModules from '@/pages/PageModules.vue'
+import PageMyQuestionsEdit from '@/pages/PageQuestionsEdit.vue'
+import PageMyQuestions from '@/pages/PageQuestions.vue'
 import PageStats from '@/pages/PageStats.vue'
 import PageCourseMarathon from '@/pages/PageCourseMarathon.vue'
 import PageTest from '@/pages/PageTest.vue'
-import PageAdminCourses from '@/pages/PageAdminCourses.vue'
 
 export const createRoutes = (): Array<RouteRecordRaw> => {
   return [
@@ -124,16 +123,16 @@ export const createRoutes = (): Array<RouteRecordRaw> => {
           component: PageTest,
           name: 'tests.show',
         },
-        {
-          path: '/admin',
-          children: [
-            {
-              path: 'courses',
-              component: PageAdminCourses,
-              name: 'admin.courses',
-            },
-          ],
-        },
+        // {
+        //   path: '/admin',
+        //   children: [
+        //     {
+        //       path: 'courses',
+        //       component: PageAdminCourses,
+        //       name: 'admin.courses',
+        //     },
+        //   ],
+        // },
       ],
     },
   ]

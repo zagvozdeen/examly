@@ -43,6 +43,13 @@ func (app *Application) getModules(w http.ResponseWriter, r *http.Request) {
 		}
 		filter.OrCreatedBy = id
 	}
+	if query.Has("all") {
+		if user.Role.Level() < enum.ModeratorRole.Level() {
+			app.forbiddenErrorResponse(w, r, errors.New("forbidden"))
+			return
+		}
+		filter.All = true
+	}
 
 	modules, err := app.store.ModulesStore.Get(ctx, filter)
 	if err != nil {

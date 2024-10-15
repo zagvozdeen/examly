@@ -29,6 +29,9 @@
         <tr>
           <th>Название</th>
           <th>Статус</th>
+          <th class="!text-right">
+            Действия
+          </th>
         </tr>
       </thead>
       <tbody>
@@ -37,7 +40,25 @@
           :key="course.id"
         >
           <td>{{ course.name }}</td>
-          <td>{{ StatusTranslates[course.status] }}</td>
+          <td>
+            <span
+              class="rounded-full text-xs px-2 py-1 font-medium"
+              :class="{
+                [StatusBackgroundColors[course.status]]: true,
+                [StatusTextColors[course.status]]: true,
+              }"
+            >{{ StatusTranslates[course.status] }}</span>
+          </td>
+          <td class="text-right">
+            <router-link :to="{ name: 'courses.edit', params: {uuid: course.uuid} }">
+              <n-button
+                type="warning"
+                size="tiny"
+              >
+                Редактировать
+              </n-button>
+            </router-link>
+          </td>
         </tr>
       </tbody>
     </n-table>
@@ -64,9 +85,16 @@
 import { NTable, NButton } from 'naive-ui'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { Course, StatusTranslates, PageExpose } from '@/types.ts'
+import {
+  Course,
+  StatusTranslates,
+  PageExpose,
+  StatusBackgrounds,
+  StatusBackgroundColors,
+  StatusTextColors,
+} from '@/types.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'
-import { me } from '@/composables/useAuthStore.ts'
+import { isAdminMode, me } from '@/composables/useAuthStore.ts'
 
 const router = useRouter()
 const courseStore = useCourseStore()
@@ -90,7 +118,8 @@ const handleExportCourses = () => {
 onMounted(() => {
   courseStore
     .getCourses({
-      'created_by': me.value?.id,
+      created_by: me.value?.id,
+      all: isAdminMode.value,
     })
     .then(data => {
       courses.value = data.data

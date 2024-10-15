@@ -3,6 +3,7 @@ import { Question } from '@/types.ts'
 
 interface GetParams {
   created_by?: number
+  all?: boolean
 }
 
 export const useQuestionStore = () => {
@@ -26,6 +27,18 @@ export const useQuestionStore = () => {
       .json<{ data: Question }>()
   }
 
+  const moderateQuestion = (uuid: string, json: object) => {
+    return ky
+      .patch(`questions/${uuid}/moderate`, { json })
+      .json()
+  }
+
+  const updateQuestion = (uuid: string, json: object) => {
+    return ky
+      .patch(`questions/${uuid}`, { json })
+      .json()
+  }
+
   const importQuestions = (json: object) => {
     return ky
       .post('questions/import', { json })
@@ -36,6 +49,8 @@ export const useQuestionStore = () => {
     getQuestions,
     createQuestion,
     getQuestionByUuid,
+    moderateQuestion,
+    updateQuestion,
     importQuestions,
   }
 }

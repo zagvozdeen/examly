@@ -54,16 +54,17 @@ func (s *CourseStore) Get(ctx context.Context, filter GetCoursesFilter) (courses
 	var sql string
 	var params []any
 
-	if filter.CreatedBy != 0 {
-		sql = "SELECT id, uuid, name, description, color, icon, status, created_by, deleted_at, created_at, updated_at FROM courses WHERE created_by = $1 AND deleted_at IS NULL"
-		params = []any{filter.CreatedBy}
-	} else if filter.OrCreatedBy != 0 {
-		sql = "SELECT id, uuid, name, description, color, icon, status, created_by, deleted_at, created_at, updated_at FROM courses WHERE (created_by = $1 OR status = $2) AND deleted_at IS NULL"
-		params = []any{filter.OrCreatedBy, enum.ActiveStatus.String()}
-	} else if filter.All {
+	switch {
+	case filter.All:
 		sql = "SELECT id, uuid, name, description, color, icon, status, created_by, deleted_at, created_at, updated_at FROM courses"
 		params = []any{}
-	} else {
+	case filter.CreatedBy != 0:
+		sql = "SELECT id, uuid, name, description, color, icon, status, created_by, deleted_at, created_at, updated_at FROM courses WHERE created_by = $1 AND deleted_at IS NULL"
+		params = []any{filter.CreatedBy}
+	case filter.OrCreatedBy != 0:
+		sql = "SELECT id, uuid, name, description, color, icon, status, created_by, deleted_at, created_at, updated_at FROM courses WHERE (created_by = $1 OR status = $2) AND deleted_at IS NULL"
+		params = []any{filter.OrCreatedBy, enum.ActiveStatus.String()}
+	default:
 		sql = "SELECT id, uuid, name, description, color, icon, status, created_by, deleted_at, created_at, updated_at FROM courses WHERE status = $1 AND deleted_at IS NULL"
 		params = []any{enum.ActiveStatus.String()}
 	}
@@ -147,16 +148,20 @@ func (s *CourseStore) GetByUUID(ctx context.Context, uuid string) (course Course
 }
 
 func (s *CourseStore) GetByIDs(ctx context.Context, ids []any) (courses []Course, err error) {
+	if len(ids) == 0 {
+		return courses, nil
+	}
+
 	placeholders := make([]string, len(ids))
 	for i := range ids {
 		placeholders[i] = fmt.Sprintf("$%d", i+1)
 	}
 
-	rows, err := s.conn.Query(
-		ctx,
-		fmt.Sprintf("SELECT id, uuid, name, description, color, icon, status, created_by, deleted_at, created_at, updated_at FROM courses WHERE id IN (%s) AND deleted_at IS NULL", strings.Join(placeholders, ",")),
-		ids...,
-	)
+	sql := fmt.Sprintf("SELECT id, uuid, name, description, color, icon, status, created_by, deleted_at, created_at, updated_at FROM courses WHERE id IN (%s) AND deleted_at IS NULL", strings.Join(placeholders, ","))
+
+	s.log.Trace().Str("sql", sql).Str("params", fmt.Sprintf("%v", ids)).Msg("Query")
+
+	rows, err := s.conn.Query(ctx, sql, ids...)
 	if err != nil {
 		return nil, err
 	}

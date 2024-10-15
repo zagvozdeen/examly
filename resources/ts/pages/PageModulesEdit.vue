@@ -1,5 +1,12 @@
 <template>
   <div class="flex flex-col gap-4">
+    <AppModerationForm
+      v-if="isAdminMode && module"
+      :status="module.status"
+      :reason="module.moderation_reason"
+      :callback="moduleStore.moderateModule"
+    />
+
     <n-form
       ref="formRef"
       :rules="formRules"
@@ -47,11 +54,12 @@
 import { NForm, NFormItem, NInput, NSelect, NButton, FormInst, FormRules, useMessage } from 'naive-ui'
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Course, PageExpose } from '@/types.ts'
+import { Course, Module, PageExpose } from '@/types.ts'
 import { useForm } from '@/composables/useForm.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'
 import { useModuleStore } from '@/composables/useModuleStore.ts'
-import { me } from '@/composables/useAuthStore.ts'
+import { isAdminMode, me } from '@/composables/useAuthStore.ts'
+import AppModerationForm from '@/components/AppModerationForm.vue'
 
 const form = useForm()
 const route = useRoute()
@@ -59,6 +67,7 @@ const router = useRouter()
 const courseStore = useCourseStore()
 const moduleStore = useModuleStore()
 const message = useMessage()
+const module = ref<Module>()
 
 const isCreating = String(route.name).endsWith('create')
 
@@ -69,7 +78,7 @@ defineExpose<PageExpose>({
 
 const formRef = ref<FormInst>()
 const formValue = reactive({
-  course_id: null as string | null,
+  course_id: null as number | null,
   name: null as string | null,
 })
 const formRules: FormRules = {
@@ -109,6 +118,16 @@ const onSubmit = () => {
 
 
 onMounted(() => {
+  if (!isCreating) {
+    moduleStore
+      .getModuleByUuid(route.params.uuid as string)
+      .then(data => {
+        module.value = data.data
+        formValue.name = data.data.name
+        formValue.course_id = data.data.course_id
+      })
+  }
+
   courseStore
     .getCourses({
       or_created_by: me.value?.id,
