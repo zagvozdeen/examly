@@ -112,7 +112,8 @@ const onSubmit = async () => {
     loadingBar.error()
 
     if (e instanceof HTTPError) {
-      message.error('При выполнении запроса произошла ошибка')
+      message.error(`При выполнении запроса произошла ошибка: ${e.response}`)
+      console.log(e.message, e.response.body)
       return
     }
 

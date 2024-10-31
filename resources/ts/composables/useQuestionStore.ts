@@ -1,12 +1,17 @@
 import { useKy } from '@/composables/useKy.ts'
 import { Question } from '@/types.ts'
 
+interface GetParams {
+  created_by?: number
+  all?: boolean
+}
+
 export const useQuestionStore = () => {
   const ky = useKy()
 
-  const getMyQuestions = () => {
+  const getQuestions = (params: GetParams) => {
     return ky
-      .get('my-questions')
+      .get('questions', { searchParams: params as Record<string, string> })
       .json<{data: Question[]}>()
   }
 
@@ -22,6 +27,18 @@ export const useQuestionStore = () => {
       .json<{ data: Question }>()
   }
 
+  const moderateQuestion = (uuid: string, json: object) => {
+    return ky
+      .patch(`questions/${uuid}/moderate`, { json })
+      .json()
+  }
+
+  const updateQuestion = (uuid: string, json: object) => {
+    return ky
+      .patch(`questions/${uuid}`, { json })
+      .json()
+  }
+
   const importQuestions = (json: object) => {
     return ky
       .post('questions/import', { json })
@@ -29,9 +46,11 @@ export const useQuestionStore = () => {
   }
 
   return {
-    getMyQuestions,
+    getQuestions,
     createQuestion,
     getQuestionByUuid,
+    moderateQuestion,
+    updateQuestion,
     importQuestions,
   }
 }

@@ -2,74 +2,44 @@ package main
 
 import (
 	"context"
-	"github.com/Den4ik117/examly/config"
-	"github.com/Den4ik117/examly/internal/handler"
-	"github.com/Den4ik117/examly/internal/repository"
-	"github.com/Den4ik117/examly/internal/service"
-	"log"
-	"log/slog"
-	"net/http"
+	"github.com/den4ik117/examly/api"
+	"github.com/den4ik117/examly/internal/db"
+	"github.com/den4ik117/examly/internal/env"
+	"github.com/den4ik117/examly/internal/store"
+	"github.com/joho/godotenv"
+	"github.com/rs/zerolog"
 	"os"
-	"os/signal"
-	"syscall"
-	"time"
 )
 
 func main() {
-	if err := os.Setenv("TZ", "UTC"); err != nil {
-		log.Fatalf("Failed to set timezone: %s", err)
-	}
+	logger := zerolog.New(zerolog.ConsoleWriter{
+		Out:        os.Stderr,
+		TimeFormat: "02.01.2006 15:04:05",
+	}).Level(zerolog.TraceLevel).With().Caller().Timestamp().Logger()
 
-	ctx, stop := signal.NotifyContext(context.Background(), syscall.SIGINT, syscall.SIGTERM)
-	defer stop()
-
-	go initLogger(ctx)
-
-	db, err := repository.NewPostgresDB()
+	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("Failed to connect to db: %s", err)
+		logger.Panic().Err(err).Msg("Failed to load .env file")
 	}
 
-	repos := repository.NewRepository(db)
-	services := service.NewService(repos)
-	handlers := handler.NewHandler(services)
-
-	router := handlers.InitRoutes()
-
-	go func() {
-		slog.Info("Starting server on :8080")
-		if err = http.ListenAndServe(":8080", router); err != nil {
-			log.Fatalf("Failed to start server: %s", err)
-		}
-	}()
-
-	<-ctx.Done()
-}
-
-func initLogger(ctx context.Context) {
-	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
-		AddSource: true,
-		Level:     slog.LevelDebug,
-	}))
-
-	if config.Envs.AppEnv == "production" {
-		f, err := os.OpenFile(
-			time.Now().Format("logs/examly-2006-01-02.log"),
-			os.O_APPEND|os.O_RDWR|os.O_CREATE,
-			0666,
-		)
-		if err != nil {
-			log.Fatalf("Failed to open log file: %s", err)
-		}
-		defer f.Close()
-		logger = slog.New(slog.NewTextHandler(f, &slog.HandlerOptions{
-			AddSource: true,
-		}))
+	cfg := api.Config{
+		AppEnv:    env.GetString("APP_ENV", "development"),
+		AppURL:    env.GetString("APP_URL", "127.0.0.1:8080"),
+		DBAddr:    env.GetString("DB_ADDR", "postgres://root:root@127.0.0.1:5432/examly?sslmode=disable"),
+		SecretKey: env.GetString("APP_KEY", ""),
 	}
 
-	slog.SetDefault(logger)
+	conn, err := db.New(context.Background(), cfg.DBAddr)
+	if err != nil {
+		logger.Panic().Err(err).Msg("Failed to connect to PostgreSQL")
+	}
+	logger.Info().Msg("Successfully connected to PostgreSQL")
 
-	<-ctx.Done()
+	storage := store.NewStorage(conn, logger)
 
-	slog.Info("Shutting down server")
+	app := api.NewApplication(logger, cfg, storage)
+
+	r := app.Mount()
+
+	logger.Fatal().Err(app.Run(r))
 }

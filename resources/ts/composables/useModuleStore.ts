@@ -1,18 +1,18 @@
 import { useKy } from '@/composables/useKy.ts'
 import { Module } from '@/types.ts'
 
+interface GetParams {
+  created_by?: number
+  or_created_by?: number
+  all?: boolean
+}
+
 export const useModuleStore = () => {
   const ky = useKy()
 
-  const getMyModules = () => {
+  const getModules = (params: GetParams) => {
     return ky
-      .get('my-modules')
-      .json<{data: Module[]}>()
-  }
-
-  const getAllModules = () => {
-    return ky
-      .get('all-modules')
+      .get('modules', { searchParams: params as Record<string, string> })
       .json<{data: Module[]}>()
   }
 
@@ -22,6 +22,18 @@ export const useModuleStore = () => {
       .json<{data: Module}>()
   }
 
+  const moderateModule = (uuid: string, json: object) => {
+    return ky
+      .patch(`modules/${uuid}/moderate`, { json })
+      .json()
+  }
+
+  const updateModule = (uuid: string, json: object) => {
+    return ky
+      .patch(`modules/${uuid}`, { json })
+      .json()
+  }
+
   const getModuleByUuid = (uuid: string) => {
     return ky
       .get(`modules/${uuid}`)
@@ -29,9 +41,10 @@ export const useModuleStore = () => {
   }
 
   return {
-    getMyModules,
-    getAllModules,
+    getModules,
     createModule,
+    moderateModule,
+    updateModule,
     getModuleByUuid,
   }
 }

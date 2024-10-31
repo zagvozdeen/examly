@@ -7,12 +7,12 @@ import PageRegister from '@/pages/PageRegister.vue'
 import PageMe from '@/pages/PageMe.vue'
 import PageMySettings from '@/pages/PageMySettings.vue'
 import PageCoursesImport from '@/pages/PageCoursesImport.vue'
-import PageMyCourses from '@/pages/PageMyCourses.vue'
-import PageMyCoursesEdit from '@/pages/PageMyCoursesEdit.vue'
-import PageMyModulesEdit from '@/pages/PageMyModulesEdit.vue'
-import PageMyModules from '@/pages/PageMyModules.vue'
-import PageMyQuestionsEdit from '@/pages/PageMyQuestionsEdit.vue'
-import PageMyQuestions from '@/pages/PageMyQuestions.vue'
+import PageMyCourses from '@/pages/PageCourses.vue'
+import PageMyCoursesEdit from '@/pages/PageCoursesEdit.vue'
+import PageMyModulesEdit from '@/pages/PageModulesEdit.vue'
+import PageMyModules from '@/pages/PageModules.vue'
+import PageMyQuestionsEdit from '@/pages/PageQuestionsEdit.vue'
+import PageMyQuestions from '@/pages/PageQuestions.vue'
 import PageStats from '@/pages/PageStats.vue'
 import PageCourseMarathon from '@/pages/PageCourseMarathon.vue'
 import PageTest from '@/pages/PageTest.vue'
@@ -34,59 +34,59 @@ export const createRoutes = (): Array<RouteRecordRaw> => {
           name: 'me',
         },
         {
-          path: '/my/settings',
+          path: '/settings',
           component: PageMySettings,
-          name: 'my.settings',
+          name: 'settings',
         },
         {
-          path: '/my/courses',
+          path: '/courses',
           component: PageMyCourses,
-          name: 'my.courses',
+          name: 'courses',
         },
         {
-          path: '/my/courses/create',
+          path: '/courses/create',
           component: PageMyCoursesEdit,
-          name: 'my.courses.create',
+          name: 'courses.create',
         },
         {
-          path: '/my/courses/:uuid/edit',
+          path: '/courses/:uuid/edit',
           component: PageMyCoursesEdit,
-          name: 'my.courses.edit',
+          name: 'courses.edit',
         },
         {
-          path: '/my/modules',
+          path: '/modules',
           component: PageMyModules,
-          name: 'my.modules',
+          name: 'modules',
         },
         {
-          path: '/my/modules/create',
+          path: '/modules/create',
           component: PageMyModulesEdit,
-          name: 'my.modules.create',
+          name: 'modules.create',
         },
         {
-          path: '/my/modules/:uuid/edit',
+          path: '/modules/:uuid/edit',
           component: PageMyModulesEdit,
-          name: 'my.modules.edit',
+          name: 'modules.edit',
         },
         {
-          path: '/my/questions',
+          path: '/questions',
           component: PageMyQuestions,
-          name: 'my.questions',
+          name: 'questions',
         },
         {
-          path: '/my/questions/create',
+          path: '/questions/create',
           component: PageMyQuestionsEdit,
-          name: 'my.questions.create',
+          name: 'questions.create',
         },
         {
-          path: '/my/questions/:uuid/edit',
+          path: '/questions/:uuid/edit',
           component: PageMyQuestionsEdit,
-          name: 'my.questions.edit',
+          name: 'questions.edit',
         },
         {
-          path: '/my/questions/import',
+          path: '/questions/import',
           component: PageCoursesImport,
-          name: 'my.questions.import',
+          name: 'questions.import',
         },
         {
           path: '/login',
@@ -123,6 +123,16 @@ export const createRoutes = (): Array<RouteRecordRaw> => {
           component: PageTest,
           name: 'tests.show',
         },
+        // {
+        //   path: '/admin',
+        //   children: [
+        //     {
+        //       path: 'courses',
+        //       component: PageAdminCourses,
+        //       name: 'admin.courses',
+        //     },
+        //   ],
+        // },
       ],
     },
   ]

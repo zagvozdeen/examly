@@ -18,8 +18,16 @@
             </router-link>
           </template>
           <main>
+            <div
+              v-if="loading"
+              class="text-base mt-4 text-center"
+            >
+              <n-spin size="small" />
+            </div>
+
             <component
               :is="Component"
+              v-else
               ref="currentComponent"
             />
           </main>
@@ -37,6 +45,7 @@
 import { onMounted, ref, watch } from 'vue'
 import { PageExpose } from '@/types.js'
 import { useAuthStore } from '@/composables/useAuthStore.ts'
+import { NSpin } from 'naive-ui'
 import AppFooter from '@/components/AppFooter.vue'
 import AppHeader from '@/components/AppHeader.vue'
 import AppLogo from '@/components/AppLogo.vue'
@@ -45,12 +54,14 @@ import AppHeaderWithBack from '@/components/AppHeaderWithBack.vue'
 const authStore = useAuthStore()
 
 const currentComponent = ref<PageExpose>()
+const loading = ref<boolean>(true)
 
 watch(currentComponent, (component) => {
   document.title = component?.title || import.meta.env.VITE_APP_NAME
 })
 
-onMounted(() => {
-  authStore.getMe()
+onMounted(async () => {
+  await authStore.getMe()
+  loading.value = false
 })
 </script>

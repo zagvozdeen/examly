@@ -1,3 +1,6 @@
+include .env
+export
+
 run:
 	@go run cmd/api/main.go
 
@@ -16,10 +19,10 @@ migration:
 	@migrate create -ext sql -dir ./migrations -seq $(filter-out $@, $(MAKECMDGOALS))
 
 migrate-up:
-	@go run cmd/migrate/main.go up
+	@migrate -source file://migrations -database ${DB_ADDR} up
 
 migrate-down:
-	@go run cmd/migrate/main.go down
+	@migrate -source file://migrations -database ${DB_ADDR} down
 
 bash:
 	@docker compose exec node /bin/sh

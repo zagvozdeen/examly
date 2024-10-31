@@ -43,19 +43,26 @@
     </router-link>
 
     <div class="grid grid-cols-2 gap-4">
-      <router-link
-        :to="{
-          name: 'courses.show.marathon',
-          params: { uuid: course.uuid },
-        }"
+      <!--      <router-link-->
+      <!--        :to="{-->
+      <!--          name: 'courses.show.marathon',-->
+      <!--          params: { uuid: course.uuid },-->
+      <!--        }"-->
+      <!--      >-->
+      <!--        <n-button-->
+      <!--          type="info"-->
+      <!--          class="!w-full"-->
+      <!--        >-->
+      <!--          Марафон-->
+      <!--        </n-button>-->
+      <!--      </router-link>-->
+
+      <n-button
+        type="info"
+        @click="handleCreateMarathon"
       >
-        <n-button
-          type="info"
-          class="!w-full"
-        >
-          Марафон
-        </n-button>
-      </router-link>
+        Марафон
+      </n-button>
 
       <n-button
         type="error"
@@ -95,11 +102,12 @@
 </template>
 
 <script lang="ts" setup>
-import { Course, CourseStats, PageExpose } from '@/types.ts'
+import { Course, CourseStats, PageExpose, TestSessionType } from '@/types.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'
 import { onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { NButton, useMessage } from 'naive-ui'
+import { useTestSessionStore } from '@/composables/useTestSessionStore.ts'
 
 defineExpose<PageExpose>({
   title: 'Курс',
@@ -109,21 +117,48 @@ const route = useRoute()
 const router = useRouter()
 const message = useMessage()
 const courseStore = useCourseStore()
+const testSessionStore = useTestSessionStore()
 
 const course = ref<Course>()
 const stats = ref<CourseStats>()
 const errorsCourse = ref<Course>()
 
 const handleCreateExam = () => {
-  courseStore
-    .createExam(route.params.uuid as string)
+  const payload = {
+    course_uuid: course.value?.uuid,
+    type: TestSessionType.Exam,
+    shuffle: true,
+  }
+
+  testSessionStore
+    .createTestSession(payload)
     .then(data => {
+      console.log(data)
       message.success('Экзамен начат!')
 
-      router.push({
-        name: 'tests.show',
-        params: { uuid: data.data },
-      })
+      // router.push({
+      //   name: 'tests.show',
+      //   params: { uuid: data.data },
+      // })
+    })
+}
+
+const handleCreateMarathon = () => {
+  const payload = {
+    course_uuid: course.value?.uuid,
+    type: TestSessionType.Marathon,
+    shuffle: true,
+  }
+
+  testSessionStore
+    .createTestSession(payload)
+    .then(data => {
+      message.success('Марафон начат!')
+
+      // router.push({
+      //   name: 'tests.show',
+      //   params: { uuid: data.data },
+      // })
     })
 }
 
@@ -131,8 +166,9 @@ onMounted(() => {
   courseStore
     .getCourseByUuid(route.params.uuid as string)
     .then(data => {
+      console.log(data)
       course.value = data.data
-      stats.value = data.stats
+      stats.value = data.stats || []
       errorsCourse.value = data.errors
     })
 })
