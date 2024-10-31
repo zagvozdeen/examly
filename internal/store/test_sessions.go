@@ -47,16 +47,68 @@ type TestSessionStore struct {
 	conn *pgxpool.Pool
 }
 
-func (s *TestSessionStore) GetByID(ctx context.Context, id int) (TestSession, error) {
-	return TestSession{}, nil
+func (s *TestSessionStore) GetByID(ctx context.Context, id int) (t TestSession, err error) {
+	err = s.conn.QueryRow(
+		ctx,
+		"SELECT id, uuid, name, type, user_id, course_id, question_ids, last_question_id, deleted_at, created_at, updated_at FROM test_sessions WHERE id = $1 AND deleted_at IS NULL",
+		id,
+	).Scan(
+		&t.ID,
+		&t.UUID,
+		&t.Name,
+		&t.Type,
+		&t.UserID,
+		&t.CourseID,
+		&t.QuestionIDs,
+		&t.LastQuestionID,
+		&t.DeletedAt,
+		&t.CreatedAt,
+		&t.UpdatedAt,
+	)
+	return
 }
 
-func (s *TestSessionStore) GetByUUID(ctx context.Context, uuid string) (TestSession, error) {
-	return TestSession{}, nil
+func (s *TestSessionStore) GetByUUID(ctx context.Context, uuid string) (t TestSession, err error) {
+	err = s.conn.QueryRow(
+		ctx,
+		"SELECT id, uuid, name, type, user_id, course_id, question_ids, last_question_id, deleted_at, created_at, updated_at FROM test_sessions WHERE uuid = $1 AND deleted_at IS NULL",
+		uuid,
+	).Scan(
+		&t.ID,
+		&t.UUID,
+		&t.Name,
+		&t.Type,
+		&t.UserID,
+		&t.CourseID,
+		&t.QuestionIDs,
+		&t.LastQuestionID,
+		&t.DeletedAt,
+		&t.CreatedAt,
+		&t.UpdatedAt,
+	)
+	return
 }
 
-func (s *TestSessionStore) GetByUserIDAndType(ctx context.Context, id int, t enum.TestSessionType) (TestSession, error) {
-	return TestSession{}, nil
+func (s *TestSessionStore) GetByUserIDAndType(ctx context.Context, id int, t enum.TestSessionType) (ts TestSession, err error) {
+	err = s.conn.QueryRow(
+		ctx,
+		"SELECT id, uuid, name, type, user_id, course_id, question_ids, last_question_id, deleted_at, created_at, updated_at FROM test_sessions WHERE user_id = $1 AND type = $2 AND deleted_at IS NULL",
+		id,
+		t.String(),
+	).Scan(
+		&ts.ID,
+		&ts.UUID,
+		&ts.Name,
+		&ts.Type,
+		&ts.UserID,
+		&ts.CourseID,
+		&ts.QuestionIDs,
+		&ts.LastQuestionID,
+		&ts.DeletedAt,
+		&ts.CreatedAt,
+		&ts.UpdatedAt,
+	)
+	return
 }
 
 func (s *TestSessionStore) Create(ctx context.Context, test *TestSession) error {
@@ -75,7 +127,19 @@ func (s *TestSessionStore) Create(ctx context.Context, test *TestSession) error 
 }
 
 func (s *TestSessionStore) Update(ctx context.Context, test *TestSession) error {
-	return nil
+	_, err := s.conn.Exec(
+		ctx,
+		"UPDATE test_sessions SET name = $1, type = $2, user_id = $3, course_id = $4, question_ids = $5, last_question_id = $6, updated_at = $7 WHERE id = $8",
+		test.Name,
+		test.Type,
+		test.UserID,
+		test.CourseID,
+		test.QuestionIDs,
+		test.LastQuestionID,
+		test.UpdatedAt,
+		test.ID,
+	)
+	return err
 }
 
 func (s *TestSessionStore) GetStats(ctx context.Context, userID int) (stats []TestSessionStats, err error) {
