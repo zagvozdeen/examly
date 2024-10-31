@@ -40,6 +40,7 @@ type TestSessionsStore interface {
 	Create(ctx context.Context, test *TestSession) error
 	Update(ctx context.Context, test *TestSession) error
 	GetStats(ctx context.Context, userID int) ([]TestSessionStats, error)
+	GetByCourseID(ctx context.Context, id int) ([]TestSession, error)
 }
 
 type TestSessionStore struct {
@@ -119,4 +120,37 @@ func (s *TestSessionStore) GetStats(ctx context.Context, userID int) (stats []Te
 	}
 
 	return stats, err
+}
+
+func (s *TestSessionStore) GetByCourseID(ctx context.Context, id int) (ts []TestSession, err error) {
+	rows, err := s.conn.Query(
+		ctx,
+		"SELECT id, uuid, name, type, user_id, course_id, question_ids, last_question_id, deleted_at, created_at, updated_at FROM test_sessions WHERE course_id = $1 AND deleted_at IS NULL",
+		id,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var t TestSession
+		err = rows.Scan(
+			&t.ID,
+			&t.UUID,
+			&t.Name,
+			&t.Type,
+			&t.UserID,
+			&t.CourseID,
+			&t.QuestionIDs,
+			&t.LastQuestionID,
+			&t.DeletedAt,
+			&t.CreatedAt,
+			&t.UpdatedAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		ts = append(ts, t)
+	}
+	return
 }
