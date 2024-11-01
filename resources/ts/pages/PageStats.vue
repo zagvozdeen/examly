@@ -6,7 +6,7 @@
     >Моя статистика</span>
 
     <div
-      v-if="stats.length === 0"
+      v-if="testSessions.length === 0"
       class="text-center text-base"
     >
       Пройдите хотя бы один тест, чтобы увидеть статистику
@@ -24,7 +24,7 @@
         </div>
       </li>
       <li
-        v-for="stat in stats"
+        v-for="stat in testSessions"
         :key="stat.id"
         class="text-xs"
       >
@@ -35,18 +35,18 @@
           }"
           class="grid grid-cols-[1fr_40px_48px] gap-y-2 p-2 hover:bg-obscure-600"
         >
-          <span>{{ TestSessionTypeTranslates[stat.type] }} от {{ format(stat.created_at, 'dd.MM.yyyy HH:mm') }}</span>
+          <span>{{ TestSessionTypeTranslates[stat.type] }} от {{ format(parseISO(stat.created_at), 'dd.MM.yyyy HH:mm') }}</span>
           <span class="text-right">
             <span class="text-green-400">{{ stat.correct }}</span>
             <span> / </span>
             <span class="text-red-400">{{ stat.incorrect }}</span>
           </span>
-          <span class="text-right text-gray-400">{{ stat.total }}</span>
+          <span class="text-right text-gray-400">{{ stat.question_ids.length }}</span>
           <span class="relative h-1 col-span-full bg-gray-700">
             <span
               class="absolute h-1 block bg-blue-500"
               :style="{
-                'width': `${Math.round((stat.correct + stat.incorrect) / stat.total * 1000) / 10}%`,
+                'width': `${Math.round((stat.correct + stat.incorrect) / stat.question_ids.length * 1000) / 10}%`,
               }"
             />
           </span>
@@ -57,19 +57,18 @@
 </template>
 
 <script lang="ts" setup>
-import { FullCourseStats, PageExpose, TestSessionTypeTranslates } from '@/types.ts'
+import { PageExpose, TestSession, TestSessionTypeTranslates } from '@/types.ts'
 import { onMounted, ref } from 'vue'
-import { useStatsStore } from '@/composables/useStatsStore.ts'
 import { useRoute, useRouter } from 'vue-router'
-import { format } from 'date-fns'
+import { format, parseISO } from 'date-fns'
+import { useTestSessionStore } from '@/composables/useTestSessionStore.ts'
 
 const route = useRoute()
 const router = useRouter()
-const statsStore = useStatsStore()
+const testSessionStore = useTestSessionStore()
+const testSessions = ref<TestSession[]>([])
 
 const isStatsByCourse = route.name === 'courses.stats'
-
-const stats = ref<FullCourseStats[]>([])
 
 defineExpose<PageExpose>({
   title: 'Статистика',
@@ -82,20 +81,14 @@ defineExpose<PageExpose>({
 })
 
 onMounted(() => {
-  if (isStatsByCourse) {
-    statsStore
-      .getCourseStats(route.params.uuid as string)
-      .then(data => {
-        stats.value = data.data
-      })
-  } else {
-    statsStore
-      .getStats()
-      .then(data => {
-        if (data.data) {
-          stats.value = data.data
-        }
-      })
-  }
+  testSessionStore
+    .getTestSessions({
+      course_uuid: route.params.uuid as (string | undefined),
+    })
+    .then(data => {
+      if (data.data) {
+        testSessions.value = data.data
+      }
+    })
 })
 </script>

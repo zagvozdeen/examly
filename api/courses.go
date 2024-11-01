@@ -121,7 +121,6 @@ func (app *Application) getCourse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
-	user := getUserFromRequest(r)
 
 	course, err := app.store.CoursesStore.GetByUUID(ctx, uid)
 	if err != nil {
@@ -132,20 +131,15 @@ func (app *Application) getCourse(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	if course.CreatedBy != user.ID && user.Role.Level() < enum.ModeratorRole.Level() {
-		app.forbiddenErrorResponse(w, r, errors.New("forbidden"))
-		return
-	}
-
-	questions, err := app.store.QuestionsStore.GetByCourseID(ctx, course.ID)
+	ts, err := app.store.TestSessionsStore.GetByCourseID(ctx, course.ID)
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return
 	}
+	course.TestSessions = ts
 
 	app.jsonResponse(w, r, http.StatusOK, map[string]any{
-		"data":      course,
-		"questions": questions,
+		"data": course,
 	})
 }
 

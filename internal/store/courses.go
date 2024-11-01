@@ -14,19 +14,20 @@ import (
 )
 
 type Course struct {
-	ID               int         `json:"id"`
-	UUID             string      `json:"uuid"`
-	Name             string      `json:"name"`
-	Description      string      `json:"description"`
-	Color            string      `json:"color"`
-	Icon             string      `json:"icon"`
-	Status           enum.Status `json:"status"`
-	ModerationReason null.String `json:"moderation_reason"`
-	CreatedBy        int         `json:"created_by"`
-	ModeratedBy      null.Int    `json:"moderated_by"`
-	DeletedAt        null.Time   `json:"deleted_at"`
-	CreatedAt        time.Time   `json:"created_at"`
-	UpdatedAt        time.Time   `json:"updated_at"`
+	ID               int           `json:"id"`
+	UUID             string        `json:"uuid"`
+	Name             string        `json:"name"`
+	Description      string        `json:"description"`
+	Color            string        `json:"color"`
+	Icon             string        `json:"icon"`
+	Status           enum.Status   `json:"status"`
+	ModerationReason null.String   `json:"moderation_reason"`
+	CreatedBy        int           `json:"created_by"`
+	ModeratedBy      null.Int      `json:"moderated_by"`
+	DeletedAt        null.Time     `json:"deleted_at"`
+	CreatedAt        time.Time     `json:"created_at"`
+	UpdatedAt        time.Time     `json:"updated_at"`
+	TestSessions     []TestSession `json:"test_sessions"`
 }
 
 type CoursesStore interface {
