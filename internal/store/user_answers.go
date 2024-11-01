@@ -16,11 +16,42 @@ type UserAnswer struct {
 }
 
 type UserAnswersStore interface {
+	GetByTestSessionID(ctx context.Context, id int) ([]UserAnswer, error)
 	Create(ctx context.Context, answer *UserAnswer) error
 }
 
 type UserAnswerStore struct {
 	conn *pgxpool.Pool
+}
+
+func (s *UserAnswerStore) GetByTestSessionID(ctx context.Context, id int) (answers []UserAnswer, err error) {
+	rows, err := s.conn.Query(
+		ctx,
+		"SELECT id, test_session_id, question_id, answer_data, is_correct, answered_at FROM user_answers WHERE test_session_id = $1",
+		id,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var answer UserAnswer
+		err = rows.Scan(
+			&answer.ID,
+			&answer.TestSessionID,
+			&answer.QuestionID,
+			&answer.AnswerData,
+			&answer.IsCorrect,
+			&answer.AnsweredAt,
+		)
+		if err != nil {
+			return nil, err
+		}
+		answers = append(answers, answer)
+	}
+
+	return
 }
 
 func (s *UserAnswerStore) Create(ctx context.Context, answer *UserAnswer) error {

@@ -121,6 +121,7 @@ export interface Question {
   module_id: number | null
   created_at: string
   updated_at: string
+  user_answers: UserAnswer[] | null
 }
 
 export interface Option {
@@ -143,19 +144,19 @@ export const TestSessionTypeTranslates: Record<TestSessionType, string> = {
   [TestSessionType.Exam]: 'Экзамен',
 }
 
-export interface UserCourse {
-  id: number
-  uuid: string
-  name: string
-  type: TestSessionType
-  user_id: number
-  course_id: number
-  last_question_id: number | null
-  created_at: string
-  updated_at: string
-  modules: UserModule[]
-  questions: UserQuestion[]
-}
+// export interface UserCourse {
+//   id: number
+//   uuid: string
+//   name: string
+//   type: TestSessionType
+//   user_id: number
+//   course_id: number
+//   last_question_id: number | null
+//   created_at: string
+//   updated_at: string
+//   modules: UserModule[]
+//   questions: UserQuestion[]
+// }
 
 export interface UserModule {
   id: number
@@ -165,38 +166,54 @@ export interface UserModule {
   updated_at: string
 }
 
-export interface UserQuestion {
-  id: number
-  uuid: string
-  content: string
-  explanation: string
-  is_true: boolean | null
-  course_id: number
-  module_id: number | null
-  question_id: number
-  file_id: number
-  type: QuestionType
-  created_at: string
-  updated_at: string
-  answers: UserAnswer[]
-}
+// export interface UserQuestion {
+//   id: number
+//   uuid: string
+//   content: string
+//   explanation: string
+//   is_true: boolean | null
+//   course_id: number
+//   module_id: number | null
+//   question_id: number
+//   file_id: number
+//   type: QuestionType
+//   created_at: string
+//   updated_at: string
+//   answers: UserAnswer[]
+// }
 
 export interface UserAnswer {
   id: number
-  content: string
+  is_correct: boolean
+  answer_data: string
   question_id: number
-  is_chosen: boolean
-  is_true: boolean
-  created_at: string
-  updated_at: string
+  test_session_id: number
+  answered_at: string
 }
 
-export interface FullCourseStats {
+// export interface FullCourseStats {
+//   id: number
+//   uuid: string
+//   type: TestSessionType
+//   created_at: number
+//   correct: number
+//   incorrect: number
+//   total: number
+// }
+
+export interface TestSession {
   id: number
   uuid: string
+  name: string
+  course_id: number
+  user_id: number
+  last_question_id: number | null
+  question_ids: number[]
+  questions: Question[] | null
   type: TestSessionType
-  created_at: number
   correct: number
   incorrect: number
-  total: number
+  deleted_at: string | null
+  created_at: string
+  updated_at: string
 }

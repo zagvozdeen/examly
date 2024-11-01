@@ -1,20 +1,20 @@
 <template>
   <div
-    v-if="course && currentQuestion"
+    v-if="testSession && currentQuestion"
     class="flex flex-col gap-4"
   >
     <ul class="flex gap-2 overflow-auto pb-4">
       <li
-        v-for="(question, index) in course.questions"
+        v-for="(question, index) in testSession.questions"
         :key="question.id"
       >
         <button
           class="w-8 h-8 rounded relative"
           :class="{
-            'bg-obscure-500': question.is_true === null && currentQuestion.id === question.id,
-            'bg-obscure-600 hover:bg-obscure-500': question.is_true === null && currentQuestion.id !== question.id,
-            'bg-green-500 hover:bg-green-600': question.is_true !== null && question.is_true,
-            'bg-red-500 hover:bg-red-600': question.is_true !== null && !question.is_true,
+            'bg-obscure-500': question.user_answers === null && currentQuestion.id === question.id,
+            'bg-obscure-600 hover:bg-obscure-500': question.user_answers === null && currentQuestion.id !== question.id,
+            'bg-green-500 hover:bg-green-600': question.user_answers !== null && question.user_answers[0].is_correct,
+            'bg-red-500 hover:bg-red-600': question.user_answers !== null && !question.user_answers[0].is_correct,
           }"
           @click="onClickQuestion(question)"
         >
@@ -30,30 +30,38 @@
     </ul>
 
     <div
-      v-if="!currentQuestion.file_id"
+      v-if="!currentQuestion.content"
       class="grid grid-cols-[min-content_1fr] items-center gap-2 -mt-4"
     >
-      <span class="text-gray-400 text-xs whitespace-nowrap select-none">Вопрос без изображения</span>
+      <span class="text-gray-400 text-xs whitespace-nowrap select-none">Вопрос без содержания</span>
+      <span class="h-px bg-obscure-50d0 bg-gray-400" />
+    </div>
+    <div
+      v-else
+      class="grid grid-cols-[min-content_1fr] items-center gap-2 -mt-4"
+    >
+      <span class="text-gray-400 text-xs whitespace-nowrap select-none">Вопрос с доп. информацией</span>
       <span class="h-px bg-obscure-50d0 bg-gray-400" />
     </div>
 
+    <span class="text-base">{{ currentQuestion.title }}</span>
     <span class="text-base">{{ currentQuestion.content }}</span>
 
     <n-input
-      v-if="currentQuestion.type === QuestionType.InputType"
+      v-if="currentQuestion.type === QuestionType.Plaintext"
       v-model:value="form.input"
       size="small"
       placeholder="Введите ответ"
-      :disabled="currentQuestion.is_true !== null"
+      :disabled="currentQuestion.user_answers !== null"
       @keydown.enter="checkAnswer"
     />
 
     <ul
-      v-if="currentQuestion.type === QuestionType.OneAnswerType"
+      v-if="currentQuestion.type === QuestionType.SingleChoice"
       class="flex flex-col gap-2"
     >
       <li
-        v-for="(answer, index) in currentQuestion.answers"
+        v-for="(answer, index) in currentQuestion.options"
         :key="answer.id"
       >
         <label
@@ -79,11 +87,11 @@
     </ul>
 
     <ul
-      v-if="currentQuestion.type === QuestionType.MultiplyAnswersType"
+      v-if="currentQuestion.type === QuestionType.MultipleChoice"
       class="flex flex-col gap-2"
     >
       <li
-        v-for="(answer, index) in currentQuestion.answers"
+        v-for="(answer, index) in currentQuestion.options"
         :key="answer.id"
       >
         <label
@@ -108,8 +116,8 @@
       </li>
     </ul>
 
-    <template v-if="currentQuestion.is_true !== null">
-      <span>Правильный ответ: {{ currentQuestion.answers.filter(a => a.is_true).map(a => a.content).join(', ') }}</span>
+    <template v-if="currentQuestion.user_answers !== null">
+      <span>Правильный ответ: {{ currentQuestion.options.filter(a => a.is_correct).map(a => a.content).join(', ') }}</span>
       <n-button
         type="primary"
         size="small"
@@ -121,7 +129,7 @@
     </template>
 
     <n-button
-      v-show="(form.answer_id || form.answers_ids.length > 0 || form.input.length > 0) && currentQuestion.is_true === null"
+      v-show="! form.answers_ids || ((form.answer_id || form.input.length > 0) && currentQuestion.user_answers === null)"
       type="primary"
       size="small"
       :loading="loading"
@@ -134,11 +142,14 @@
 </template>
 
 <script lang="ts" setup>
-import { PageExpose, QuestionType, UserCourse, UserQuestion } from '@/types.ts'
+import { PageExpose, Question, QuestionType, TestSession } from '@/types.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { NButton, NInput, useLoadingBar, useMessage } from 'naive-ui'
+import { useTestSessionStore } from '@/composables/useTestSessionStore.ts'
+import { useUserAnswerStore } from '@/composables/useUserAnswerStore.ts'
+import * as test from 'node:test'
 
 defineExpose<PageExpose>({
   title: 'Прохождение теста',
@@ -148,10 +159,12 @@ const route = useRoute()
 const courseStore = useCourseStore()
 const loadingBar = useLoadingBar()
 const message = useMessage()
+const testSessionStore = useTestSessionStore()
+const userAnswerStore = useUserAnswerStore()
 
 const loading = ref<boolean>(false)
-const course = ref<UserCourse>()
-const currentQuestion = ref<UserQuestion>()
+const testSession = ref<TestSession>()
+const currentQuestion = ref<Question>()
 const form = reactive({
   answer_id: null as null | number,
   answers_ids: [] as number[],
@@ -164,12 +177,12 @@ const clearForm = () => {
   form.input = ''
 }
 
-const onClickQuestion = (question: UserQuestion) => {
+const onClickQuestion = (question: Question) => {
   currentQuestion.value = question
 }
 
 const checkAnswer = () => {
-  if (!currentQuestion.value) {
+  if (!currentQuestion.value || !testSession.value) {
     message.error('Вопрос не найден')
     return
   }
@@ -177,19 +190,16 @@ const checkAnswer = () => {
   loading.value = true
   loadingBar.start()
 
-  courseStore
-    .checkAnswer(currentQuestion.value.uuid, form)
+  userAnswerStore
+    .checkAnswer({
+      course_id: testSession.value.id,
+      question_id: currentQuestion.value.id,
+      answer_id: form.answer_id,
+      answers_ids: form.answers_ids,
+      plaintext: form.input,
+    })
     .then(data => {
-      if (course.value) {
-        const index = course.value.questions.findIndex(question => question.id === currentQuestion.value?.id)
-        course.value.questions[index] = data.data
-        currentQuestion.value = data.data
-
-        if (data.data.is_true) {
-          nextQuestion()
-        }
-      }
-
+      console.log(data)
       loadingBar.finish()
     })
     .catch(() => {
@@ -198,54 +208,91 @@ const checkAnswer = () => {
     .finally(() => {
       loading.value = false
     })
+
+  // courseStore
+  //   .checkAnswer(currentQuestion.value.uuid, form)
+  //   .then(data => {
+  //     if (testSession.value) {
+  //       const index = testSession.value.questions.findIndex(question => question.id === currentQuestion.value?.id)
+  //       testSession.value.questions[index] = data.data
+  //       currentQuestion.value = data.data
+  //
+  //       if (data.data.is_true) {
+  //         nextQuestion()
+  //       }
+  //     }
+  //
+  //     loadingBar.finish()
+  //   })
+  //   .catch(() => {
+  //     loadingBar.error()
+  //   })
+  //   .finally(() => {
+  //     loading.value = false
+  //   })
 }
 
 const nextQuestionIndex = computed(() => {
-  if (!course.value) return -1
+  if (!testSession.value || !testSession.value.questions) return -1
 
-  const index = course.value.questions.findIndex(question => question.id === currentQuestion.value?.id)
+  const index = testSession.value.questions.findIndex(question => question.id === currentQuestion.value?.id)
 
   if (index === -1) return -1
 
-  return course.value.questions[index + 1] ? index + 1 : -1
+  return testSession.value.questions[index + 1] ? index + 1 : -1
 })
 
 const nextQuestion = () => {
-  if (nextQuestionIndex.value !== -1 && course.value) {
-    currentQuestion.value = course.value.questions[nextQuestionIndex.value]
+  if (nextQuestionIndex.value !== -1 && testSession.value && testSession.value.questions) {
+    currentQuestion.value = testSession.value.questions[nextQuestionIndex.value]
   }
 }
 
-watch(currentQuestion, (question: UserQuestion | undefined) => {
+watch(currentQuestion, (question: Question | undefined) => {
   clearForm()
 
-  if (question && question.is_true !== null) {
+  if (question && question.user_answers !== null) {
     switch (question.type) {
-    case QuestionType.OneAnswerType:
-      form.answer_id = question.answers.find(answer => answer.is_chosen)?.id || null
+    case QuestionType.SingleChoice:
+      form.answer_id = question.options.find(answer => answer.is_chosen)?.id || null
       break
-    case QuestionType.MultiplyAnswersType:
-      form.answers_ids = question.answers.filter(answer => answer.is_chosen).map(answer => answer.id)
+    case QuestionType.MultipleChoice:
+      form.answers_ids = question.options.filter(answer => answer.is_chosen).map(answer => answer.id)
       break
-    case QuestionType.InputType:
-      form.input = question.answers.find(answer => answer.is_chosen)?.content || ''
+    case QuestionType.Plaintext:
+      form.input = question.options.find(answer => answer.is_chosen)?.content || ''
       break
     }
   }
 })
 
 onMounted(() => {
-  courseStore
-    .getUserCourseByUuid(route.params.uuid as string)
+  testSessionStore
+    .getTestSession(route.params.uuid as string)
     .then(data => {
-      course.value = data.data
+      if (data.data && data.data.questions) {
+        testSession.value = data.data
 
-      if (data.data.last_question_id) {
-        const question = data.data.questions.find(question => question.id === data.data.last_question_id)
-        currentQuestion.value = question || data.data.questions[0]
-      } else {
-        currentQuestion.value = data.data.questions[0]
+        if (data.data.last_question_id) {
+          const question = data.data.questions.find(question => question.id === data.data.last_question_id)
+          currentQuestion.value = question || data.data.questions[0]
+        } else {
+          currentQuestion.value = data.data.questions[0]
+        }
       }
+      // console.log(data.data)
     })
+  // courseStore
+  //   .getUserCourseByUuid(route.params.uuid as string)
+  //   .then(data => {
+  //     testSession.value = data.data
+  //
+  //     if (data.data.last_question_id) {
+  //       const question = data.data.questions.find(question => question.id === data.data.last_question_id)
+  //       currentQuestion.value = question || data.data.questions[0]
+  //     } else {
+  //       currentQuestion.value = data.data.questions[0]
+  //     }
+  //   })
 })
 </script>
