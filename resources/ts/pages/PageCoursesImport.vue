@@ -117,7 +117,7 @@ const onSubmit = async () => {
 
 onMounted(() => {
   courseStore
-    .getCourses()
+    .getCourses({})
     .then(data => {
       courses.value = data.data
     })

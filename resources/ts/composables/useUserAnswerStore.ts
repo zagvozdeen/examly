@@ -1,4 +1,5 @@
 import { useKy } from '@/composables/useKy.ts'
+import { UserAnswer } from '@/types.ts'
 
 export const useUserAnswerStore = () => {
   const ky = useKy()
@@ -6,7 +7,7 @@ export const useUserAnswerStore = () => {
   const checkAnswer = (json: object) => {
     return ky
       .post('user-answers', { json })
-      .json()
+      .json<{data: UserAnswer}>()
   }
 
   return {

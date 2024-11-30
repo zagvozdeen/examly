@@ -1,11 +1,11 @@
 package api
 
 import (
-	"encoding/json"
 	"errors"
 	"github.com/den4ik117/examly/internal/enum"
 	"github.com/den4ik117/examly/internal/store"
 	"github.com/google/uuid"
+	"github.com/guregu/null/v5"
 	"net/http"
 	"slices"
 	"time"
@@ -28,16 +28,6 @@ func (app *Application) checkAnswer(w http.ResponseWriter, r *http.Request) {
 
 	if err := Validate.Struct(payload); err != nil {
 		app.badRequestResponse(w, r, err)
-		return
-	}
-
-	data, err := json.Marshal(map[string]any{
-		"answer_id":   payload.AnswerID,
-		"answers_ids": payload.AnswersIDs,
-		"plaintext":   payload.Plaintext,
-	})
-	if err != nil {
-		app.internalServerError(w, r, err)
 		return
 	}
 
@@ -93,11 +83,14 @@ func (app *Application) checkAnswer(w http.ResponseWriter, r *http.Request) {
 
 	if payload.AnswerID != 0 {
 		for _, option := range question.Options {
-			correct = option.IsCorrect && option.ID == payload.AnswerID
+			if option.IsCorrect {
+				correct = option.ID == payload.AnswerID
+				break
+			}
 		}
 	}
 
-	if payload.AnswersIDs != nil {
+	if len(payload.AnswersIDs) > 0 {
 		correct = true
 		for _, option := range question.Options {
 			for _, id := range payload.AnswersIDs {
@@ -118,9 +111,13 @@ func (app *Application) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	answer := &store.UserAnswer{
 		TestSessionID: payload.TestSessionID,
 		QuestionID:    payload.QuestionID,
-		AnswerData:    string(data),
-		IsCorrect:     correct,
-		AnsweredAt:    time.Now(),
+		AnswerData: map[string]any{
+			"answer_id":   payload.AnswerID,
+			"answers_ids": payload.AnswersIDs,
+			"plaintext":   payload.Plaintext,
+		},
+		IsCorrect:  correct,
+		AnsweredAt: time.Now(),
 	}
 
 	err = app.store.UserAnswersStore.Create(ctx, answer)
@@ -130,30 +127,29 @@ func (app *Application) checkAnswer(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if !correct {
-		mistake, err := app.store.TestSessionsStore.GetByUserIDAndType(ctx, user.ID, enum.MistakeTestSessionType)
+		mistake, err := app.store.TestSessionsStore.GetTestSession(ctx, user.ID, question.CourseID, enum.MistakeTestSessionType)
 		if err != nil {
-			if errors.Is(err, store.ErrNotFound) {
-				uid, err := uuid.NewV7()
-				if err != nil {
-					app.internalServerError(w, r, err)
-					return
-				}
-
-				mistake = store.TestSession{
-					UUID:        uid.String(),
-					Name:        "Mistakes",
-					Type:        enum.MistakeTestSessionType,
-					UserID:      user.ID,
-					QuestionIDs: []int{question.ID},
-					CreatedAt:   time.Now(),
-					UpdatedAt:   time.Now(),
-				}
-				err = app.store.TestSessionsStore.Create(ctx, &mistake)
-				if err != nil {
-					app.internalServerError(w, r, err)
-					return
-				}
-			} else {
+			if !errors.Is(err, store.ErrNotFound) {
+				app.internalServerError(w, r, err)
+				return
+			}
+			uid, err := uuid.NewV7()
+			if err != nil {
+				app.internalServerError(w, r, err)
+				return
+			}
+			mistake = store.TestSession{
+				UUID:        uid.String(),
+				Name:        "Mistakes",
+				Type:        enum.MistakeTestSessionType,
+				UserID:      user.ID,
+				CourseID:    null.IntFrom(int64(question.CourseID)),
+				QuestionIDs: []int{question.ID},
+				CreatedAt:   time.Now(),
+				UpdatedAt:   time.Now(),
+			}
+			err = app.store.TestSessionsStore.Create(ctx, &mistake)
+			if err != nil {
 				app.internalServerError(w, r, err)
 				return
 			}
@@ -167,9 +163,13 @@ func (app *Application) checkAnswer(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	err = app.store.TestSessionsStore.SetLastQuestionID(ctx, test.ID, question.ID, time.Now())
+	if err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
 	app.jsonResponse(w, r, http.StatusCreated, map[string]any{
 		"data": answer,
 	})
 }
-
-//func (app *Application) name(w http.ResponseWriter, r *http.Request) {}

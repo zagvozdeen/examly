@@ -144,10 +144,12 @@ func (s *QuestionStore) Get(ctx context.Context, filter GetQuestionsFilter) (que
 func (s *QuestionStore) GetByID(ctx context.Context, id int) (question Question, err error) {
 	err = s.conn.QueryRow(
 		ctx,
-		"SELECT id, options FROM questions WHERE id = $1 AND deleted_at IS NULL",
+		"SELECT id, course_id, type, options FROM questions WHERE id = $1 AND deleted_at IS NULL",
 		id,
 	).Scan(
 		&question.ID,
+		&question.CourseID,
+		&question.Type,
 		&question.Options,
 	)
 
@@ -237,6 +239,9 @@ func (s *QuestionStore) GetByCourseID(ctx context.Context, id int) (questions []
 }
 
 func (s *QuestionStore) GetByIDs(ctx context.Context, ids []int) (questions []Question, err error) {
+	if len(ids) == 0 {
+		return []Question{}, nil
+	}
 	bindings := make([]string, len(ids))
 	params := make([]any, len(ids))
 	for i, id := range ids {

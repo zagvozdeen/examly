@@ -93,15 +93,15 @@
 </template>
 
 <script lang="ts" setup>
-import { NForm, NFormItem, NInput, NButton, FormInst, FormRules, useMessage, NSelect } from 'naive-ui'
+import { NForm, NFormItem, NInput, NButton, FormInst, FormRules, useMessage } from 'naive-ui'
 import { onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { StatusTranslates, PageExpose, Status, Course } from '@/types.ts'
+import { PageExpose, Course } from '@/types.ts'
 import { useForm } from '@/composables/useForm.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'
 import AppColorSelector from '@/components/AppColorSelector.vue'
 import AppIconSelector from '@/components/AppIconSelector.vue'
-import { isAdminMode, isModerator } from '@/composables/useAuthStore.ts'
+import { isAdminMode } from '@/composables/useAuthStore.ts'
 import AppModerationForm from '@/components/AppModerationForm.vue'
 
 const form = useForm()

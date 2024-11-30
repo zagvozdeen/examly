@@ -1,5 +1,5 @@
 import { useKy } from '@/composables/useKy.ts'
-import { TestSession } from '@/types.ts'
+import { TestSession, UserAnswer } from '@/types.ts'
 
 interface GetParams {
   course_uuid?: string
@@ -17,13 +17,16 @@ export const useTestSessionStore = () => {
   const getTestSession = (uuid: string) => {
     return ky
       .get(`test-sessions/${uuid}`)
-      .json<{data: TestSession}>()
+      .json<{
+        data: TestSession
+        answers: Record<number, UserAnswer>
+      }>()
   }
 
   const createTestSession = (json: object) => {
     return ky
       .post('test-sessions', { json })
-      .json()
+      .json<{data: TestSession}>()
   }
 
   return {

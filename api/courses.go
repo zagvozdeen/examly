@@ -121,6 +121,7 @@ func (app *Application) getCourse(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ctx := r.Context()
+	user := getUserFromRequest(r)
 
 	course, err := app.store.CoursesStore.GetByUUID(ctx, uid)
 	if err != nil {
@@ -138,8 +139,37 @@ func (app *Application) getCourse(w http.ResponseWriter, r *http.Request) {
 	}
 	course.TestSessions = ts
 
+	mistakes, err := app.store.TestSessionsStore.GetTestSession(ctx, user.ID, course.ID, enum.MistakeTestSessionType)
+	if err != nil {
+		if !errors.Is(err, store.ErrNotFound) {
+			app.internalServerError(w, r, err)
+			return
+		}
+		uid, err := uuid.NewV7()
+		if err != nil {
+			app.internalServerError(w, r, err)
+			return
+		}
+		mistakes = store.TestSession{
+			UUID:        uid.String(),
+			Name:        course.Name,
+			Type:        enum.MistakeTestSessionType,
+			UserID:      user.ID,
+			CourseID:    null.IntFrom(int64(course.ID)),
+			QuestionIDs: []int{},
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+		}
+		err = app.store.TestSessionsStore.Create(ctx, &mistakes)
+		if err != nil {
+			app.internalServerError(w, r, err)
+			return
+		}
+	}
+
 	app.jsonResponse(w, r, http.StatusOK, map[string]any{
-		"data": course,
+		"data":     course,
+		"mistakes": mistakes,
 	})
 }
 

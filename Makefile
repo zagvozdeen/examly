@@ -28,7 +28,8 @@ bash:
 	@docker compose exec node /bin/sh
 
 build:
-	@docker compose exec node npm run build
+	@GOOS=linux GOARCH=amd64 go build -o examly ./cmd/api
+	@cd resources && npm run build
 
 check:
 	@docker compose exec node npm run check

@@ -62,7 +62,7 @@ const courses = ref<Course[]>([])
 
 onMounted(() => {
   courseStore
-    .getCourses()
+    .getCourses({})
     .then(data => {
       courses.value = data.data
     })

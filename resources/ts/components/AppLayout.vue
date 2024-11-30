@@ -6,7 +6,7 @@
           <AppHeaderWithBack
             v-if="currentComponent?.back"
             :title="currentComponent.title"
-            :back="currentComponent.back"
+            :back="isRef(currentComponent.back) ? currentComponent.back.value : currentComponent.back"
           />
           <template v-else>
             <AppHeader class="sm:block hidden" />
@@ -42,7 +42,7 @@
 </template>
 
 <script lang="ts" setup>
-import { onMounted, ref, watch } from 'vue'
+import { isRef, onMounted, ref, watch } from 'vue'
 import { PageExpose } from '@/types.js'
 import { useAuthStore } from '@/composables/useAuthStore.ts'
 import { NSpin } from 'naive-ui'

@@ -193,9 +193,18 @@ func (app *Application) getTestSession(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ua, err := app.store.UserAnswersStore.GetByTestSessionID(ctx, test.ID)
+	if err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+	uam := make(map[int]store.UserAnswer, len(ua))
+	for _, answer := range ua {
+		uam[answer.QuestionID] = answer
+	}
+
 	app.jsonResponse(w, r, http.StatusOK, map[string]any{
-		"data": test,
+		"data":    test,
+		"answers": uam,
 	})
 }
-
-//func (app *Application) name(w http.ResponseWriter, r *http.Request) {}

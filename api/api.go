@@ -20,10 +20,10 @@ type Application struct {
 }
 
 type Config struct {
-	AppEnv    string
-	AppURL    string
-	DBAddr    string
-	SecretKey string
+	IsProduction bool
+	AppURL       string
+	DBAddr       string
+	SecretKey    string
 }
 
 func NewApplication(log zerolog.Logger, config Config, store store.Storage) *Application {

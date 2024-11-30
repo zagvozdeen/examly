@@ -1,9 +1,6 @@
 <template>
   <div class="flex flex-col gap-4">
-    <span
-      v-if="!isStatsByCourse"
-      class="text-2xl text-center py-8"
-    >Моя статистика</span>
+    <span class="text-2xl text-center py-8">Моя статистика</span>
 
     <div
       v-if="testSessions.length === 0"
@@ -59,36 +56,21 @@
 <script lang="ts" setup>
 import { PageExpose, TestSession, TestSessionTypeTranslates } from '@/types.ts'
 import { onMounted, ref } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
 import { format, parseISO } from 'date-fns'
 import { useTestSessionStore } from '@/composables/useTestSessionStore.ts'
 
-const route = useRoute()
-const router = useRouter()
 const testSessionStore = useTestSessionStore()
 const testSessions = ref<TestSession[]>([])
 
-const isStatsByCourse = route.name === 'courses.stats'
-
 defineExpose<PageExpose>({
   title: 'Статистика',
-  back: isStatsByCourse
-    ? router.resolve({
-      name: 'courses.show',
-      params: { uuid: route.params.uuid },
-    })
-    : undefined,
 })
 
 onMounted(() => {
   testSessionStore
-    .getTestSessions({
-      course_uuid: route.params.uuid as (string | undefined),
-    })
+    .getTestSessions({})
     .then(data => {
-      if (data.data) {
-        testSessions.value = data.data
-      }
+      testSessions.value = data.data || []
     })
 })
 </script>

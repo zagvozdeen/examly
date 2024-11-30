@@ -12,7 +12,7 @@ export default () => {
       host: true,
       origin: process.env.VITE_APP_URL,
     },
-    base: process.env.VITE_APP_URL,
+    // base: process.env.VITE_APP_URL,
     plugins: [vue()],
     resolve: {
       alias: {

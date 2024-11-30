@@ -2,9 +2,11 @@ package store
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"github.com/den4ik117/examly/internal/enum"
 	"github.com/guregu/null/v5"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
 	"strings"
@@ -18,6 +20,7 @@ type TestSession struct {
 	Type           enum.TestSessionType `json:"type"`
 	UserID         int                  `json:"user_id"`
 	CourseID       null.Int             `json:"course_id"`
+	CourseUUID     null.String          `json:"course_uuid"`
 	QuestionIDs    []int                `json:"question_ids"`
 	LastQuestionID null.Int             `json:"last_question_id"`
 	Correct        int                  `json:"correct"`
@@ -43,6 +46,8 @@ type TestSessionsStore interface {
 	Create(ctx context.Context, test *TestSession) error
 	Update(ctx context.Context, test *TestSession) error
 	GetByCourseID(ctx context.Context, id int) ([]TestSession, error)
+	GetTestSession(ctx context.Context, userID int, courseID int, t enum.TestSessionType) (TestSession, error)
+	SetLastQuestionID(ctx context.Context, id int, questionID int, now time.Time) error
 }
 
 type TestSessionStore struct {
@@ -61,10 +66,10 @@ func (s *TestSessionStore) Get(ctx context.Context, filter GetTestSessionsFilter
 
 	switch {
 	case filter.CourseID != 0:
-		sql = "SELECT id, uuid, name, type, user_id, course_id, question_ids, last_question_id, deleted_at, created_at, updated_at FROM test_sessions WHERE user_id = $1 AND course_id = $2 AND deleted_at IS NULL"
+		sql = "SELECT id, uuid, name, type, user_id, course_id, question_ids, last_question_id, deleted_at, created_at, updated_at FROM test_sessions WHERE user_id = $1 AND course_id = $2 AND deleted_at IS NULL ORDER BY created_at DESC"
 		params = []any{filter.UserID, filter.CourseID}
 	default:
-		sql = "SELECT id, uuid, name, type, user_id, course_id, question_ids, last_question_id, deleted_at, created_at, updated_at FROM test_sessions WHERE user_id = $1 AND deleted_at IS NULL"
+		sql = "SELECT id, uuid, name, type, user_id, course_id, question_ids, last_question_id, deleted_at, created_at, updated_at FROM test_sessions WHERE user_id = $1 AND deleted_at IS NULL ORDER BY created_at DESC"
 		params = []any{filter.UserID}
 	}
 
@@ -158,7 +163,7 @@ func (s *TestSessionStore) GetByID(ctx context.Context, id int) (t TestSession, 
 func (s *TestSessionStore) GetByUUID(ctx context.Context, uuid string) (t TestSession, err error) {
 	err = s.conn.QueryRow(
 		ctx,
-		"SELECT id, uuid, name, type, user_id, course_id, question_ids, last_question_id, deleted_at, created_at, updated_at FROM test_sessions WHERE uuid = $1 AND deleted_at IS NULL",
+		"SELECT ts.id, ts.uuid, ts.name, ts.type, ts.user_id, ts.course_id, ts.question_ids, ts.last_question_id, ts.deleted_at, ts.created_at, ts.updated_at, c.uuid FROM test_sessions ts JOIN courses c on c.id = ts.course_id WHERE ts.uuid = $1 AND ts.deleted_at IS NULL",
 		uuid,
 	).Scan(
 		&t.ID,
@@ -172,6 +177,7 @@ func (s *TestSessionStore) GetByUUID(ctx context.Context, uuid string) (t TestSe
 		&t.DeletedAt,
 		&t.CreatedAt,
 		&t.UpdatedAt,
+		&t.CourseUUID,
 	)
 	return
 }
@@ -229,50 +235,6 @@ func (s *TestSessionStore) Update(ctx context.Context, test *TestSession) error 
 	return err
 }
 
-//func (s *TestSessionStore) GetStats(ctx context.Context, userID int) (stats []TestSessionStats, err error) {
-//	rows, err := s.conn.Query(
-//		ctx,
-//		`
-//			SELECT c.id                                              AS id,
-//				   c.uuid                                            AS uuid,
-//				   c.type                                            AS type,
-//				   c.created_at                                      AS created_at,
-//				   COUNT(q.*) FILTER ( WHERE q.is_correct is true )  AS correct,
-//				   COUNT(q.*) FILTER ( WHERE q.is_correct is false ) AS incorrect,
-//				   array_length(c.question_ids, 1)                   AS total
-//			FROM test_sessions c
-//					 JOIN user_answers q on c.id = q.test_session_id
-//			WHERE c.user_id = $1 AND c.deleted_at IS NULL
-//			GROUP BY c.id, c.uuid, c.type, c.created_at
-//			ORDER BY c.id DESC
-//`,
-//		userID,
-//	)
-//	if err != nil {
-//		return stats, err
-//	}
-//	defer rows.Close()
-//
-//	for rows.Next() {
-//		var stat TestSessionStats
-//		err = rows.Scan(
-//			&stat.ID,
-//			&stat.UUID,
-//			&stat.Type,
-//			&stat.CreatedAt,
-//			&stat.Correct,
-//			&stat.Incorrect,
-//			&stat.Total,
-//		)
-//		if err != nil {
-//			return stats, err
-//		}
-//		stats = append(stats, stat)
-//	}
-//
-//	return stats, err
-//}
-
 func (s *TestSessionStore) GetByCourseID(ctx context.Context, id int) (ts []TestSession, err error) {
 	rows, err := s.conn.Query(
 		ctx,
@@ -304,4 +266,41 @@ func (s *TestSessionStore) GetByCourseID(ctx context.Context, id int) (ts []Test
 		ts = append(ts, t)
 	}
 	return
+}
+
+func (s *TestSessionStore) GetTestSession(ctx context.Context, userID int, courseID int, t enum.TestSessionType) (ts TestSession, err error) {
+	err = s.conn.QueryRow(
+		ctx,
+		"SELECT id, uuid, name, type, user_id, course_id, question_ids, last_question_id, deleted_at, created_at, updated_at FROM test_sessions WHERE user_id = $1 AND course_id = $2 AND type = $3 AND deleted_at IS NULL",
+		userID,
+		courseID,
+		t.String(),
+	).Scan(
+		&ts.ID,
+		&ts.UUID,
+		&ts.Name,
+		&ts.Type,
+		&ts.UserID,
+		&ts.CourseID,
+		&ts.QuestionIDs,
+		&ts.LastQuestionID,
+		&ts.DeletedAt,
+		&ts.CreatedAt,
+		&ts.UpdatedAt,
+	)
+	if errors.Is(err, pgx.ErrNoRows) {
+		err = ErrNotFound
+	}
+	return
+}
+
+func (s *TestSessionStore) SetLastQuestionID(ctx context.Context, id int, questionID int, now time.Time) error {
+	_, err := s.conn.Exec(
+		ctx,
+		"UPDATE test_sessions SET last_question_id = $1, updated_at = $2 WHERE id = $3",
+		questionID,
+		now,
+		id,
+	)
+	return err
 }
