@@ -51,3 +51,17 @@ prod-migrate-up:
 	@docker compose exec migrate ./migrate up
 prod-migrate-down:
 	@docker compose exec migrate ./migrate down
+
+deploy: build
+deploy:
+	ssh root@185.221.214.4 "cd /var/www/examly.ru && systemctl stop examly.service && rm examly || true && rm -rf public"
+	scp examly root@185.221.214.4:/var/www/examly.ru
+	scp .env root@185.221.214.4:/var/www/examly.ru
+	scp Makefile root@185.221.214.4:/var/www/examly.ru
+	scp -r resources/dist root@185.221.214.4:/var/www/examly.ru/public
+	scp -r migrations root@185.221.214.4:/var/www/examly.ru/migrations
+	scp .docker/services/deploy/nginx.conf root@185.221.214.4:/etc/nginx/sites-available/examly.ru
+#	ssh root@185.221.214.4 "ln -s /etc/nginx/sites-available/examly.ru /etc/nginx/sites-enabled/examly.ru"
+	scp .docker/services/deploy/examly.service root@185.221.214.4:/etc/systemd/system
+	ssh root@185.221.214.4 "systemctl daemon-reload && systemctl restart examly.service && make migrate-up"
+
