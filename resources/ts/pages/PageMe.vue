@@ -1,6 +1,8 @@
 <template>
   <div class="flex flex-col gap-4">
-    <span class="text-2xl text-center py-8">Личный кабинет</span>
+    <span class="text-2xl text-center py-8">
+      {{ me?.role === UserRole.Company ? 'Личный кабинет работодателя' : 'Личный кабинет' }}
+    </span>
 
     <div
       v-if="!me || me.role === UserRole.Guest"
@@ -81,44 +83,51 @@
             <i class="bi bi-chevron-right" />
           </router-link>
         </li>
-        <!--        <li class="h-px w-[calc(100%-28px-1rem)] ml-auto bg-obscure-500" />-->
-        <!--        <li>-->
-        <!--          <router-link-->
-        <!--            class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"-->
-        <!--            :to="{-->
-        <!--              name: 'questions.import',-->
-        <!--            }"-->
-        <!--          >-->
-        <!--            <div class="bg-purple-400 rounded w-full py-0.5 text-center">-->
-        <!--              <i class="bi bi-file-earmark-arrow-up-fill" />-->
-        <!--            </div>-->
-        <!--            <span>Импортировать вопросы</span>-->
-        <!--            <i class="bi bi-chevron-right" />-->
-        <!--          </router-link>-->
-        <!--        </li>-->
-        <li class="h-px w-[calc(100%-28px-1rem)] ml-auto bg-obscure-500" />
-        <li>
-          <div
-            class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 bg-opacity-50 p-2"
-          >
-            <div class="bg-orange-400 rounded w-full py-0.5 text-center">
-              <i class="bi bi-arrow-left-right" />
+        <template v-if="isModerator">
+          <li class="h-px w-[calc(100%-28px-1rem)] ml-auto bg-obscure-500" />
+          <li>
+            <div
+              class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 bg-opacity-50 p-2"
+            >
+              <div class="bg-orange-400 rounded w-full py-0.5 text-center">
+                <i class="bi bi-arrow-left-right" />
+              </div>
+              <span class="select-none">Режим администратора</span>
+              <AppAdminMode />
             </div>
-            <span class="select-none">Режим администратора</span>
-            <AppAdminMode />
-          </div>
-        </li>
+          </li>
+        </template>
       </ul>
+
+      <button
+        class="block w-full gap-2 bg-obscure-700 rounded-md hover:bg-obscure-500 bg-opacity-50 p-2 text-red-400"
+        type="button"
+        @click="logout"
+      >
+        <span>Выйти</span>
+      </button>
     </template>
   </div>
 </template>
 
 <script lang="ts" setup>
-import { isAdminMode, me } from '../composables/useAuthStore.ts'
+import { isAdminMode, isModerator, me, useAuthStore } from '../composables/useAuthStore.ts'
 import { PageExpose, UserRole, UserRoleTranslates } from '@/types.ts'
 import AppAdminMode from '@/components/AppAdminMode.vue'
+import { useRouter } from 'vue-router'
+import { useMessage } from 'naive-ui'
 
 defineExpose<PageExpose>({
   title: 'Личный кабинет',
 })
+
+const router = useRouter()
+const message = useMessage()
+const authStore = useAuthStore()
+
+const logout = () => {
+  authStore.logout()
+  router.push({ name: 'login' })
+  message.info('Вы вышли из аккаунта')
+}
 </script>

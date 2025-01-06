@@ -9,6 +9,7 @@ export interface PageExpose {
 export enum UserRole {
   Guest = 'guest',
   Member = 'member',
+  Company = 'company',
   Moderator = 'moderator',
   Admin = 'admin',
 }
@@ -16,6 +17,7 @@ export enum UserRole {
 export const UserRoleTranslates: Record<UserRole, string> = {
   [UserRole.Guest]: 'Гость',
   [UserRole.Member]: 'Пользователь',
+  [UserRole.Company]: 'Компания',
   [UserRole.Moderator]: 'Модератор',
   [UserRole.Admin]: 'Администратор',
 }
@@ -122,6 +124,7 @@ export interface Question {
   module_id: number | null
   created_at: string
   updated_at: string
+  tags_ids: number[] | null
   // user_answers: UserAnswer[] | null
 }
 
@@ -174,4 +177,9 @@ export interface TestSession {
   deleted_at: string | null
   created_at: string
   updated_at: string
+}
+
+export interface Tag {
+  id: number
+  name: string
 }

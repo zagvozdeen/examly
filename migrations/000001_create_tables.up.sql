@@ -33,9 +33,6 @@ CREATE TABLE IF NOT EXISTS users
 ALTER TABLE files
     ADD CONSTRAINT files_created_by_foreign FOREIGN KEY (created_by) REFERENCES users (id);
 
-CREATE UNIQUE INDEX users_uuid_unique_index ON users (uuid);
-CREATE INDEX users_deleted_at_not_null_index ON users (deleted_at) WHERE deleted_at IS NOT NULL;
-
 CREATE TABLE IF NOT EXISTS courses
 (
     id                SERIAL PRIMARY KEY,
@@ -53,9 +50,6 @@ CREATE TABLE IF NOT EXISTS courses
     updated_at        TIMESTAMP                     NOT NULL
 );
 
-CREATE UNIQUE INDEX courses_uuid_unique_index ON courses (uuid);
-CREATE INDEX courses_deleted_at_not_null_index ON courses (deleted_at) WHERE deleted_at IS NOT NULL;
-
 CREATE TABLE IF NOT EXISTS modules
 (
     id                SERIAL PRIMARY KEY,
@@ -70,9 +64,6 @@ CREATE TABLE IF NOT EXISTS modules
     created_at        TIMESTAMP                       NOT NULL,
     updated_at        TIMESTAMP                       NOT NULL
 );
-
-CREATE UNIQUE INDEX modules_uuid_unique_index ON modules (uuid);
-CREATE INDEX modules_deleted_at_not_null_index ON modules (deleted_at) WHERE deleted_at IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS questions
 (
@@ -129,3 +120,57 @@ CREATE TABLE IF NOT EXISTS user_answers
 );
 
 CREATE INDEX user_answers_test_session_id_index ON user_answers (test_session_id);
+
+CREATE TABLE IF NOT EXISTS tags
+(
+    id   SERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL
+);
+
+INSERT INTO tags (name)
+VALUES ('Разработка ПО'),
+       ('Frontend'),
+       ('Backend'),
+       ('Проектирование баз данных'),
+       ('Разработка под iOS'),
+       ('Разработка под Android'),
+       ('System Design'),
+       ('Аналитика данных и ИИ'),
+       ('Разработка десктопных приложений'),
+       ('Создание игр'),
+       ('Системное администрирование и DevOps'),
+       ('Управление серверами и сетями'),
+       ('Контейнеризация и оркестрация (Docker, Kubernetes)'),
+       ('Непрерывная интеграция и развертывание (CI/CD)'),
+       ('Информационная безопасность'),
+       ('Кибербезопасность'),
+       ('Защита данных и нормативное соответствие'),
+       ('Управление угрозами и уязвимостями'),
+       ('Анализ данных и бизнес-аналитика'),
+       ('Машинное обучение и глубокое обучение'),
+       ('Обработка естественного языка'),
+       ('Сетевые технологии'),
+       ('Сетевое администрирование'),
+       ('Протоколы и сетевые архитектуры'),
+       ('Базы данных и хранение данных'),
+       ('Администрирование БД'),
+       ('Управление большими данными'),
+       ('Облачные технологии'),
+       ('Облачные платформы (AWS, Azure, Google Cloud)'),
+       ('Архитектура облачных решений'),
+       ('Управление облачными услугами'),
+       ('Проектный менеджмент в IT'),
+       ('Управление продуктом'),
+       ('Управление командами разработки'),
+       ('Разработка встроенных систем'),
+       ('Программирование микроконтроллеров'),
+       ('Создание IoT-устройств'),
+       ('Разработка VR и AR приложений'),
+       ('Технологии блокчейна и криптовалюта');
+
+CREATE TABLE IF NOT EXISTS question_tag
+(
+    question_id INTEGER references questions (id) NOT NULL,
+    tag_id      INTEGER references tags (id)      NOT NULL,
+    PRIMARY KEY (question_id, tag_id)
+)

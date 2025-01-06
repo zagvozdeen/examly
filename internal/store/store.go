@@ -19,6 +19,7 @@ type Storage struct {
 	FilesStore        FilesStore
 	TestSessionsStore TestSessionsStore
 	UserAnswersStore  UserAnswersStore
+	TagsStore         TagsStore
 }
 
 func NewStorage(conn *pgxpool.Pool, log zerolog.Logger) Storage {
@@ -30,5 +31,6 @@ func NewStorage(conn *pgxpool.Pool, log zerolog.Logger) Storage {
 		FilesStore:        &FileStore{conn},
 		TestSessionsStore: &TestSessionStore{conn, log},
 		UserAnswersStore:  &UserAnswerStore{conn},
+		TagsStore:         &TagStore{conn},
 	}
 }

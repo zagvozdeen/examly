@@ -35,6 +35,7 @@ type Question struct {
 	CreatedAt        time.Time         `json:"created_at"`
 	UpdatedAt        time.Time         `json:"updated_at"`
 	UserAnswers      []UserAnswer      `json:"user_answers"`
+	TagsIDs          []int             `json:"tags_ids"`
 }
 
 type Option struct {

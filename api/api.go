@@ -85,6 +85,8 @@ func (app *Application) Mount() *mux.Router {
 
 	authRouter.HandleFunc("/users", app.getUsers).Methods("GET")
 
+	authRouter.HandleFunc("/tags", app.getTags).Methods("GET")
+
 	return router
 }
 

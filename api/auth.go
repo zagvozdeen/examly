@@ -18,6 +18,7 @@ type claims struct {
 }
 
 type RegisterUserPayload struct {
+	Role                 string `json:"role" validate:"required"`
 	FirstName            string `json:"first_name" validate:"required,max=255"`
 	LastName             string `json:"last_name" validate:"required,max=255"`
 	Email                string `json:"email" validate:"required,email,max=255"`
@@ -34,6 +35,12 @@ func (app *Application) register(w http.ResponseWriter, r *http.Request) {
 
 	if err := Validate.Struct(payload); err != nil {
 		app.badRequestResponse(w, r, err)
+		return
+	}
+
+	role, err := enum.NewUserRole(payload.Role)
+	if err != nil || !(role == enum.MemberRole || role == enum.CompanyRole) {
+		app.badRequestResponse(w, r, errors.New("invalid role"))
 		return
 	}
 
@@ -54,7 +61,7 @@ func (app *Application) register(w http.ResponseWriter, r *http.Request) {
 		Email:     null.StringFrom(payload.Email),
 		FirstName: null.StringFrom(payload.FirstName),
 		LastName:  null.StringFrom(payload.LastName),
-		Role:      enum.MemberRole,
+		Role:      role,
 		Password:  null.StringFrom(string(bytes)),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),

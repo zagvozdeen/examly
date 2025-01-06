@@ -24,6 +24,14 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "role": {
+                    "type": "string",
+                    "required": true,
+                    "enum": [
+                      "member",
+                      "company"
+                    ]
+                  },
                   "first_name": {
                     "type": "string",
                     "required": true
@@ -179,10 +187,6 @@
                   "course_id": {
                     "type": "integer",
                     "required": true
-                  },
-                  "file_id": {
-                    "type": "integer",
-                    "required": false
                   },
                   "module_id": {
                     "type": "integer",
