@@ -16,6 +16,7 @@ import PageMyQuestions from '@/pages/PageQuestions.vue'
 import PageStats from '@/pages/PageStats.vue'
 // import PageCourseMarathon from '@/pages/PageCourseMarathon.vue'
 import PageTest from '@/pages/PageTest.vue'
+import PageSelectionSystem from '@/pages/PageSelectionSystem.vue'
 
 export const createRoutes = (): Array<RouteRecordRaw> => {
   return [
@@ -122,6 +123,11 @@ export const createRoutes = (): Array<RouteRecordRaw> => {
           path: '/tests/:uuid',
           component: PageTest,
           name: 'tests.show',
+        },
+        {
+          path: '/selection-system',
+          component: PageSelectionSystem,
+          name: 'selection-system',
         },
         // {
         //   path: '/admin',

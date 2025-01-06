@@ -83,6 +83,21 @@
             <i class="bi bi-chevron-right" />
           </router-link>
         </li>
+        <li class="h-px w-[calc(100%-28px-1rem)] ml-auto bg-obscure-500" />
+        <li>
+          <router-link
+            class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
+            :to="{
+              name: 'selection-system',
+            }"
+          >
+            <div class="bg-zinc-400 rounded w-full py-0.5 text-center">
+              <i class="bi bi-list-columns" />
+            </div>
+            <span>Система подбора</span>
+            <i class="bi bi-chevron-right" />
+          </router-link>
+        </li>
         <template v-if="isModerator">
           <li class="h-px w-[calc(100%-28px-1rem)] ml-auto bg-obscure-500" />
           <li>

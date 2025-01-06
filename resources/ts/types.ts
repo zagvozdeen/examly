@@ -135,6 +135,7 @@ export interface Option {
 }
 
 export enum TestSessionType {
+  SelectionSystem = 'selection-system',
   Marathon = 'marathon',
   Mistake = 'mistake',
   Module = 'module',
@@ -142,6 +143,7 @@ export enum TestSessionType {
 }
 
 export const TestSessionTypeTranslates: Record<TestSessionType, string> = {
+  [TestSessionType.SelectionSystem]: 'Система подбора',
   [TestSessionType.Marathon]: 'Марафон',
   [TestSessionType.Mistake]: 'Ошибки',
   [TestSessionType.Module]: 'Модуль',

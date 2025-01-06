@@ -57,19 +57,15 @@ func (app *Application) getTestSessions(w http.ResponseWriter, r *http.Request) 
 }
 
 type CreateTestSessionPayload struct {
-	CourseUUID string `json:"course_uuid" validate:"required"`
-	Type       string `json:"type" validate:"required"`
-	Shuffle    bool   `json:"shuffle" validate:""`
+	CourseUUID string `json:"course_uuid"`
+	Type       string `json:"type"`
+	Shuffle    bool   `json:"shuffle"`
+	TagsIDs    []int  `json:"tags_ids"`
 }
 
 func (app *Application) createTestSession(w http.ResponseWriter, r *http.Request) {
 	var payload CreateTestSessionPayload
 	if err := readJSON(w, r, &payload); err != nil {
-		app.badRequestResponse(w, r, err)
-		return
-	}
-
-	if err := Validate.Struct(payload); err != nil {
 		app.badRequestResponse(w, r, err)
 		return
 	}
@@ -92,22 +88,44 @@ func (app *Application) createTestSession(w http.ResponseWriter, r *http.Request
 
 	ctx := r.Context()
 
-	course, err := app.store.CoursesStore.GetByUUID(ctx, payload.CourseUUID)
-	if err != nil {
-		app.internalServerError(w, r, err)
-		return
-	}
-
-	questions, err := app.store.QuestionsStore.GetByCourseID(ctx, course.ID)
-	if err != nil {
-		app.internalServerError(w, r, err)
-		return
-	}
-
 	var ids []int
-	for _, question := range questions {
-		ids = append(ids, question.ID)
+	var name string
+	var courseId null.Int
+	if t == enum.SelectionSystemTestSessionType {
+		if len(payload.TagsIDs) == 0 {
+			app.badRequestResponse(w, r, errors.New("tags are required for selection system test session"))
+			return
+		}
+		ids, err = app.store.TagsStore.GetTagsQuestions(ctx, payload.TagsIDs)
+		if err != nil {
+			app.internalServerError(w, r, err)
+			return
+		}
+		name = "Тест системы подбора"
+	} else {
+		course, err := app.store.CoursesStore.GetByUUID(ctx, payload.CourseUUID)
+		if err != nil {
+			if errors.Is(err, store.ErrNotFound) {
+				app.notFoundErrorResponse(w, r, err)
+				return
+			}
+			app.internalServerError(w, r, err)
+			return
+		}
+
+		questions, err := app.store.QuestionsStore.GetByCourseID(ctx, course.ID)
+		if err != nil {
+			app.internalServerError(w, r, err)
+			return
+		}
+
+		for _, question := range questions {
+			ids = append(ids, question.ID)
+		}
+		name = course.Name
+		courseId = null.IntFrom(int64(course.ID))
 	}
+
 	if payload.Shuffle {
 		rand.Shuffle(len(ids), func(i, j int) {
 			ids[i], ids[j] = ids[j], ids[i]
@@ -118,10 +136,10 @@ func (app *Application) createTestSession(w http.ResponseWriter, r *http.Request
 
 	test := &store.TestSession{
 		UUID:        uid.String(),
-		Name:        course.Name,
+		Name:        name,
 		Type:        t,
 		UserID:      user.ID,
-		CourseID:    null.IntFrom(int64(course.ID)),
+		CourseID:    courseId,
 		QuestionIDs: ids,
 		CreatedAt:   time.Now(),
 		UpdatedAt:   time.Now(),
@@ -135,20 +153,6 @@ func (app *Application) createTestSession(w http.ResponseWriter, r *http.Request
 
 	app.jsonResponse(w, r, http.StatusCreated, map[string]any{
 		"data": test,
-	})
-}
-
-func (app *Application) getUserStats(w http.ResponseWriter, r *http.Request) {
-	//user := getUserFromRequest(r)
-
-	//stats, err := app.store.TestSessionsStore.GetStats(r.Context(), user.ID)
-	//if err != nil {
-	//	app.internalServerError(w, r, err)
-	//	return
-	//}
-
-	app.jsonResponse(w, r, http.StatusOK, map[string]any{
-		"data": nil,
 	})
 }
 

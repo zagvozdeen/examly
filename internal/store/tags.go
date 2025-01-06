@@ -16,6 +16,7 @@ type TagsStore interface {
 	Get(ctx context.Context) ([]Tag, error)
 	CreateQuestionTags(ctx context.Context, questionId int, ids []int) (err error)
 	GetQuestionTags(ctx context.Context, id int) ([]int, error)
+	GetTagsQuestions(ctx context.Context, tagsIds []int) ([]int, error)
 }
 
 type TagStore struct {
@@ -41,32 +42,6 @@ func (s *TagStore) Get(ctx context.Context) (tags []Tag, err error) {
 	}
 	return tags, nil
 }
-
-//func (s *TagStore) UpdateQuestionTags(ctx context.Context, questionId int, tagsIds []int) (err error) {
-//	args := make([]any, len(tagsIds)+1)
-//	args[0] = questionId
-//	placeholders := make([]string, len(tagsIds))
-//	for i, id := range tagsIds {
-//		_, err = s.conn.Exec(
-//			ctx,
-//			"INSERT INTO question_tag (question_id, tag_id) VALUES ($1, $2) ON CONFLICT DO NOTHING",
-//			questionId,
-//			id,
-//		)
-//		if err != nil {
-//			return err
-//		}
-//		placeholders[i] = fmt.Sprintf("$%d", i+2)
-//		args[i+1] = id
-//	}
-//	placeholder := strings.Join(placeholders, ",")
-//	_, err = s.conn.Exec(
-//		ctx,
-//		fmt.Sprintf("DELETE FROM question_tag WHERE question_id = $1 AND tag_id NOT IN (%s)", placeholder),
-//		args...,
-//	)
-//	return err
-//}
 
 func (s *TagStore) CreateQuestionTags(ctx context.Context, questionId int, ids []int) (err error) {
 	args := make([]any, len(ids)+1)
@@ -103,4 +78,28 @@ func (s *TagStore) GetQuestionTags(ctx context.Context, id int) (ids []int, err 
 		ids = append(ids, id)
 	}
 	return ids, nil
+}
+
+func (s *TagStore) GetTagsQuestions(ctx context.Context, tagsIds []int) (ids []int, err error) {
+	placeholders := make([]string, len(tagsIds))
+	args := make([]any, len(tagsIds))
+	for i, id := range tagsIds {
+		placeholders[i] = fmt.Sprintf("$%d", i+1)
+		args[i] = id
+	}
+	sql := fmt.Sprintf("SELECT DISTINCT question_id FROM question_tag WHERE tag_id IN (%s)", strings.Join(placeholders, ","))
+	rows, err := s.conn.Query(ctx, sql, args...)
+	if err != nil {
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var id int
+		err = rows.Scan(&id)
+		if err != nil {
+			return
+		}
+		ids = append(ids, id)
+	}
+	return
 }

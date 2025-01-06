@@ -6,16 +6,16 @@ export const useForm = () => {
   const loadingBar = useLoadingBar()
   
   const handle = async (formRef: FormInst | undefined, isCreating: boolean, creatingCallback: () => Promise<void>, editingCallback: () => Promise<void>) => {
+    return submit(formRef, isCreating ? creatingCallback : editingCallback)
+  }
+
+  const submit = async (formRef: FormInst | undefined, callback: () => Promise<void>) => {
     try {
       await formRef?.validate()
 
       loadingBar.start()
 
-      if (isCreating) {
-        await creatingCallback()
-      } else {
-        await editingCallback()
-      }
+      await callback()
 
       loadingBar.finish()
     } catch (e) {
@@ -38,5 +38,6 @@ export const useForm = () => {
 
   return {
     handle,
+    submit,
   }
 }

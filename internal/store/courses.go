@@ -140,12 +140,10 @@ func (s *CourseStore) GetByUUID(ctx context.Context, uuid string) (course Course
 		&course.CreatedAt,
 		&course.UpdatedAt,
 	)
-
 	if errors.Is(err, pgx.ErrNoRows) {
-		return course, ErrNotFound
+		err = ErrNotFound
 	}
-
-	return course, err
+	return
 }
 
 func (s *CourseStore) GetByIDs(ctx context.Context, ids []any) (courses []Course, err error) {
