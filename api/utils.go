@@ -24,7 +24,6 @@ func newTestApplication(t *testing.T) *Application {
 	return &Application{
 		log: logger,
 		config: Config{
-			AppEnv:    "testing",
 			AppURL:    "127.0.0.1:8888",
 			SecretKey: "qwert12345",
 		},

@@ -28,7 +28,7 @@ func NewStorage(conn *pgxpool.Pool, log zerolog.Logger) Storage {
 		ModulesStore:      &ModuleStore{conn, log},
 		QuestionsStore:    &QuestionStore{conn, log},
 		FilesStore:        &FileStore{conn},
-		TestSessionsStore: &TestSessionStore{conn},
+		TestSessionsStore: &TestSessionStore{conn, log},
 		UserAnswersStore:  &UserAnswerStore{conn},
 	}
 }

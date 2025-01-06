@@ -176,9 +176,9 @@ import {
   NCheckbox,
   useMessage,
 } from 'naive-ui'
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { Course, Module, Option, PageExpose, Question, QuestionType, QuestionTypeTranslates, UserRole } from '@/types.ts'
+import { Course, Module, Option, PageExpose, Question, QuestionType, QuestionTypeTranslates } from '@/types.ts'
 import { useForm } from '@/composables/useForm.ts'
 import { useCourseStore } from '@/composables/useCourseStore.ts'
 import { useModuleStore } from '@/composables/useModuleStore.ts'

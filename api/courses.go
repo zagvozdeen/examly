@@ -132,20 +132,44 @@ func (app *Application) getCourse(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	if course.CreatedBy != user.ID && user.Role.Level() < enum.ModeratorRole.Level() {
-		app.forbiddenErrorResponse(w, r, errors.New("forbidden"))
-		return
-	}
-
-	questions, err := app.store.QuestionsStore.GetByCourseID(ctx, course.ID)
+	ts, err := app.store.TestSessionsStore.GetByCourseID(ctx, course.ID)
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return
 	}
+	course.TestSessions = ts
+
+	mistakes, err := app.store.TestSessionsStore.GetTestSession(ctx, user.ID, course.ID, enum.MistakeTestSessionType)
+	if err != nil {
+		if !errors.Is(err, store.ErrNotFound) {
+			app.internalServerError(w, r, err)
+			return
+		}
+		uid, err := uuid.NewV7()
+		if err != nil {
+			app.internalServerError(w, r, err)
+			return
+		}
+		mistakes = store.TestSession{
+			UUID:        uid.String(),
+			Name:        course.Name,
+			Type:        enum.MistakeTestSessionType,
+			UserID:      user.ID,
+			CourseID:    null.IntFrom(int64(course.ID)),
+			QuestionIDs: []int{},
+			CreatedAt:   time.Now(),
+			UpdatedAt:   time.Now(),
+		}
+		err = app.store.TestSessionsStore.Create(ctx, &mistakes)
+		if err != nil {
+			app.internalServerError(w, r, err)
+			return
+		}
+	}
 
 	app.jsonResponse(w, r, http.StatusOK, map[string]any{
-		"data":      course,
-		"questions": questions,
+		"data":     course,
+		"mistakes": mistakes,
 	})
 }
 

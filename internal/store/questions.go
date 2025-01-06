@@ -34,6 +34,7 @@ type Question struct {
 	DeletedAt        null.Time         `json:"deleted_at"`
 	CreatedAt        time.Time         `json:"created_at"`
 	UpdatedAt        time.Time         `json:"updated_at"`
+	UserAnswers      []UserAnswer      `json:"user_answers"`
 }
 
 type Option struct {
@@ -143,10 +144,12 @@ func (s *QuestionStore) Get(ctx context.Context, filter GetQuestionsFilter) (que
 func (s *QuestionStore) GetByID(ctx context.Context, id int) (question Question, err error) {
 	err = s.conn.QueryRow(
 		ctx,
-		"SELECT id, options FROM questions WHERE id = $1 AND deleted_at IS NULL",
+		"SELECT id, course_id, type, options FROM questions WHERE id = $1 AND deleted_at IS NULL",
 		id,
 	).Scan(
 		&question.ID,
+		&question.CourseID,
+		&question.Type,
 		&question.Options,
 	)
 
@@ -236,15 +239,20 @@ func (s *QuestionStore) GetByCourseID(ctx context.Context, id int) (questions []
 }
 
 func (s *QuestionStore) GetByIDs(ctx context.Context, ids []int) (questions []Question, err error) {
+	if len(ids) == 0 {
+		return []Question{}, nil
+	}
 	bindings := make([]string, len(ids))
-	for i := range ids {
+	params := make([]any, len(ids))
+	for i, id := range ids {
 		bindings[i] = fmt.Sprintf("$%d", i+1)
+		params[i] = id
 	}
 	sql := fmt.Sprintf(
 		"SELECT id, uuid, title, content, explanation, moderation_reason, type, status, course_id, module_id, created_by, moderated_by, prev_question_id, next_question_id, options, deleted_at, created_at, updated_at FROM questions WHERE id IN (%s) AND deleted_at IS NULL",
 		strings.Join(bindings, ","),
 	)
-	rows, err := s.conn.Query(ctx, sql, ids)
+	rows, err := s.conn.Query(ctx, sql, params...)
 	if err != nil {
 		return nil, err
 	}

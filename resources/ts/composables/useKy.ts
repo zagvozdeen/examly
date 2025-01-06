@@ -6,7 +6,10 @@ export const useKy = () => {
     hooks: {
       beforeRequest: [
         (request) => {
-          request.headers.set('Authorization', `Bearer ${localStorage.getItem('token')}`)
+          const token = localStorage.getItem('token')
+          if (token) {
+            request.headers.set('Authorization', `Bearer ${token}`)
+          }
         },
       ],
       afterResponse: [

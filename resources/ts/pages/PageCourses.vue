@@ -89,7 +89,6 @@ import {
   Course,
   StatusTranslates,
   PageExpose,
-  StatusBackgrounds,
   StatusBackgroundColors,
   StatusTextColors,
 } from '@/types.ts'
@@ -107,13 +106,13 @@ defineExpose<PageExpose>({
   back: router.resolve({ name: 'me' }),
 })
 
-const handleExportCourses = () => {
-  courseStore
-    .exportCourses()
-    .then((data) => {
-      filePath.value = data.data
-    })
-}
+// const handleExportCourses = () => {
+//   courseStore
+//     .exportCourses()
+//     .then((data) => {
+//       filePath.value = data.data
+//     })
+// }
 
 onMounted(() => {
   courseStore

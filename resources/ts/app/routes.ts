@@ -14,7 +14,7 @@ import PageMyModules from '@/pages/PageModules.vue'
 import PageMyQuestionsEdit from '@/pages/PageQuestionsEdit.vue'
 import PageMyQuestions from '@/pages/PageQuestions.vue'
 import PageStats from '@/pages/PageStats.vue'
-import PageCourseMarathon from '@/pages/PageCourseMarathon.vue'
+// import PageCourseMarathon from '@/pages/PageCourseMarathon.vue'
 import PageTest from '@/pages/PageTest.vue'
 
 export const createRoutes = (): Array<RouteRecordRaw> => {
@@ -103,11 +103,11 @@ export const createRoutes = (): Array<RouteRecordRaw> => {
           component: PageCourse,
           name: 'courses.show',
         },
-        {
-          path: '/courses/:uuid/marathon',
-          component: PageCourseMarathon,
-          name: 'courses.show.marathon',
-        },
+        // {
+        //   path: '/courses/:uuid/marathon',
+        //   component: PageCourseMarathon,
+        //   name: 'courses.show.marathon',
+        // },
         {
           path: '/courses/:uuid/stats',
           component: PageStats,

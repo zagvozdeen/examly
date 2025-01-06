@@ -43,6 +43,7 @@ func (app *Application) authMiddleware(next http.Handler) http.Handler {
 			return []byte(app.config.SecretKey), nil
 		})
 		if err != nil {
+			//app.internalServerError(w, r, fmt.Errorf("parse token: %w, header: %s, parts: %v", err, header, parts))
 			app.internalServerError(w, r, err)
 			return
 		}

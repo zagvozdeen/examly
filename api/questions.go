@@ -96,10 +96,10 @@ func (app *Application) createQuestion(w http.ResponseWriter, r *http.Request) {
 
 	correct := false
 	var options store.Options
-	for _, answer := range payload.Answers {
+	for i, answer := range payload.Answers {
 		correct = correct || answer.IsCorrect || t == enum.PlaintextQuestionType
 		options = append(options, store.Option{
-			ID:        answer.ID,
+			ID:        i + 1,
 			Content:   answer.Content,
 			IsCorrect: answer.IsCorrect,
 		})
@@ -230,10 +230,10 @@ func (app *Application) updateQuestion(w http.ResponseWriter, r *http.Request) {
 
 	correct := false
 	var options store.Options
-	for _, answer := range payload.Answers {
+	for i, answer := range payload.Answers {
 		correct = correct || answer.IsCorrect || t == enum.PlaintextQuestionType
 		options = append(options, store.Option{
-			ID:        answer.ID,
+			ID:        i + 1,
 			Content:   answer.Content,
 			IsCorrect: answer.IsCorrect,
 		})

@@ -1,9 +1,8 @@
 module github.com/den4ik117/examly
 
-go 1.22.5
+go 1.23.2
 
 require (
-	github.com/go-playground/assert/v2 v2.2.0
 	github.com/go-playground/validator/v10 v10.22.1
 	github.com/golang-jwt/jwt/v5 v5.2.1
 	github.com/google/uuid v1.6.0

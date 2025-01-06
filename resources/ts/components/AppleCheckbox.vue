@@ -13,6 +13,6 @@
   </label>
 </template>
 
-<script setup>
+<script setup lang="ts">
 const modelValue = defineModel('modelValue')
 </script>

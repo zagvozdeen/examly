@@ -20,10 +20,10 @@ type Application struct {
 }
 
 type Config struct {
-	AppEnv    string
-	AppURL    string
-	DBAddr    string
-	SecretKey string
+	IsProduction bool
+	AppURL       string
+	DBAddr       string
+	SecretKey    string
 }
 
 func NewApplication(log zerolog.Logger, config Config, store store.Storage) *Application {
@@ -75,6 +75,7 @@ func (app *Application) Mount() *mux.Router {
 
 	authRouter.HandleFunc("/files", app.uploadFile).Methods("POST")
 
+	authRouter.HandleFunc("/test-sessions", app.getTestSessions).Methods("GET")
 	authRouter.HandleFunc("/test-sessions", app.createTestSession).Methods("POST")
 	authRouter.HandleFunc("/test-sessions/stats", app.getUserStats).Methods("GET")
 	authRouter.HandleFunc("/test-sessions/{uuid}", app.getTestSession).Methods("GET")
