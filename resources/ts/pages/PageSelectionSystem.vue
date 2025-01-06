@@ -60,7 +60,7 @@ const message = useMessage()
 const testSessionStore = useTestSessionStore()
 
 defineExpose<PageExpose>({
-  title: 'Система подбора',
+  title: 'Система подбора вопросов',
   back: router.resolve({ name: 'me' }),
 })
 

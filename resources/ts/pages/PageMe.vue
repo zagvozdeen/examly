@@ -94,7 +94,7 @@
             <div class="bg-zinc-400 rounded w-full py-0.5 text-center">
               <i class="bi bi-list-columns" />
             </div>
-            <span>Система подбора</span>
+            <span>Система подбора вопросов</span>
             <i class="bi bi-chevron-right" />
           </router-link>
         </li>
