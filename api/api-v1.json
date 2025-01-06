@@ -169,7 +169,12 @@
                   },
                   "type": {
                     "type": "string",
-                    "required": true
+                    "required": true,
+                    "enum": [
+                      "single_choice",
+                      "multiple_choice",
+                      "plaintext"
+                    ]
                   },
                   "course_id": {
                     "type": "integer",
