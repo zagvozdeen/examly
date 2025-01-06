@@ -1,8 +1,8 @@
 package api
 
 import (
-	"github.com/den4ik117/examly/internal/store"
 	"github.com/rs/zerolog"
+	"github.com/zagvozdeen/examly/internal/store"
 	"net/http"
 	"net/http/httptest"
 	"os"

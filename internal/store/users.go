@@ -3,10 +3,10 @@ package store
 import (
 	"context"
 	"errors"
-	"github.com/den4ik117/examly/internal/enum"
 	"github.com/guregu/null/v5"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/zagvozdeen/examly/internal/enum"
 	"time"
 )
 

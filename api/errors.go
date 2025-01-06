@@ -2,7 +2,7 @@ package api
 
 import (
 	"errors"
-	"github.com/den4ik117/examly/internal/enum"
+	"github.com/zagvozdeen/examly/internal/enum"
 	"net/http"
 )
 

@@ -3,9 +3,9 @@ package api
 import (
 	"context"
 	"errors"
-	"github.com/den4ik117/examly/internal/store"
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
+	"github.com/zagvozdeen/examly/internal/store"
 	"net/http"
 	"os"
 	"os/signal"

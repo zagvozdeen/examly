@@ -2,11 +2,11 @@ package api
 
 import (
 	"errors"
-	"github.com/den4ik117/examly/internal/enum"
-	"github.com/den4ik117/examly/internal/store"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/guregu/null/v5"
+	"github.com/zagvozdeen/examly/internal/enum"
+	"github.com/zagvozdeen/examly/internal/store"
 	"net/http"
 	"strconv"
 	"time"

@@ -1,4 +1,4 @@
-module github.com/den4ik117/examly
+module github.com/zagvozdeen/examly
 
 go 1.23.2
 

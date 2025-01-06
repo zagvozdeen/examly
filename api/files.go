@@ -3,9 +3,9 @@ package api
 import (
 	"errors"
 	"fmt"
-	"github.com/den4ik117/examly/internal/enum"
-	"github.com/den4ik117/examly/internal/store"
 	"github.com/google/uuid"
+	"github.com/zagvozdeen/examly/internal/enum"
+	"github.com/zagvozdeen/examly/internal/store"
 	"io"
 	"net/http"
 	"os"

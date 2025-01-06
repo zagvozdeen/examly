@@ -2,8 +2,8 @@ package api
 
 import (
 	"fmt"
-	"github.com/den4ik117/examly/internal/enum"
 	"github.com/guregu/null/v5"
+	"github.com/zagvozdeen/examly/internal/enum"
 	"net/http"
 )
 

@@ -5,7 +5,7 @@ package store
 import (
 	context "context"
 
-	enum "github.com/den4ik117/examly/internal/enum"
+	enum "github.com/zagvozdeen/examly/internal/enum"
 	mock "github.com/stretchr/testify/mock"
 )
 
