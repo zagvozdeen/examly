@@ -3,6 +3,7 @@ package api
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
 	"github.com/zagvozdeen/examly/internal/store"
@@ -114,7 +115,7 @@ func (app *Application) Run(router *mux.Router) error {
 		shutdown <- server.Shutdown(ctx)
 	}()
 
-	app.log.Info().Str("addr", app.config.AppURL).Msg("Server has started")
+	app.log.Info().Str("addr", fmt.Sprintf("http://%s", app.config.AppURL)).Msg("Server has started")
 
 	err := server.ListenAndServe()
 	if !errors.Is(err, http.ErrServerClosed) {
