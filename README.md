@@ -17,7 +17,8 @@ EXAMLY — сервис для подготовки к собеседовани�
 - Golang
 - PostgreSQL
 - Docker
-- TypeScript + VueJS
+- TypeScript
+- VueJS
 
 ## Как запустить
 
