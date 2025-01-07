@@ -14,10 +14,10 @@ import PageMyModules from '@/pages/PageModules.vue'
 import PageMyQuestionsEdit from '@/pages/PageQuestionsEdit.vue'
 import PageMyQuestions from '@/pages/PageQuestions.vue'
 import PageStats from '@/pages/PageStats.vue'
-// import PageCourseMarathon from '@/pages/PageCourseMarathon.vue'
 import PageTest from '@/pages/PageTest.vue'
 import PageSelectionSystem from '@/pages/PageSelectionSystem.vue'
 import PageRecommendationSystem from '@/pages/PageRecommendationSystem.vue'
+import PageFeedback from '@/pages/PageFeedback.vue'
 
 export const createRoutes = (): Array<RouteRecordRaw> => {
   return [
@@ -105,11 +105,6 @@ export const createRoutes = (): Array<RouteRecordRaw> => {
           component: PageCourse,
           name: 'courses.show',
         },
-        // {
-        //   path: '/courses/:uuid/marathon',
-        //   component: PageCourseMarathon,
-        //   name: 'courses.show.marathon',
-        // },
         {
           path: '/courses/:uuid/stats',
           component: PageStats,
@@ -135,16 +130,11 @@ export const createRoutes = (): Array<RouteRecordRaw> => {
           component: PageRecommendationSystem,
           name: 'recommendation-system',
         },
-        // {
-        //   path: '/admin',
-        //   children: [
-        //     {
-        //       path: 'courses',
-        //       component: PageAdminCourses,
-        //       name: 'admin.courses',
-        //     },
-        //   ],
-        // },
+        {
+          path: '/feedback',
+          component: PageFeedback,
+          name: 'feedback',
+        },
       ],
     },
   ]

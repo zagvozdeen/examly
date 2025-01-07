@@ -1,3 +1,5 @@
+DROP TABLE IF EXISTS user_experience;
+
 DROP TABLE IF EXISTS question_tag;
 DROP TABLE IF EXISTS tags;
 

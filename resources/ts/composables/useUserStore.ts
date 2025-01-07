@@ -1,5 +1,5 @@
 import { useKy } from '@/composables/useKy.ts'
-import { User } from '@/types.ts'
+import { User, UserExperience } from '@/types.ts'
 
 export const useUserStore = () => {
   const ky = useKy()
@@ -10,7 +10,21 @@ export const useUserStore = () => {
       .json<{data: User[]}>()
   }
 
+  const getUserExperience = () => {
+    return ky
+      .get('users/experience')
+      .json<{data: UserExperience | null}>()
+  }
+
+  const createUserExperience = (json: object) => {
+    return ky
+      .post('users/experience', { json })
+      .json<{data: UserExperience}>()
+  }
+
   return {
     getUsers,
+    getUserExperience,
+    createUserExperience,
   }
 }

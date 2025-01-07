@@ -83,6 +83,8 @@ func (app *Application) Mount() *mux.Router {
 	authRouter.HandleFunc("/user-answers", app.checkAnswer).Methods("POST")
 
 	authRouter.HandleFunc("/users", app.getUsers).Methods("GET")
+	authRouter.HandleFunc("/users/experience", app.getUserExperience).Methods("GET")
+	authRouter.HandleFunc("/users/experience", app.createUserExperience).Methods("POST")
 
 	authRouter.HandleFunc("/tags", app.getTags).Methods("GET")
 

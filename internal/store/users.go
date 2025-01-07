@@ -11,22 +11,44 @@ import (
 )
 
 type User struct {
-	ID          int           `json:"id"`
-	UUID        string        `json:"uuid"`
-	Email       null.String   `json:"email"`
-	FirstName   null.String   `json:"first_name"`
-	LastName    null.String   `json:"last_name"`
-	FullName    null.String   `json:"full_name"`
-	Role        enum.UserRole `json:"role"`
-	Password    null.String   `json:"-"`
-	AvatarID    null.Int      `json:"avatar_id"`
-	Description null.String   `json:"description"`
-	CompanyName null.String   `json:"company_name"`
-	Contact     null.String   `json:"contact"`
-	Account     int           `json:"account"`
-	DeletedAt   null.Time     `json:"deleted_at"`
-	CreatedAt   time.Time     `json:"created_at"`
-	UpdatedAt   time.Time     `json:"updated_at"`
+	ID                int           `json:"id"`
+	UUID              string        `json:"uuid"`
+	Email             null.String   `json:"email"`
+	FirstName         null.String   `json:"first_name"`
+	LastName          null.String   `json:"last_name"`
+	FullName          null.String   `json:"full_name"`
+	Role              enum.UserRole `json:"role"`
+	Password          null.String   `json:"-"`
+	AvatarID          null.Int      `json:"avatar_id"`
+	Description       null.String   `json:"description"`
+	CompanyName       null.String   `json:"company_name"`
+	Contact           null.String   `json:"contact"`
+	Account           int           `json:"account"`
+	DeletedAt         null.Time     `json:"deleted_at"`
+	CreatedAt         time.Time     `json:"created_at"`
+	UpdatedAt         time.Time     `json:"updated_at"`
+	HasUserExperience bool          `json:"has_user_experience"`
+}
+
+type UserExperience struct {
+	ID        int       `json:"id"`
+	UserID    int       `json:"user_id"`
+	One       int       `json:"one"`
+	Two       int       `json:"two"`
+	Three     int       `json:"three"`
+	Four      string    `json:"four"`
+	Five      int       `json:"five"`
+	Six       int       `json:"six"`
+	Seven     string    `json:"seven"`
+	Eight     string    `json:"eight"`
+	Nine      int       `json:"nine"`
+	Ten       string    `json:"ten"`
+	Eleven    int       `json:"eleven"`
+	Twelve    string    `json:"twelve"`
+	Thirteen  string    `json:"thirteen"`
+	DeletedAt null.Time `json:"deleted_at"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 type UsersStore interface {
@@ -35,6 +57,9 @@ type UsersStore interface {
 	GetByEmail(ctx context.Context, email string) (User, error)
 	GetByID(ctx context.Context, id int) (User, error)
 	Update(ctx context.Context, user *User) error
+	UpdateAccount(ctx context.Context, user *User) error
+	GetUserExperience(ctx context.Context, id int) (UserExperience, error)
+	CreateUserExperience(ctx context.Context, ue *UserExperience) error
 }
 
 type UserStore struct {
@@ -152,4 +177,68 @@ func (s *UserStore) Update(ctx context.Context, user *User) error {
 		user.ID,
 	)
 	return err
+}
+func (s *UserStore) UpdateAccount(ctx context.Context, user *User) error {
+	_, err := s.conn.Exec(
+		ctx,
+		"UPDATE users SET account = $1, updated_at = $2 WHERE id = $3",
+		user.Account,
+		user.UpdatedAt,
+		user.ID,
+	)
+	return err
+}
+
+func (s *UserStore) GetUserExperience(ctx context.Context, id int) (ue UserExperience, err error) {
+	err = s.conn.QueryRow(
+		ctx,
+		"SELECT id, user_id, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, deleted_at, created_at, updated_at FROM user_experience WHERE user_id = $1 AND deleted_at IS NULL",
+		id,
+	).Scan(
+		&ue.ID,
+		&ue.UserID,
+		&ue.One,
+		&ue.Two,
+		&ue.Three,
+		&ue.Four,
+		&ue.Five,
+		&ue.Six,
+		&ue.Seven,
+		&ue.Eight,
+		&ue.Nine,
+		&ue.Ten,
+		&ue.Eleven,
+		&ue.Twelve,
+		&ue.Thirteen,
+		&ue.DeletedAt,
+		&ue.CreatedAt,
+		&ue.UpdatedAt,
+	)
+	if errors.Is(err, pgx.ErrNoRows) {
+		err = ErrNotFound
+	}
+	return
+}
+
+func (s *UserStore) CreateUserExperience(ctx context.Context, ue *UserExperience) error {
+	return s.conn.QueryRow(
+		ctx,
+		"INSERT INTO user_experience (user_id, one, two, three, four, five, six, seven, eight, nine, ten, eleven, twelve, thirteen, created_at, updated_at) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16) RETURNING id",
+		ue.UserID,
+		ue.One,
+		ue.Two,
+		ue.Three,
+		ue.Four,
+		ue.Five,
+		ue.Six,
+		ue.Seven,
+		ue.Eight,
+		ue.Nine,
+		ue.Ten,
+		ue.Eleven,
+		ue.Twelve,
+		ue.Thirteen,
+		ue.CreatedAt,
+		ue.UpdatedAt,
+	).Scan(&ue.ID)
 }

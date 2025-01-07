@@ -177,4 +177,26 @@ CREATE TABLE IF NOT EXISTS question_tag
     question_id INTEGER references questions (id) NOT NULL,
     tag_id      INTEGER references tags (id)      NOT NULL,
     PRIMARY KEY (question_id, tag_id)
-)
+);
+
+CREATE TABLE IF NOT EXISTS user_experience
+(
+    id         SERIAL PRIMARY KEY,
+    user_id    INTEGER REFERENCES users (id) NOT NULL,
+    one        SMALLINT                      NOT NULL,
+    two        SMALLINT                      NOT NULL,
+    three      SMALLINT                      NOT NULL,
+    four       VARCHAR(255)                  NOT NULL,
+    five       SMALLINT                      NOT NULL,
+    six        SMALLINT                      NOT NULL,
+    seven      VARCHAR(255)                  NOT NULL,
+    eight      VARCHAR(255)                  NOT NULL,
+    nine       SMALLINT                      NOT NULL,
+    ten        VARCHAR(255)                  NOT NULL,
+    eleven     SMALLINT                      NOT NULL,
+    twelve     VARCHAR(255)                  NOT NULL,
+    thirteen   VARCHAR(255)                  NOT NULL,
+    deleted_at TIMESTAMP                     NULL,
+    created_at TIMESTAMP                     NOT NULL,
+    updated_at TIMESTAMP                     NOT NULL
+);

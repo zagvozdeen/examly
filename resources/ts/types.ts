@@ -38,6 +38,27 @@ export interface User {
   account: number
   created_at: string
   updated_at: string
+  has_user_experience: boolean
+}
+export interface UserExperience {
+  id: number
+  user_id: number
+  one: number
+  two: number
+  three: number
+  four: string
+  five: number
+  six: number
+  seven: string
+  eight: string
+  nine: number
+  ten: string
+  eleven: number
+  twelve: string
+  thirteen: string
+  deleted_at: string | null
+  created_at: string
+  updated_at: string
 }
 
 export enum Status {

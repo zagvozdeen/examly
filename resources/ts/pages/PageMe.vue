@@ -131,6 +131,23 @@
         </template>
       </ul>
 
+      <ul class="flex flex-col bg-obscure-700 rounded-md overflow-hidden">
+        <li>
+          <router-link
+            class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
+            :to="{
+              name: 'feedback',
+            }"
+          >
+            <div class="bg-orange-400 rounded w-full py-0.5 text-center">
+              <i class="bi bi-star-fill" />
+            </div>
+            <span>Опрос пользы приложения<sup class="text-green-400">[{{ filled ? 'награда получена' : 'награда не получена' }}]</sup></span>
+            <i class="bi bi-chevron-right" />
+          </router-link>
+        </li>
+      </ul>
+
       <button
         class="block w-full gap-2 bg-obscure-700 rounded-md hover:bg-obscure-500 bg-opacity-50 p-2 text-red-400"
         type="button"
@@ -148,6 +165,8 @@ import { PageExpose, UserRole, UserRoleTranslates } from '@/types.ts'
 import AppAdminMode from '@/components/AppAdminMode.vue'
 import { useRouter } from 'vue-router'
 import { useMessage } from 'naive-ui'
+import { onMounted, ref } from 'vue'
+import { useUserStore } from '@/composables/useUserStore.ts'
 
 defineExpose<PageExpose>({
   title: 'Личный кабинет',
@@ -156,10 +175,20 @@ defineExpose<PageExpose>({
 const router = useRouter()
 const message = useMessage()
 const authStore = useAuthStore()
+const userStore = useUserStore()
+const filled = ref(false)
 
 const logout = () => {
   authStore.logout()
   router.push({ name: 'login' })
   message.info('Вы вышли из аккаунта')
 }
+
+onMounted(() => {
+  userStore
+    .getUserExperience()
+    .then(({ data }) => {
+      filled.value = data !== null
+    })
+})
 </script>
