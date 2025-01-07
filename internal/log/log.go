@@ -3,11 +3,16 @@ package log
 import (
 	"github.com/rs/zerolog"
 	"os"
+	"time"
 )
 
 func CreateLogger(toFile bool) zerolog.Logger {
 	if toFile {
-		f, err := os.OpenFile("./logs/examly.log", os.O_WRONLY|os.O_CREATE|os.O_APPEND, 0644)
+		f, err := os.OpenFile(
+			time.Now().Format("./logs/2006_01_02_examly.log"),
+			os.O_WRONLY|os.O_CREATE|os.O_APPEND,
+			0644,
+		)
 		if err != nil {
 			panic(err)
 		}
