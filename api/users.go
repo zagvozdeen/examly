@@ -154,6 +154,12 @@ func (app *Application) createUserExperience(w http.ResponseWriter, r *http.Requ
 	user := getUserFromRequest(r)
 	ctx := r.Context()
 
+	_, err := app.store.UsersStore.GetUserExperience(ctx, user.ID)
+	if !errors.Is(err, store.ErrNotFound) {
+		app.badRequestResponse(w, r, errors.New("user experience already exists"))
+		return
+	}
+
 	ue := &store.UserExperience{
 		UserID:    user.ID,
 		One:       payload.One,
@@ -173,7 +179,7 @@ func (app *Application) createUserExperience(w http.ResponseWriter, r *http.Requ
 		UpdatedAt: time.Now(),
 	}
 
-	err := app.store.UsersStore.CreateUserExperience(ctx, ue)
+	err = app.store.UsersStore.CreateUserExperience(ctx, ue)
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return

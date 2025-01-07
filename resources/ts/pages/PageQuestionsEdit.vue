@@ -133,8 +133,6 @@
         </div>
       </n-form-item>
 
-      {{ formValue.options }}
-
       <n-form-item
         label="Объяснение"
         path="explanation"
