@@ -25,8 +25,8 @@
     await fetch(`${URL}/auth/login`, {
         method: 'POST',
         body: JSON.stringify({
-            email: 'zagvozdeen@gmail.com',
-            password: 'fsN9GqdypxQ3icz',
+            email: 'ivan@mail.ru',
+            password: 'password',
         }),
     }).then(data => data.json()).then(data => token = data.data)
 
