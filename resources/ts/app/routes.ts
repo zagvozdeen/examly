@@ -17,6 +17,7 @@ import PageStats from '@/pages/PageStats.vue'
 // import PageCourseMarathon from '@/pages/PageCourseMarathon.vue'
 import PageTest from '@/pages/PageTest.vue'
 import PageSelectionSystem from '@/pages/PageSelectionSystem.vue'
+import PageRecommendationSystem from '@/pages/PageRecommendationSystem.vue'
 
 export const createRoutes = (): Array<RouteRecordRaw> => {
   return [
@@ -128,6 +129,11 @@ export const createRoutes = (): Array<RouteRecordRaw> => {
           path: '/selection-system',
           component: PageSelectionSystem,
           name: 'selection-system',
+        },
+        {
+          path: '/recommendation-system',
+          component: PageRecommendationSystem,
+          name: 'recommendation-system',
         },
         // {
         //   path: '/admin',

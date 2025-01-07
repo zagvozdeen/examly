@@ -74,7 +74,9 @@ func (app *Application) updateCurrentUser(w http.ResponseWriter, r *http.Request
 }
 
 func (app *Application) getUsers(w http.ResponseWriter, r *http.Request) {
-	if ok := app.checkRole(w, r, enum.ModeratorRole); !ok {
+	u := getUserFromRequest(r)
+	if u.Role.Level() < enum.ModeratorRole.Level() && u.Role != enum.CompanyRole {
+		app.forbiddenErrorResponse(w, r, errors.New("you do not have permissions"))
 		return
 	}
 
@@ -82,6 +84,15 @@ func (app *Application) getUsers(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return
+	}
+
+	for i, user := range users {
+		if user.LastName.IsZero() && user.FirstName.IsZero() {
+			user.FullName = null.StringFrom(fmt.Sprintf("Гость #%d", user.ID))
+		} else {
+			user.FullName = null.StringFrom(fmt.Sprintf("%s %s", user.LastName.String, user.FirstName.String))
+		}
+		users[i] = user
 	}
 
 	app.jsonResponse(w, r, http.StatusOK, map[string]any{

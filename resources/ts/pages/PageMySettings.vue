@@ -83,7 +83,7 @@
         />
       </n-form-item>
 
-      <template v-if="[UserRole.Referral, UserRole.Company].includes(formValue.role)">
+      <template v-if="[UserRole.Referral, UserRole.Company].includes((formValue.role || UserRole.Member) as UserRole)">
         <n-form-item
           label="Название компании"
           path="company_name"
@@ -104,17 +104,17 @@
             type="textarea"
           />
         </n-form-item>
-
-        <n-form-item
-          label="Контакт для связи"
-          path="contact"
-        >
-          <n-input
-            v-model:value="formValue.contact"
-            placeholder="Введите контакт для связи"
-          />
-        </n-form-item>
       </template>
+
+      <n-form-item
+        label="Контакт для связи"
+        path="contact"
+      >
+        <n-input
+          v-model:value="formValue.contact"
+          placeholder="Введите контакт для связи"
+        />
+      </n-form-item>
 
       <n-form-item
         :show-feedback="false"

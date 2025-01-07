@@ -42,7 +42,7 @@ type UserStore struct {
 }
 
 func (s *UserStore) Get(ctx context.Context) (users []User, err error) {
-	sql := "SELECT id, uuid, email, first_name, last_name, role, avatar_id, deleted_at, created_at, updated_at FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC"
+	sql := "SELECT id, uuid, email, first_name, last_name, role, avatar_id, deleted_at, created_at, updated_at, contact FROM users WHERE deleted_at IS NULL ORDER BY created_at DESC"
 	rows, err := s.conn.Query(ctx, sql)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -65,6 +65,7 @@ func (s *UserStore) Get(ctx context.Context) (users []User, err error) {
 			&user.DeletedAt,
 			&user.CreatedAt,
 			&user.UpdatedAt,
+			&user.Contact,
 		)
 		if err != nil {
 			return

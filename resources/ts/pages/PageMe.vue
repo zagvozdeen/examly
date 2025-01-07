@@ -98,6 +98,23 @@
             <i class="bi bi-chevron-right" />
           </router-link>
         </li>
+        <template v-if="me.role === UserRole.Company">
+          <li class="h-px w-[calc(100%-28px-1rem)] ml-auto bg-obscure-500" />
+          <li>
+            <router-link
+              class="grid grid-cols-[28px_1fr_min-content] items-center gap-2 hover:bg-obscure-500 bg-opacity-50 p-2"
+              :to="{
+                name: 'recommendation-system',
+              }"
+            >
+              <div class="bg-pink-400 rounded w-full py-0.5 text-center">
+                <i class="bi bi-person-raised-hand" />
+              </div>
+              <span>Система рекомендаций кандидатов</span>
+              <i class="bi bi-chevron-right" />
+            </router-link>
+          </li>
+        </template>
         <template v-if="isModerator">
           <li class="h-px w-[calc(100%-28px-1rem)] ml-auto bg-obscure-500" />
           <li>
