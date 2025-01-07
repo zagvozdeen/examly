@@ -17,21 +17,22 @@ CREATE INDEX files_deleted_at_not_null_index ON files (deleted_at) WHERE deleted
 
 CREATE TABLE IF NOT EXISTS users
 (
-    id           SERIAL PRIMARY KEY,
-    uuid         uuid                          not null,
-    email        VARCHAR(255)                  NULL,
-    first_name   VARCHAR(255)                  NULL,
-    last_name    VARCHAR(255)                  NULL,
-    role         VARCHAR(50)                   NOT NULL,
-    password     VARCHAR(255)                  NULL,
-    avatar_id    INTEGER references files (id) NULL,
-    description  TEXT                          NULL,
-    company_name VARCHAR(255)                  NULL,
-    contact      VARCHAR(255)                  NULL,
-    account      INTEGER                       NOT NULL DEFAULT 0,
-    deleted_at   TIMESTAMP                     NULL,
-    created_at   TIMESTAMP                     NOT NULL,
-    updated_at   TIMESTAMP                     NOT NULL
+    id                 SERIAL PRIMARY KEY,
+    uuid               uuid                          not null,
+    email              VARCHAR(255)                  NULL,
+    first_name         VARCHAR(255)                  NULL,
+    last_name          VARCHAR(255)                  NULL,
+    role               VARCHAR(50)                   NOT NULL,
+    password           VARCHAR(255)                  NULL,
+    avatar_id          INTEGER references files (id) NULL,
+    description        TEXT                          NULL,
+    company_name       VARCHAR(255)                  NULL,
+    contact            VARCHAR(255)                  NULL,
+    account            INTEGER                       NOT NULL DEFAULT 0,
+    can_view_referrals BOOLEAN                       NOT NULL DEFAULT false,
+    deleted_at         TIMESTAMP                     NULL,
+    created_at         TIMESTAMP                     NOT NULL,
+    updated_at         TIMESTAMP                     NOT NULL
 );
 
 ALTER TABLE files

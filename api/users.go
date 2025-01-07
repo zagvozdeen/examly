@@ -191,3 +191,52 @@ func (app *Application) createUserExperience(w http.ResponseWriter, r *http.Requ
 		"data": ue,
 	})
 }
+
+func (app *Application) getReferrals(w http.ResponseWriter, r *http.Request) {
+	user := getUserFromRequest(r)
+	ctx := r.Context()
+
+	if !user.CanViewReferrals {
+		app.forbiddenErrorResponse(w, r, errors.New("you do not have permissions"))
+		return
+	}
+
+	referrals, err := app.store.UsersStore.GetReferrals(ctx, user.ID)
+	if err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	app.jsonResponse(w, r, http.StatusOK, map[string]any{
+		"data": referrals,
+	})
+}
+
+func (app *Application) unlockReferrals(w http.ResponseWriter, r *http.Request) {
+	user := getUserFromRequest(r)
+	ctx := r.Context()
+
+	if user.CanViewReferrals {
+		app.badRequestResponse(w, r, errors.New("you already have permissions"))
+		return
+	}
+
+	if user.Account < 50 {
+		app.badRequestResponse(w, r, errors.New("not enough money"))
+		return
+	}
+
+	user.Account -= 50
+	user.UpdatedAt = time.Now()
+	user.CanViewReferrals = true
+
+	err := app.store.UsersStore.UpdateCanViewReferrals(ctx, &user)
+	if err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	app.jsonResponse(w, r, http.StatusOK, map[string]any{
+		"data": user,
+	})
+}

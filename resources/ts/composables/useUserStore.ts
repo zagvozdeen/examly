@@ -22,9 +22,23 @@ export const useUserStore = () => {
       .json<{data: UserExperience}>()
   }
 
+  const getReferrals = () => {
+    return ky
+      .get('users/referrals')
+      .json<{data: User[]}>()
+  }
+
+  const unlockReferrals = () => {
+    return ky
+      .post('users/referrals/unlock')
+      .json()
+  }
+
   return {
     getUsers,
     getUserExperience,
     createUserExperience,
+    getReferrals,
+    unlockReferrals,
   }
 }

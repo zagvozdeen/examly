@@ -18,6 +18,7 @@ import PageTest from '@/pages/PageTest.vue'
 import PageSelectionSystem from '@/pages/PageSelectionSystem.vue'
 import PageRecommendationSystem from '@/pages/PageRecommendationSystem.vue'
 import PageFeedback from '@/pages/PageFeedback.vue'
+import PageReferrals from '@/pages/PageReferrals.vue'
 
 export const createRoutes = (): Array<RouteRecordRaw> => {
   return [
@@ -134,6 +135,11 @@ export const createRoutes = (): Array<RouteRecordRaw> => {
           path: '/feedback',
           component: PageFeedback,
           name: 'feedback',
+        },
+        {
+          path: '/referrals',
+          component: PageReferrals,
+          name: 'referrals',
         },
       ],
     },

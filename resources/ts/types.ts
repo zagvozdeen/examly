@@ -36,6 +36,7 @@ export interface User {
   company_name: string | null
   contact: string | null
   account: number
+  can_view_referrals: boolean
   created_at: string
   updated_at: string
   has_user_experience: boolean
@@ -99,8 +100,6 @@ export interface Course {
   updated_at: string
 }
 
-export type CourseStats = Array<{completed: number, total: number, name: string}>
-
 export interface FileModel {
   id: number
   uuid: string
@@ -152,7 +151,6 @@ export interface Question {
   created_at: string
   updated_at: string
   tags_ids: number[] | null
-  // user_answers: UserAnswer[] | null
 }
 
 export interface Option {

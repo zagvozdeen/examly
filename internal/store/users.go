@@ -24,6 +24,7 @@ type User struct {
 	CompanyName       null.String   `json:"company_name"`
 	Contact           null.String   `json:"contact"`
 	Account           int           `json:"account"`
+	CanViewReferrals  bool          `json:"can_view_referrals"`
 	DeletedAt         null.Time     `json:"deleted_at"`
 	CreatedAt         time.Time     `json:"created_at"`
 	UpdatedAt         time.Time     `json:"updated_at"`
@@ -58,8 +59,10 @@ type UsersStore interface {
 	GetByID(ctx context.Context, id int) (User, error)
 	Update(ctx context.Context, user *User) error
 	UpdateAccount(ctx context.Context, user *User) error
+	UpdateCanViewReferrals(ctx context.Context, user *User) error
 	GetUserExperience(ctx context.Context, id int) (UserExperience, error)
 	CreateUserExperience(ctx context.Context, ue *UserExperience) error
+	GetReferrals(ctx context.Context, id int) (users []User, err error)
 }
 
 type UserStore struct {
@@ -136,7 +139,7 @@ func (s *UserStore) GetByEmail(ctx context.Context, email string) (user User, er
 func (s *UserStore) GetByID(ctx context.Context, id int) (user User, err error) {
 	err = s.conn.QueryRow(
 		ctx,
-		"SELECT id, uuid, email, first_name, last_name, role, password, avatar_id, deleted_at, created_at, updated_at, description, company_name, contact, account FROM users WHERE id = $1 AND deleted_at IS NULL",
+		"SELECT id, uuid, email, first_name, last_name, role, password, avatar_id, deleted_at, created_at, updated_at, description, company_name, contact, account, can_view_referrals FROM users WHERE id = $1 AND deleted_at IS NULL",
 		id,
 	).Scan(
 		&user.ID,
@@ -154,6 +157,7 @@ func (s *UserStore) GetByID(ctx context.Context, id int) (user User, err error) 
 		&user.CompanyName,
 		&user.Contact,
 		&user.Account,
+		&user.CanViewReferrals,
 	)
 	if errors.Is(err, pgx.ErrNoRows) {
 		err = ErrNotFound
@@ -178,10 +182,23 @@ func (s *UserStore) Update(ctx context.Context, user *User) error {
 	)
 	return err
 }
+
 func (s *UserStore) UpdateAccount(ctx context.Context, user *User) error {
 	_, err := s.conn.Exec(
 		ctx,
 		"UPDATE users SET account = $1, updated_at = $2 WHERE id = $3",
+		user.Account,
+		user.UpdatedAt,
+		user.ID,
+	)
+	return err
+}
+
+func (s *UserStore) UpdateCanViewReferrals(ctx context.Context, user *User) error {
+	_, err := s.conn.Exec(
+		ctx,
+		"UPDATE users SET can_view_referrals = $1, account = $2, updated_at = $3 WHERE id = $4",
+		user.CanViewReferrals,
 		user.Account,
 		user.UpdatedAt,
 		user.ID,
@@ -241,4 +258,42 @@ func (s *UserStore) CreateUserExperience(ctx context.Context, ue *UserExperience
 		ue.CreatedAt,
 		ue.UpdatedAt,
 	).Scan(&ue.ID)
+}
+
+func (s *UserStore) GetReferrals(ctx context.Context, id int) (users []User, err error) {
+	rows, err := s.conn.Query(
+		ctx,
+		"SELECT id, uuid, email, first_name, last_name, role, avatar_id, deleted_at, created_at, updated_at, contact FROM users WHERE id != $1 AND role IN ($2, $3) AND deleted_at IS NULL ORDER BY created_at DESC",
+		id,
+		enum.CompanyRole.String(),
+		enum.ReferralRole.String(),
+	)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			err = ErrNotFound
+		}
+		return
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var user User
+		err = rows.Scan(
+			&user.ID,
+			&user.UUID,
+			&user.Email,
+			&user.FirstName,
+			&user.LastName,
+			&user.Role,
+			&user.AvatarID,
+			&user.DeletedAt,
+			&user.CreatedAt,
+			&user.UpdatedAt,
+			&user.Contact,
+		)
+		if err != nil {
+			return
+		}
+		users = append(users, user)
+	}
+	return
 }
