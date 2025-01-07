@@ -16,7 +16,7 @@
           size="small"
         >
           <n-radio-button
-            v-for="type in typesOptions"
+            v-for="type in rolesOptions"
             :key="type.value"
             type="primary"
             :value="type.value"
@@ -27,7 +27,7 @@
         <n-select
           v-model:value="formValue.role"
           class="sm:hidden block"
-          :options="typesOptions"
+          :options="rolesOptions"
         />
       </n-form-item>
 
@@ -138,7 +138,7 @@ import { reactive, ref } from 'vue'
 import { useAuthStore } from '@/composables/useAuthStore.ts'
 import { HTTPError } from 'ky'
 import { useRouter } from 'vue-router'
-import { PageExpose, UserRole } from '@/types.ts'
+import { PageExpose, UserRole, UserRoleTranslates } from '@/types.ts'
 
 defineExpose<PageExpose>({
   title: 'Регистрация',
@@ -199,9 +199,10 @@ const clearForm = () => {
   formValue.password_confirmation = null
 }
 
-const typesOptions = [
-  { label: 'Пользователь', value: UserRole.Member },
-  { label: 'Компания', value: UserRole.Company },
+const rolesOptions = [
+  { label: UserRoleTranslates[UserRole.Member], value: UserRole.Member },
+  { label: UserRoleTranslates[UserRole.Referral], value: UserRole.Referral },
+  { label: UserRoleTranslates[UserRole.Company], value: UserRole.Company },
 ]
 
 const onSubmit = async () => {

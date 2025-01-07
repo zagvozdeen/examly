@@ -11,18 +11,22 @@ import (
 )
 
 type User struct {
-	ID        int           `json:"id"`
-	UUID      string        `json:"uuid"`
-	Email     null.String   `json:"email"`
-	FirstName null.String   `json:"first_name"`
-	LastName  null.String   `json:"last_name"`
-	FullName  null.String   `json:"full_name"`
-	Role      enum.UserRole `json:"role"`
-	Password  null.String   `json:"-"`
-	AvatarID  null.Int      `json:"avatar_id"`
-	DeletedAt null.Time     `json:"deleted_at"`
-	CreatedAt time.Time     `json:"created_at"`
-	UpdatedAt time.Time     `json:"updated_at"`
+	ID          int           `json:"id"`
+	UUID        string        `json:"uuid"`
+	Email       null.String   `json:"email"`
+	FirstName   null.String   `json:"first_name"`
+	LastName    null.String   `json:"last_name"`
+	FullName    null.String   `json:"full_name"`
+	Role        enum.UserRole `json:"role"`
+	Password    null.String   `json:"-"`
+	AvatarID    null.Int      `json:"avatar_id"`
+	Description null.String   `json:"description"`
+	CompanyName null.String   `json:"company_name"`
+	Contact     null.String   `json:"contact"`
+	Account     int           `json:"account"`
+	DeletedAt   null.Time     `json:"deleted_at"`
+	CreatedAt   time.Time     `json:"created_at"`
+	UpdatedAt   time.Time     `json:"updated_at"`
 }
 
 type UsersStore interface {
@@ -96,22 +100,17 @@ func (s *UserStore) GetByEmail(ctx context.Context, email string) (user User, er
 		ctx,
 		"SELECT id, password FROM users WHERE email = $1 AND deleted_at IS NULL",
 		email,
-	).Scan(
-		&user.ID,
-		&user.Password,
-	)
-
+	).Scan(&user.ID, &user.Password)
 	if errors.Is(err, pgx.ErrNoRows) {
-		return user, ErrNotFound
+		err = ErrNotFound
 	}
-
 	return
 }
 
 func (s *UserStore) GetByID(ctx context.Context, id int) (user User, err error) {
 	err = s.conn.QueryRow(
 		ctx,
-		"SELECT id, uuid, email, first_name, last_name, role, password, avatar_id, deleted_at, created_at, updated_at FROM users WHERE id = $1 AND deleted_at IS NULL",
+		"SELECT id, uuid, email, first_name, last_name, role, password, avatar_id, deleted_at, created_at, updated_at, description, company_name, contact, account FROM users WHERE id = $1 AND deleted_at IS NULL",
 		id,
 	).Scan(
 		&user.ID,
@@ -125,25 +124,30 @@ func (s *UserStore) GetByID(ctx context.Context, id int) (user User, err error) 
 		&user.DeletedAt,
 		&user.CreatedAt,
 		&user.UpdatedAt,
+		&user.Description,
+		&user.CompanyName,
+		&user.Contact,
+		&user.Account,
 	)
-
 	if errors.Is(err, pgx.ErrNoRows) {
-		return user, ErrNotFound
+		err = ErrNotFound
 	}
-
 	return
 }
 
 func (s *UserStore) Update(ctx context.Context, user *User) error {
 	_, err := s.conn.Exec(
 		ctx,
-		`UPDATE users
-			SET email = $1, first_name = $2, last_name = $3, updated_at = $4
-			WHERE id = $5 AND deleted_at IS NULL`,
+		"UPDATE users SET email = $1, first_name = $2, last_name = $3, description = $4, company_name = $5, contact = $6, avatar_id = $7, updated_at = $8, role = $9 WHERE id = $10",
 		user.Email,
 		user.FirstName,
 		user.LastName,
+		user.Description,
+		user.CompanyName,
+		user.Contact,
+		user.AvatarID,
 		user.UpdatedAt,
+		user.Role,
 		user.ID,
 	)
 	return err

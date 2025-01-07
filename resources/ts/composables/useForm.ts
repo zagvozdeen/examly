@@ -19,12 +19,12 @@ export const useForm = () => {
 
       loadingBar.finish()
     } catch (e) {
+      loadingBar.error()
+
       if (e instanceof Array) {
         message.error('Пожалуйста, исправьте ошибки в форме')
         return
       }
-
-      loadingBar.error()
 
       if (e instanceof HTTPError) {
         message.error('При выполнении запроса произошла ошибка')

@@ -39,7 +39,7 @@ func (app *Application) register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	role, err := enum.NewUserRole(payload.Role)
-	if err != nil || !(role == enum.MemberRole || role == enum.CompanyRole) {
+	if err != nil || !(role == enum.MemberRole || role == enum.ReferralRole || role == enum.CompanyRole) {
 		app.badRequestResponse(w, r, errors.New("invalid role"))
 		return
 	}
@@ -56,6 +56,13 @@ func (app *Application) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ctx := r.Context()
+	_, err = app.store.UsersStore.GetByEmail(ctx, payload.Email)
+	if !errors.Is(err, store.ErrNotFound) {
+		app.badRequestResponse(w, r, errors.New("email already exists"))
+		return
+	}
+
 	user := &store.User{
 		UUID:      uid.String(),
 		Email:     null.StringFrom(payload.Email),
@@ -67,7 +74,7 @@ func (app *Application) register(w http.ResponseWriter, r *http.Request) {
 		UpdatedAt: time.Now(),
 	}
 
-	err = app.store.UsersStore.Create(r.Context(), user)
+	err = app.store.UsersStore.Create(ctx, user)
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return

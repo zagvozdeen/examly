@@ -9,6 +9,7 @@ export interface PageExpose {
 export enum UserRole {
   Guest = 'guest',
   Member = 'member',
+  Referral = 'referral',
   Company = 'company',
   Moderator = 'moderator',
   Admin = 'admin',
@@ -17,6 +18,7 @@ export enum UserRole {
 export const UserRoleTranslates: Record<UserRole, string> = {
   [UserRole.Guest]: 'Гость',
   [UserRole.Member]: 'Пользователь',
+  [UserRole.Referral]: 'Реферал',
   [UserRole.Company]: 'Компания',
   [UserRole.Moderator]: 'Модератор',
   [UserRole.Admin]: 'Администратор',
@@ -30,6 +32,10 @@ export interface User {
   full_name: string | null
   avatar_id: number | null
   role: UserRole
+  description: string | null
+  company_name: string | null
+  contact: string | null
+  account: number
   created_at: string
   updated_at: string
 }

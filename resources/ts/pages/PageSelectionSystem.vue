@@ -84,7 +84,7 @@ const onSubmit = () => {
       shuffle: true,
     }
 
-    testSessionStore
+    return testSessionStore
       .createTestSession(payload)
       .then(data => {
         router.push({
@@ -94,7 +94,6 @@ const onSubmit = () => {
 
         message.success('Мы создали для вас уникальный тест')
       })
-
   })
 }
 </script>

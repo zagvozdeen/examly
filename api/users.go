@@ -1,6 +1,7 @@
 package api
 
 import (
+	"errors"
 	"fmt"
 	"github.com/guregu/null/v5"
 	"github.com/zagvozdeen/examly/internal/enum"
@@ -20,9 +21,13 @@ func (app *Application) getCurrentUser(w http.ResponseWriter, r *http.Request) {
 }
 
 type UpdateUserPayload struct {
-	FirstName string `json:"first_name" validate:"required,max=255"`
-	LastName  string `json:"last_name" validate:"required,max=255"`
-	Email     string `json:"email" validate:"required,email,max=255"`
+	Role        string `json:"role" validate:"required"`
+	FirstName   string `json:"first_name" validate:"required,max=255"`
+	LastName    string `json:"last_name" validate:"required,max=255"`
+	Email       string `json:"email" validate:"required,email,max=255"`
+	Description string `json:"description" validate:""`
+	CompanyName string `json:"company_name" validate:""`
+	Contact     string `json:"contact" validate:""`
 }
 
 func (app *Application) updateCurrentUser(w http.ResponseWriter, r *http.Request) {
@@ -36,13 +41,28 @@ func (app *Application) updateCurrentUser(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	ctx := r.Context()
 	user := getUserFromRequest(r)
+
+	role, err := enum.NewUserRole(payload.Role)
+	if err != nil || !(role == enum.MemberRole || role == enum.ReferralRole || role == enum.CompanyRole) {
+		app.badRequestResponse(w, r, errors.New("invalid role"))
+		return
+	}
+	if user.Role.Level() >= enum.ModeratorRole.Level() {
+		role = user.Role
+	}
+
+	user.Role = role
 	user.FirstName = null.StringFrom(payload.FirstName)
 	user.LastName = null.StringFrom(payload.LastName)
 	user.Email = null.StringFrom(payload.Email)
 	user.FullName = null.StringFrom(fmt.Sprintf("%s %s", user.LastName.String, user.FirstName.String))
+	user.Description = null.NewString(payload.Description, payload.Description != "")
+	user.CompanyName = null.NewString(payload.CompanyName, payload.CompanyName != "")
+	user.Contact = null.NewString(payload.Contact, payload.Contact != "")
 
-	err := app.store.UsersStore.Update(r.Context(), &user)
+	err = app.store.UsersStore.Update(ctx, &user)
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return
