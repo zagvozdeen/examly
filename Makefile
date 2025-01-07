@@ -18,7 +18,7 @@ build:
 	@cd resources && npm run build
 
 deploy: build
-	ssh root@185.221.214.4 "cd /var/www/examly.ru && systemctl stop examly.service && rm examly || true && rm -rf public"
+	ssh root@185.221.214.4 "cd /var/www/examly.ru && systemctl stop examly.service && rm examly || true && rm -rf public && rm -rf migrations"
 	scp examly root@185.221.214.4:/var/www/examly.ru
 	scp .env root@185.221.214.4:/var/www/examly.ru
 	scp Makefile root@185.221.214.4:/var/www/examly.ru
