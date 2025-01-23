@@ -2,11 +2,11 @@ package api
 
 import (
 	"errors"
-	"github.com/den4ik117/examly/internal/enum"
-	"github.com/den4ik117/examly/internal/store"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/guregu/null/v5"
+	"github.com/zagvozdeen/examly/internal/enum"
+	"github.com/zagvozdeen/examly/internal/store"
 	"net/http"
 	"strconv"
 	"time"
@@ -30,7 +30,7 @@ func (app *Application) getQuestions(w http.ResponseWriter, r *http.Request) {
 		}
 		filter.CreatedBy = id
 	}
-	if query.Has("all") {
+	if query.Get("all") == "true" {
 		if user.Role.Level() < enum.ModeratorRole.Level() {
 			app.forbiddenErrorResponse(w, r, errors.New("forbidden"))
 			return
@@ -50,18 +50,20 @@ func (app *Application) getQuestions(w http.ResponseWriter, r *http.Request) {
 }
 
 type CreateQuestionPayload struct {
-	Title       string `json:"title" validate:"required"`
-	Content     string `json:"content" validate:""`
-	Explanation string `json:"explanation" validate:""`
-	Type        string `json:"type" validate:"required"`
-	CourseID    int    `json:"course_id" validate:"required"`
-	FileID      int    `json:"file_id" validate:""`
-	ModuleID    int    `json:"module_id" validate:""`
-	Answers     []struct {
-		ID        int    `json:"id" validate:"required"`
-		Content   string `json:"content" validate:"required"`
-		IsCorrect bool   `json:"is_correct" validate:""`
-	} `json:"answers" validate:"required,dive,required"`
+	Title       string          `json:"title" validate:"required"`
+	Content     string          `json:"content" validate:""`
+	Explanation string          `json:"explanation" validate:""`
+	Type        string          `json:"type" validate:"required"`
+	CourseID    int             `json:"course_id" validate:"required"`
+	ModuleID    int             `json:"module_id" validate:""`
+	Options     []OptionPayload `json:"options" validate:"required,dive,required"`
+	TagsIDs     []int           `json:"tags_ids" validate:""`
+}
+
+type OptionPayload struct {
+	ID        int    `json:"id" validate:"required"`
+	Content   string `json:"content" validate:"required"`
+	IsCorrect bool   `json:"is_correct" validate:""`
 }
 
 func (app *Application) createQuestion(w http.ResponseWriter, r *http.Request) {
@@ -96,7 +98,7 @@ func (app *Application) createQuestion(w http.ResponseWriter, r *http.Request) {
 
 	correct := false
 	var options store.Options
-	for i, answer := range payload.Answers {
+	for i, answer := range payload.Options {
 		correct = correct || answer.IsCorrect || t == enum.PlaintextQuestionType
 		options = append(options, store.Option{
 			ID:        i + 1,
@@ -126,6 +128,12 @@ func (app *Application) createQuestion(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if err := app.store.QuestionsStore.Create(r.Context(), question); err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	err = app.store.TagsStore.CreateQuestionTags(r.Context(), question.ID, payload.TagsIDs)
+	if err != nil {
 		app.internalServerError(w, r, err)
 		return
 	}
@@ -160,24 +168,28 @@ func (app *Application) getQuestion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ids, err := app.store.TagsStore.GetQuestionTags(ctx, question.ID)
+	if err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+	question.TagsIDs = ids
+
 	app.jsonResponse(w, r, http.StatusOK, map[string]any{
 		"data": question,
 	})
 }
 
 type UpdateQuestionPayload struct {
-	Title       string `json:"title" validate:"required"`
-	Content     string `json:"content" validate:""`
-	Explanation string `json:"explanation" validate:""`
-	Type        string `json:"type" validate:"required"`
-	CourseID    int    `json:"course_id" validate:"required"`
-	FileID      int    `json:"file_id" validate:""`
-	ModuleID    int    `json:"module_id" validate:""`
-	Answers     []struct {
-		ID        int    `json:"id" validate:"required"`
-		Content   string `json:"content" validate:"required"`
-		IsCorrect bool   `json:"is_correct" validate:""`
-	} `json:"options" validate:"required,dive,required"`
+	Title       string          `json:"title" validate:"required"`
+	Content     string          `json:"content" validate:""`
+	Explanation string          `json:"explanation" validate:""`
+	Type        string          `json:"type" validate:"required"`
+	CourseID    int             `json:"course_id" validate:"required"`
+	FileID      int             `json:"file_id" validate:""`
+	ModuleID    int             `json:"module_id" validate:""`
+	Answers     []OptionPayload `json:"options" validate:"required,dive,required"`
+	TagsIDs     []int           `json:"tags_ids" validate:""`
 }
 
 func (app *Application) updateQuestion(w http.ResponseWriter, r *http.Request) {
@@ -261,6 +273,12 @@ func (app *Application) updateQuestion(w http.ResponseWriter, r *http.Request) {
 	}
 
 	err = app.store.QuestionsStore.Create(ctx, nextQuestion)
+	if err != nil {
+		app.internalServerError(w, r, err)
+		return
+	}
+
+	err = app.store.TagsStore.CreateQuestionTags(r.Context(), nextQuestion.ID, payload.TagsIDs)
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return

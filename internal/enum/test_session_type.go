@@ -15,6 +15,8 @@ func NewTestSessionType(s any) (TestSessionType, error) {
 		return UnknownTestSessionType, errors.New("can not assert test session type to string")
 	}
 	switch role {
+	case SelectionSystemTestSessionType.slug:
+		return SelectionSystemTestSessionType, nil
 	case MarathonTestSessionType.slug:
 		return MarathonTestSessionType, nil
 	case MistakeTestSessionType.slug:
@@ -29,11 +31,12 @@ func NewTestSessionType(s any) (TestSessionType, error) {
 }
 
 var (
-	UnknownTestSessionType  = TestSessionType{""}
-	MarathonTestSessionType = TestSessionType{"marathon"}
-	MistakeTestSessionType  = TestSessionType{"mistake"}
-	ModuleTestSessionType   = TestSessionType{"module"}
-	ExamTestSessionType     = TestSessionType{"exam"}
+	UnknownTestSessionType         = TestSessionType{""}
+	SelectionSystemTestSessionType = TestSessionType{"selection-system"}
+	MarathonTestSessionType        = TestSessionType{"marathon"}
+	MistakeTestSessionType         = TestSessionType{"mistake"}
+	ModuleTestSessionType          = TestSessionType{"module"}
+	ExamTestSessionType            = TestSessionType{"exam"}
 )
 
 func (u TestSessionType) String() string {

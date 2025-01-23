@@ -2,11 +2,11 @@ package api
 
 import (
 	"errors"
-	"github.com/den4ik117/examly/internal/enum"
-	"github.com/den4ik117/examly/internal/store"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/guregu/null/v5"
+	"github.com/zagvozdeen/examly/internal/enum"
+	"github.com/zagvozdeen/examly/internal/store"
 	"net/http"
 	"strconv"
 	"time"
@@ -42,7 +42,7 @@ func (app *Application) getCourses(w http.ResponseWriter, r *http.Request) {
 		}
 		filter.OrCreatedBy = id
 	}
-	if query.Has("all") {
+	if query.Get("all") == "true" {
 		if user.Role.Level() < enum.ModeratorRole.Level() {
 			app.forbiddenErrorResponse(w, r, errors.New("forbidden"))
 			return

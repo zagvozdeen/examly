@@ -2,11 +2,11 @@ package api
 
 import (
 	"errors"
-	"github.com/den4ik117/examly/internal/enum"
-	"github.com/den4ik117/examly/internal/store"
 	"github.com/golang-jwt/jwt/v5"
 	"github.com/google/uuid"
 	"github.com/guregu/null/v5"
+	"github.com/zagvozdeen/examly/internal/enum"
+	"github.com/zagvozdeen/examly/internal/store"
 	"golang.org/x/crypto/bcrypt"
 	"net/http"
 	"time"
@@ -18,6 +18,7 @@ type claims struct {
 }
 
 type RegisterUserPayload struct {
+	Role                 string `json:"role" validate:"required"`
 	FirstName            string `json:"first_name" validate:"required,max=255"`
 	LastName             string `json:"last_name" validate:"required,max=255"`
 	Email                string `json:"email" validate:"required,email,max=255"`
@@ -37,6 +38,12 @@ func (app *Application) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	role, err := enum.NewUserRole(payload.Role)
+	if err != nil || !(role == enum.MemberRole || role == enum.ReferralRole || role == enum.CompanyRole) {
+		app.badRequestResponse(w, r, errors.New("invalid role"))
+		return
+	}
+
 	uid, err := uuid.NewV7()
 	if err != nil {
 		app.internalServerError(w, r, err)
@@ -49,18 +56,25 @@ func (app *Application) register(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ctx := r.Context()
+	_, err = app.store.UsersStore.GetByEmail(ctx, payload.Email)
+	if !errors.Is(err, store.ErrNotFound) {
+		app.badRequestResponse(w, r, errors.New("email already exists"))
+		return
+	}
+
 	user := &store.User{
 		UUID:      uid.String(),
 		Email:     null.StringFrom(payload.Email),
 		FirstName: null.StringFrom(payload.FirstName),
 		LastName:  null.StringFrom(payload.LastName),
-		Role:      enum.MemberRole,
+		Role:      role,
 		Password:  null.StringFrom(string(bytes)),
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
 
-	err = app.store.UsersStore.Create(r.Context(), user)
+	err = app.store.UsersStore.Create(ctx, user)
 	if err != nil {
 		app.internalServerError(w, r, err)
 		return

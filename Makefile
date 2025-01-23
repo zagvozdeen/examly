@@ -4,17 +4,6 @@ export
 run:
 	@go run cmd/api/main.go
 
-up:
-	@docker compose up -d
-	@docker compose exec -d node npm run dev
-
-down:
-	@docker compose down
-
-restart r:
-	@make down
-	@make up
-
 migration:
 	@migrate create -ext sql -dir ./migrations -seq $(filter-out $@, $(MAKECMDGOALS))
 
@@ -24,37 +13,12 @@ migrate-up:
 migrate-down:
 	@migrate -source file://migrations -database ${DB_ADDR} down
 
-bash:
-	@docker compose exec node /bin/sh
-
 build:
 	@GOOS=linux GOARCH=amd64 go build -o examly ./cmd/api
 	@cd resources && npm run build
 
-check:
-	@docker compose exec node npm run check
-
-prod-up:
-	@docker compose --file compose.prod.yaml up --build -d
-prod-down:
-	@docker compose --file compose.prod.yaml down
-prod-restart prod-r:
-	@make prod-down
-	@make prod-up
-prod-build:
-	@docker compose exec node npm run build
-	@rm -rf ./public/dist || true
-	@rm ./public/index.html || true
-	@mv ./resources/dist ./public
-	@mv ./public/dist/index.html ./public/index.html
-prod-migrate-up:
-	@docker compose exec migrate ./migrate up
-prod-migrate-down:
-	@docker compose exec migrate ./migrate down
-
 deploy: build
-deploy:
-	ssh root@185.221.214.4 "cd /var/www/examly.ru && systemctl stop examly.service && rm examly || true && rm -rf public"
+	ssh root@185.221.214.4 "cd /var/www/examly.ru && systemctl stop examly.service && rm examly || true && rm -rf public && rm -rf migrations"
 	scp examly root@185.221.214.4:/var/www/examly.ru
 	scp .env root@185.221.214.4:/var/www/examly.ru
 	scp Makefile root@185.221.214.4:/var/www/examly.ru

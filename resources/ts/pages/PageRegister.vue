@@ -7,6 +7,31 @@
       @submit.prevent="onSubmit"
     >
       <n-form-item
+        label="Роль"
+        path="role"
+      >
+        <n-radio-group
+          v-model:value="formValue.role"
+          class="w-full sm:!flex !hidden"
+          size="small"
+        >
+          <n-radio-button
+            v-for="type in rolesOptions"
+            :key="type.value"
+            type="primary"
+            :value="type.value"
+            :label="type.label"
+            class="flex-1 text-center"
+          />
+        </n-radio-group>
+        <n-select
+          v-model:value="formValue.role"
+          class="sm:hidden block"
+          :options="rolesOptions"
+        />
+      </n-form-item>
+
+      <n-form-item
         label="Имя"
         path="first_name"
       >
@@ -97,12 +122,23 @@
   </div>
 </template>
 <script lang="ts" setup>
-import { NForm, NFormItem, NInput, NButton, FormInst, FormRules, useMessage } from 'naive-ui'
+import {
+  FormInst,
+  FormRules,
+  NButton,
+  NForm,
+  NFormItem,
+  NInput,
+  NRadioButton,
+  NRadioGroup,
+  NSelect,
+  useMessage,
+} from 'naive-ui'
 import { reactive, ref } from 'vue'
 import { useAuthStore } from '@/composables/useAuthStore.ts'
 import { HTTPError } from 'ky'
 import { useRouter } from 'vue-router'
-import { PageExpose } from '@/types.ts'
+import { PageExpose, UserRole, UserRoleTranslates } from '@/types.ts'
 
 defineExpose<PageExpose>({
   title: 'Регистрация',
@@ -114,6 +150,7 @@ const authStore = useAuthStore()
 
 const formRef = ref<FormInst>()
 const formValue = reactive({
+  role: UserRole.Member as string | null,
   first_name: null as string | null,
   last_name: null as string | null,
   email: null as string | null,
@@ -121,6 +158,11 @@ const formValue = reactive({
   password_confirmation: null as string | null,
 })
 const formRules: FormRules = {
+  role: {
+    required: true,
+    type: 'string',
+    message: 'Выберите свою роль',
+  },
   first_name: {
     required: true,
     type: 'string',
@@ -156,6 +198,12 @@ const clearForm = () => {
   formValue.password = null
   formValue.password_confirmation = null
 }
+
+const rolesOptions = [
+  { label: UserRoleTranslates[UserRole.Member], value: UserRole.Member },
+  { label: UserRoleTranslates[UserRole.Referral], value: UserRole.Referral },
+  { label: UserRoleTranslates[UserRole.Company], value: UserRole.Company },
+]
 
 const onSubmit = async () => {
   try {

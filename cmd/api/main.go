@@ -2,16 +2,16 @@ package main
 
 import (
 	"context"
-	"github.com/den4ik117/examly/api"
-	"github.com/den4ik117/examly/internal/db"
-	"github.com/den4ik117/examly/internal/env"
-	"github.com/den4ik117/examly/internal/log"
-	"github.com/den4ik117/examly/internal/store"
 	"github.com/joho/godotenv"
+	"github.com/zagvozdeen/examly/api"
+	"github.com/zagvozdeen/examly/internal/db"
+	"github.com/zagvozdeen/examly/internal/env"
+	"github.com/zagvozdeen/examly/internal/log"
+	"github.com/zagvozdeen/examly/internal/store"
 )
 
 func main() {
-	cfg := api.Config{IsProduction: true}
+	cfg := api.Config{IsProduction: false}
 
 	logger := log.CreateLogger(cfg.IsProduction)
 

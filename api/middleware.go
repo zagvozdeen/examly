@@ -2,8 +2,8 @@ package api
 
 import (
 	"errors"
-	"github.com/den4ik117/examly/internal/store"
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/zagvozdeen/examly/internal/store"
 	"golang.org/x/net/context"
 	"net/http"
 	"strings"

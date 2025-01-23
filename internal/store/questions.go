@@ -6,11 +6,11 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/den4ik117/examly/internal/enum"
 	"github.com/guregu/null/v5"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
+	"github.com/zagvozdeen/examly/internal/enum"
 	"strings"
 	"time"
 )
@@ -35,6 +35,7 @@ type Question struct {
 	CreatedAt        time.Time         `json:"created_at"`
 	UpdatedAt        time.Time         `json:"updated_at"`
 	UserAnswers      []UserAnswer      `json:"user_answers"`
+	TagsIDs          []int             `json:"tags_ids"`
 }
 
 type Option struct {

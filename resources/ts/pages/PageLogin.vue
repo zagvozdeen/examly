@@ -96,6 +96,8 @@ const onSubmit = async () => {
 
     localStorage.setItem('token', data.data)
 
+    await authStore.getMe()
+
     clearForm()
 
     message.success('Вы успешно вошли в систему')

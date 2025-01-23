@@ -9,6 +9,8 @@ export interface PageExpose {
 export enum UserRole {
   Guest = 'guest',
   Member = 'member',
+  Referral = 'referral',
+  Company = 'company',
   Moderator = 'moderator',
   Admin = 'admin',
 }
@@ -16,6 +18,8 @@ export enum UserRole {
 export const UserRoleTranslates: Record<UserRole, string> = {
   [UserRole.Guest]: 'Гость',
   [UserRole.Member]: 'Пользователь',
+  [UserRole.Referral]: 'Реферал',
+  [UserRole.Company]: 'Компания',
   [UserRole.Moderator]: 'Модератор',
   [UserRole.Admin]: 'Администратор',
 }
@@ -28,6 +32,32 @@ export interface User {
   full_name: string | null
   avatar_id: number | null
   role: UserRole
+  description: string | null
+  company_name: string | null
+  contact: string | null
+  account: number
+  can_view_referrals: boolean
+  created_at: string
+  updated_at: string
+  has_user_experience: boolean
+}
+export interface UserExperience {
+  id: number
+  user_id: number
+  one: number
+  two: number
+  three: number
+  four: string
+  five: number
+  six: number
+  seven: string
+  eight: string
+  nine: number
+  ten: string
+  eleven: number
+  twelve: string
+  thirteen: string
+  deleted_at: string | null
   created_at: string
   updated_at: string
 }
@@ -69,8 +99,6 @@ export interface Course {
   created_at: string
   updated_at: string
 }
-
-export type CourseStats = Array<{completed: number, total: number, name: string}>
 
 export interface FileModel {
   id: number
@@ -122,7 +150,7 @@ export interface Question {
   module_id: number | null
   created_at: string
   updated_at: string
-  // user_answers: UserAnswer[] | null
+  tags_ids: number[] | null
 }
 
 export interface Option {
@@ -132,6 +160,7 @@ export interface Option {
 }
 
 export enum TestSessionType {
+  SelectionSystem = 'selection-system',
   Marathon = 'marathon',
   Mistake = 'mistake',
   Module = 'module',
@@ -139,6 +168,7 @@ export enum TestSessionType {
 }
 
 export const TestSessionTypeTranslates: Record<TestSessionType, string> = {
+  [TestSessionType.SelectionSystem]: 'Система подбора',
   [TestSessionType.Marathon]: 'Марафон',
   [TestSessionType.Mistake]: 'Ошибки',
   [TestSessionType.Module]: 'Модуль',
@@ -174,4 +204,9 @@ export interface TestSession {
   deleted_at: string | null
   created_at: string
   updated_at: string
+}
+
+export interface Tag {
+  id: number
+  name: string
 }

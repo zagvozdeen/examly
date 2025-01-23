@@ -58,10 +58,18 @@ export const useAuthStore = () => {
       .json<{data: number}>()
   }
 
+  const logout = async () => {
+    localStorage.removeItem('token')
+    me.value = undefined
+    isAuthenticated.value = false
+    isModerator.value = false
+  }
+
   return {
     getMe,
     updateMe,
     login,
     register,
+    logout,
   }
 }

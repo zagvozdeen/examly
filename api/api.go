@@ -3,9 +3,10 @@ package api
 import (
 	"context"
 	"errors"
-	"github.com/den4ik117/examly/internal/store"
+	"fmt"
 	"github.com/gorilla/mux"
 	"github.com/rs/zerolog"
+	"github.com/zagvozdeen/examly/internal/store"
 	"net/http"
 	"os"
 	"os/signal"
@@ -77,12 +78,17 @@ func (app *Application) Mount() *mux.Router {
 
 	authRouter.HandleFunc("/test-sessions", app.getTestSessions).Methods("GET")
 	authRouter.HandleFunc("/test-sessions", app.createTestSession).Methods("POST")
-	authRouter.HandleFunc("/test-sessions/stats", app.getUserStats).Methods("GET")
 	authRouter.HandleFunc("/test-sessions/{uuid}", app.getTestSession).Methods("GET")
 
 	authRouter.HandleFunc("/user-answers", app.checkAnswer).Methods("POST")
 
 	authRouter.HandleFunc("/users", app.getUsers).Methods("GET")
+	authRouter.HandleFunc("/users/experience", app.getUserExperience).Methods("GET")
+	authRouter.HandleFunc("/users/experience", app.createUserExperience).Methods("POST")
+	authRouter.HandleFunc("/users/referrals", app.getReferrals).Methods("GET")
+	authRouter.HandleFunc("/users/referrals/unlock", app.unlockReferrals).Methods("POST")
+
+	authRouter.HandleFunc("/tags", app.getTags).Methods("GET")
 
 	return router
 }
@@ -114,7 +120,7 @@ func (app *Application) Run(router *mux.Router) error {
 		shutdown <- server.Shutdown(ctx)
 	}()
 
-	app.log.Info().Str("addr", app.config.AppURL).Msg("Server has started")
+	app.log.Info().Str("addr", fmt.Sprintf("http://%s", app.config.AppURL)).Msg("Server has started")
 
 	err := server.ListenAndServe()
 	if !errors.Is(err, http.ErrServerClosed) {

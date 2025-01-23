@@ -146,6 +146,15 @@
       </n-form-item>
 
       <n-form-item
+        label="Теги"
+        path="tags_ids"
+      >
+        <AppDynamicTags
+          v-model:values="formValue.tags_ids"
+        />
+      </n-form-item>
+
+      <n-form-item
         :show-feedback="false"
         :show-label="false"
       >
@@ -187,6 +196,7 @@ import AppAnswerInput from '@/components/AppAnswerInput.vue'
 import { isAdminMode, me } from '@/composables/useAuthStore.ts'
 import AppTextEditor from '@/components/AppTextEditor.vue'
 import AppModerationForm from '@/components/AppModerationForm.vue'
+import AppDynamicTags from '@/components/AppDynamicTags.vue'
 
 const form = useForm()
 const route = useRoute()
@@ -204,11 +214,11 @@ defineExpose<PageExpose>({
   back: router.resolve({ name: 'questions' }),
 })
 
-const answerCreator = (start: number = 1) => {
+const answerCreator = (start: number = 0) => {
   let id = start
 
   return () => ({
-    id: id++,
+    id: ++id,
     content: '',
     is_correct: false,
   })
@@ -226,6 +236,7 @@ const formValue = reactive({
   type: QuestionType.SingleChoice,
   options: [createAnswer(), createAnswer()] as Array<Option>,
   explanation: null as string | null,
+  tags_ids: [] as number[],
 })
 const formRules: FormRules = {
   course_id: {
@@ -274,6 +285,7 @@ const clearForm = () => {
     createAnswer(),
     createAnswer(),
   ]
+  formValue.tags_ids = []
 }
 
 const onSubmit = () => {
@@ -285,6 +297,7 @@ const onSubmit = () => {
     type: formValue.type,
     options: formValue.options.filter(answer => answer.content),
     explanation: formValue.explanation,
+    tags_ids: formValue.tags_ids,
   }
 
   form.handle(formRef.value, isCreating, async () => {
@@ -340,6 +353,7 @@ onMounted(() => {
         formValue.course_id = data.data.course_id
         formValue.module_id = data.data.module_id
         formValue.moderation_reason = data.data.moderation_reason
+        formValue.tags_ids = data.data.tags_ids || []
 
         createAnswer = answerCreator(data.data.options.at(-1)?.id || 1)
 

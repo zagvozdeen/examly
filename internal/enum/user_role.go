@@ -20,6 +20,10 @@ func NewUserRole(s any) (UserRole, error) {
 		return GuestRole, nil
 	case MemberRole.slug:
 		return MemberRole, nil
+	case ReferralRole.slug:
+		return ReferralRole, nil
+	case CompanyRole.slug:
+		return CompanyRole, nil
 	case ModeratorRole.slug:
 		return ModeratorRole, nil
 	case AdminRole.slug:
@@ -33,8 +37,10 @@ var (
 	UnknownRole   = UserRole{"", 0}
 	GuestRole     = UserRole{"guest", 1}
 	MemberRole    = UserRole{"member", 2}
-	ModeratorRole = UserRole{"moderator", 3}
-	AdminRole     = UserRole{"admin", 4}
+	ReferralRole  = UserRole{"referral", 3}
+	CompanyRole   = UserRole{"company", 4}
+	ModeratorRole = UserRole{"moderator", 5}
+	AdminRole     = UserRole{"admin", 6}
 )
 
 func (u UserRole) String() string {

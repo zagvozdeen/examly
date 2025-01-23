@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/den4ik117/examly/internal/enum"
 	"github.com/guregu/null/v5"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/rs/zerolog"
+	"github.com/zagvozdeen/examly/internal/enum"
 	"strings"
 	"time"
 )
@@ -140,12 +140,10 @@ func (s *CourseStore) GetByUUID(ctx context.Context, uuid string) (course Course
 		&course.CreatedAt,
 		&course.UpdatedAt,
 	)
-
 	if errors.Is(err, pgx.ErrNoRows) {
-		return course, ErrNotFound
+		err = ErrNotFound
 	}
-
-	return course, err
+	return
 }
 
 func (s *CourseStore) GetByIDs(ctx context.Context, ids []any) (courses []Course, err error) {
